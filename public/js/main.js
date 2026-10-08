@@ -1,9 +1,12 @@
-/* Boot: pick the arena, load its best score, and start the frame loop. */
+/* Boot: show the arena picker and start the frame loop. */
+// Arenas that appear on the start screen as "Coming soon" until their file exists.
+const COMING_SOON = [{number: 2, name: "Grandma's House", ready: false}];
+
 setArena('page-one');
 loadBest();
 bestEl.textContent = 'Best ' + pad6(best);
-document.getElementById('ov-arena').textContent = 'Arena ' + arena.number + ' \u00b7 ' + arena.name;
 reset();
+showPicker();
 
 let last = performance.now();
 function frame(now) {

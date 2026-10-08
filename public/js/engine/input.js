@@ -88,12 +88,48 @@ document.querySelectorAll('[data-k]').forEach(b => {
 document.getElementById('pad').addEventListener('touchstart', e => e.preventDefault(), {passive:false});
 
 goBtn.addEventListener('click', start);
+document.getElementById('to-arenas').addEventListener('click', showPicker);
+
+/* ---------- start screen: pick an arena ---------- */
+const PICK_TITLE = ovTitle.innerHTML, PICK_TEXT = ovText.textContent;
+function showPicker() {
+  state = 'title';
+  overlay.hidden = false;
+  overlay.classList.add('picking');
+  ovArena.textContent = 'Pick an arena';
+  if (PICK_TITLE !== undefined) ovTitle.innerHTML = PICK_TITLE;
+  ovText.textContent = PICK_TEXT;
+  ovScore.hidden = true; ovActions.hidden = true; arenaList.hidden = false;
+  arenaList.textContent = '';
+  const cards = Object.values(ARENAS).map(a => ({...a, ready: true})).concat(COMING_SOON)
+    .sort((a, b) => a.number - b.number);
+  for (const a of cards) {
+    const card = document.createElement('button');
+    card.type = 'button'; card.className = 'arena-card'; card.disabled = !a.ready;
+    const part = (cls, text) => { const s = document.createElement('span'); s.className = cls; s.textContent = text; card.appendChild(s); };
+    part('num', 'Arena ' + a.number);
+    part('name', a.name);
+    part('best', a.ready ? 'Best ' + pad6(readBest(a.id)) : 'Coming soon');
+    if (a.ready) card.addEventListener('click', () => pickArena(a.id));
+    arenaList.appendChild(card);
+  }
+}
+function pickArena(id) {
+  setArena(id); loadBest();
+  bestEl.textContent = 'Best ' + pad6(best);
+  start();
+}
+
 function start() {
+  // a boss skip link for another arena (#eraser, #chancla...) switches to that arena
+  const m = location.hash.match(/^#([a-z]+?)(\d*)$/);
+  if (m && !arena.bossLoop.includes(m[1])) {
+    const other = Object.values(ARENAS).find(a => a.bossLoop.includes(m[1]));
+    if (other) { setArena(other.id); loadBest(); bestEl.textContent = 'Best ' + pad6(best); }
+  }
   reset();
   jumpQ = 0; kickQ = 0;
-  // Skip-ahead links: add #giant or #sensei to the page address
   // Skip-ahead links for testing: #giant, #sensei, #giant2, #eraser ... (any boss in this arena's loop)
-  const m = location.hash.match(/^#([a-z]+?)(\d*)$/);
   if (m) {
     let nth = +(m[2] || 1), skip = -1;
     arena.bossLoop.forEach((k, i) => { if (skip < 0 && k === m[1] && --nth === 0) skip = i; });
@@ -102,17 +138,19 @@ function start() {
   banner = {title: arena.name.toUpperCase(), sub: 'Arena ' + arena.number, life: 1.8};
   state = 'play';
   overlay.hidden = true;
+  overlay.classList.remove('picking');
 }
 function showOver() {
   state = 'over';
   if (!runCheated && score > best) { best = score; try { localStorage.setItem(bestKey(), String(best)); } catch (e) {} }
   bestEl.textContent = 'Best ' + pad6(best);
+  ovArena.textContent = 'Arena ' + arena.number + ' \u00b7 ' + arena.name;
   ovTitle.textContent = deathTitle || 'You got rainbowed.';
+  arenaList.hidden = true; ovActions.hidden = false;
   ovScore.hidden = false;
   ovScore.textContent = pad6(score);
   let msg = kills + (kills === 1 ? ' stickman' : ' stickmen') + ' turned into rainbows';
   if (bossesBeaten) msg += ', ' + bossesBeaten + (bossesBeaten === 1 ? ' boss' : ' bosses') + ' beaten';
   ovText.textContent = msg + '. Best run: ' + pad6(best) + '.' + (runCheated ? ' A cheat code was on, so this run is not saved.' : '');
-  goBtn.textContent = 'Again';
   overlay.hidden = false;
 }

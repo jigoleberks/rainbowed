@@ -25,15 +25,19 @@ const ovTitle = document.getElementById('ov-title');
 const ovText = document.getElementById('ov-text');
 const ovScore = document.getElementById('ov-score');
 const goBtn = document.getElementById('go');
+const arenaList = document.getElementById('arena-list');
+const ovActions = document.getElementById('ov-actions');
+const ovArena = document.getElementById('ov-arena');
 const bestEl = document.getElementById('best');
 
 let best = 0;
 // Page One keeps the original key so existing best scores carry over.
-const bestKey = () => arena.id === 'page-one' ? 'rsb-best' : 'rsb-best-' + arena.id;
-function loadBest() {
-  best = 0;
-  try { best = parseInt(localStorage.getItem(bestKey()) || '0', 10) || 0; } catch (e) {}
+const bestKeyFor = id => id === 'page-one' ? 'rsb-best' : 'rsb-best-' + id;
+const bestKey = () => bestKeyFor(arena.id);
+function readBest(id) {
+  try { return parseInt(localStorage.getItem(bestKeyFor(id)) || '0', 10) || 0; } catch (e) { return 0; }
 }
+function loadBest() { best = readBest(arena.id); }
 const pad6 = n => String(n).padStart(6, '0');
 bestEl.textContent = 'Best ' + pad6(best);
 

@@ -28,6 +28,7 @@ function boot(hash = '') {
     addEventListener: (t, f) => (listeners[id + ':' + t] = listeners[id + ':' + t] || []).push(f),
     getContext: ctx2d, getBoundingClientRect: () => ({width: 800, height: 450, left: 0, top: 0}),
     classList: {add() {}, remove() {}}, setPointerCapture() {},
+    children: [], appendChild(c) { this.children.push(c); return c; },
   });
   let raf = null, now = 0;
   const sandbox = {
@@ -57,6 +58,8 @@ function boot(hash = '') {
     pointer(type, o) { (listeners['game:' + type] || []).forEach(f => f(Object.assign({pointerType: 'mouse', clientX: 500, clientY: 200, pointerId: 1, preventDefault() {}}, o))); },
     saw: re => drawn.some(s => re.test(s)),
     godMode() { this.run('hurt = function () {};'); },
+    el,
+    click(id) { (listeners[id + ':click'] || []).forEach(f => f()); },
   };
   return g;
 }
@@ -73,6 +76,20 @@ test('boots to the title screen on Page One', () => {
   ok(g.get('state') === 'title', 'state is ' + g.get('state'));
   ok(g.get('arena.id') === 'page-one', 'arena is ' + g.get('arena.id'));
   ok(g.get('PLATS.length') === 3, 'expected 3 shelves');
+});
+
+test('start screen lists Page One and a coming-soon card, and Arenas goes back to it', () => {
+  const g = boot();
+  const cards = g.el('arena-list').children;
+  ok(cards.length >= 2, 'cards: ' + cards.length);
+  ok(cards[0].disabled === false && cards[0].children[1].textContent === 'Page One', 'first card should be a playable Page One');
+  ok(cards.some(c => c.disabled && c.children[2].textContent === 'Coming soon'), 'no coming-soon card');
+  g.run("pickArena('page-one')");
+  ok(g.get('state') === 'play', 'picking an arena did not start a run');
+  g.run('showOver()');
+  ok(g.el('ov-actions').hidden === false && g.el('arena-list').hidden === true, 'game over should show Again and Arenas');
+  g.click('to-arenas');
+  ok(g.get('state') === 'title' && g.el('arena-list').hidden === false, 'Arenas did not return to the picker');
 });
 
 test('skip links start one kill before the boss', () => {

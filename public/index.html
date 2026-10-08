@@ -23,11 +23,15 @@
   <div class="stage">
     <canvas id="game" aria-label="Game arena"></canvas>
     <div id="overlay">
-      <span class="arena" id="ov-arena">Arena 1 · Page One</span>
+      <span class="arena" id="ov-arena">Pick an arena</span>
       <h2 id="ov-title">They keep coming.<br>Paint the town.</h2>
       <div class="score" id="ov-score" hidden></div>
       <p id="ov-text">Stickmen pour in from both sides and drop from the sky. Every third kill in a row slows time. Reach 25 kills and something big shows up.</p>
-      <button class="go" id="go" type="button">Start</button>
+      <div class="arenas" id="arena-list"></div>
+      <div class="actions" id="ov-actions" hidden>
+        <button class="go" id="go" type="button">Again</button>
+        <button class="go ghost" id="to-arenas" type="button">Arenas</button>
+      </div>
     </div>
   </div>
 
