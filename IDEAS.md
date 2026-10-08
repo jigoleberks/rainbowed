@@ -14,6 +14,15 @@ There is no winning. Every run ends with "You got rainbowed."
     snail energy: you can't really kill him, just keep away forever. Touch = death.
   - La Chancla: tiny, unbothered grandma with more health than the Giant. Lobs
     slippers in arcs like grenades; they burst into rainbow splats on landing.
+    Look: shorter than the hero and hunched (curved spine), hair bun, little round
+    glasses, triangle stick-figure dress, cardigan lines over the shoulders, fuzzy
+    pink slippers (her only color). Throws one, has one bare foot, pulls a new one
+    from her cardigan pocket. Slow shuffle, sets down a mug of tea before the fight.
+    Big overhand windup with a "!" before each throw.
+    She's after the mess, not the hero: her slippers rainbow stickmen too.
+    Survive the timer and a TV flickers on; she shuffles back to her armchair. If her
+    health hits zero she doesn't get rainbowed, she just sits down: "Fine. Wipe your
+    feet next time." Death message: "You got chancla'd."
 - Arena names and their 100-kill bosses:
   - Arena 1, Page One: The Eraser (built)
   - Arena 2, Grandma's House: La Chancla, plus Sophy
