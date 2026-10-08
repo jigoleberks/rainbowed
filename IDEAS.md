@@ -27,7 +27,13 @@ There is no winning. Every run ends with "You got rainbowed."
   - Arena 1, Page One: The Eraser (built)
   - Arena 2, Grandma's House: La Chancla, plus Sophy
   - Arena 3, The Long Hallway: The Slow One
-- Still to build: an arena picker on the start screen, and a best score per arena.
+- Still to build: a start/splash screen with an arena picker, and a best score per arena.
+  Comes with Grandma's House, since that's the second arena.
+
+## Share results button (zero maintenance)
+On the game-over screen, a Share button that copies text (or opens the phone's share
+sheet) like: "I got rainbowed by the Sensei at 154 kills on Page One. rainbowed.ca"
+No server needed, and every share is a link back to the game.
 - Arena idea, The House: shelves are real furniture (bookshelf, kitchen counter, top
   of the fridge), with mugs, plants and books on them and a ceiling light overhead.
   This is Sophy's home arena. La Chancla is the natural 100-kill boss here.
