@@ -37,11 +37,11 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
 .go{font-family:var(--display);font-size:1.15rem;padding:9px 28px;border:3px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:999px;cursor:pointer}
 .go:hover{background:var(--accent);border-color:var(--accent)}
 .go:focus-visible,.pad button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-.pad{display:none;justify-content:space-between;align-items:center;gap:12px;user-select:none;-webkit-user-select:none;touch-action:none}
-.grp{display:flex;gap:10px;align-items:center}
-.pad button{width:66px;height:66px;border-radius:50%;border:3px solid var(--ink);background:var(--paper);color:var(--ink);font-family:var(--display);font-size:1rem;touch-action:none;padding:0;box-shadow:3px 3px 0 var(--ink)}
+.pad{display:none;justify-content:space-between;align-items:center;gap:8px;user-select:none;-webkit-user-select:none;touch-action:none}
+.grp{display:flex;gap:8px;align-items:center}
+.pad button{width:clamp(48px,14vw,66px);height:clamp(48px,14vw,66px);border-radius:50%;border:3px solid var(--ink);background:var(--paper);color:var(--ink);font-family:var(--display);font-size:clamp(.8rem,3.4vw,1rem);touch-action:none;padding:0;box-shadow:3px 3px 0 var(--ink)}
 .pad button.on{background:var(--ink);color:var(--paper);transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
-.pad .fire{width:80px;height:80px;background:var(--accent);color:var(--paper);font-size:1.15rem}
+.pad .fire{width:clamp(58px,17vw,80px);height:clamp(58px,17vw,80px);background:var(--accent);color:var(--paper);font-size:1.15rem}
 .pad .fire.on{background:var(--ink)}
 .help{margin:0;font-size:.78rem;line-height:1.55;color:var(--muted);max-width:70ch}
 .help b{color:var(--ink);font-weight:600}
@@ -76,12 +76,13 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
     </div>
     <div class="grp">
       <button data-k="jump" type="button">Jump</button>
+      <button data-k="kick" type="button">Kick</button>
       <button data-k="fire" class="fire" type="button">Fire</button>
     </div>
   </div>
 
-  <p class="help help-desk"><b>A / D</b> move · <b>W</b> jump, press again mid-air to flip · <b>S</b> drop through a ledge · <b>Mouse</b> aims, hold click to fire · <b>J</b> fires at the nearest enemy</p>
-  <p class="help help-touch"><b>Fire</b> auto-aims at the nearest stickman. You can also press and hold the arena to shoot where your finger is. Tap <b>Jump</b> twice to flip. Turn your phone sideways for a bigger arena.</p>
+  <p class="help help-desk"><b>A / D</b> move · <b>W</b> jump, press again mid-air to flip · <b>S</b> drop through a ledge · <b>K</b> kick, in the air for a flying kick · <b>Mouse</b> aims, hold click to fire · <b>J</b> fires at the nearest enemy</p>
+  <p class="help help-touch"><b>Fire</b> auto-aims at the nearest stickman. You can also press and hold the arena to shoot where your finger is. Tap <b>Jump</b> twice to backflip. <b>Kick</b> launches stickmen into each other. Turn your phone sideways for a bigger arena.</p>
 </main>
 
 <script>
@@ -127,7 +128,8 @@ let boss, bossWarn, nextBossAt, bossCount, bossesBeaten, cine, banner, geyser;
 const cam = {x: W / 2, y: H / 2, z: 1};
 
 function reset() {
-  player = {x:W/2, y:G, vx:0, vy:0, onGround:true, facing:1, phase:0, jumps:2, spin:0, spinT:0, drop:0, recoil:0, aim:0, dead:false};
+  player = {x:W/2, y:G, vx:0, vy:0, onGround:true, facing:1, phase:0, jumps:2, spin:0, spinT:0, drop:0, recoil:0, aim:0, dead:false,
+    kickT:0, kickCd:0, airKick:true, kickDir:1, pose:null, tilt:0, flipDir:-1};
   enemies = []; bullets = []; parts = []; debris = []; rings = []; texts = []; eproj = []; waves = [];
   score = 0; kills = 0; combo = 0; comboT = 0; slow = 0; shake = 0; spawnT = 0.8;
   hp = 5; invuln = 1; fireCd = 0; flash = 0; overT = 0;
@@ -139,14 +141,15 @@ reset();
 
 /* ---------- input ---------- */
 const keys = {}, btn = {};
-let jumpQ = 0;
-const KEYMAP = {ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'jump',KeyW:'jump',Space:'jump',ArrowDown:'down',KeyS:'down',KeyJ:'fire',KeyK:'fire'};
+let jumpQ = 0, kickQ = 0;
+const KEYMAP = {ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'jump',KeyW:'jump',Space:'jump',ArrowDown:'down',KeyS:'down',KeyJ:'fire',KeyK:'kick',KeyL:'kick'};
 addEventListener('keydown', e => {
   if (state !== 'play' && (e.code === 'Enter' || e.code === 'Space') && state !== 'dying' && document.activeElement !== goBtn) { e.preventDefault(); start(); return; }
   const k = KEYMAP[e.code];
   if (!k) return;
   e.preventDefault();
   if (k === 'jump' && !e.repeat) jumpQ = 0.12;
+  if (k === 'kick' && !e.repeat) kickQ = 0.12;
   keys[k] = true;
 });
 addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) keys[k] = false; });
@@ -181,6 +184,7 @@ document.querySelectorAll('[data-k]').forEach(b => {
     try { b.setPointerCapture(e.pointerId); } catch (_) {}
     btn[k] = true; b.classList.add('on');
     if (k === 'jump') jumpQ = 0.12;
+    if (k === 'kick') kickQ = 0.12;
   });
   const up = () => { btn[k] = false; b.classList.remove('on'); };
   b.addEventListener('pointerup', up);
@@ -193,6 +197,7 @@ document.getElementById('pad').addEventListener('touchstart', e => e.preventDefa
 goBtn.addEventListener('click', start);
 function start() {
   reset();
+  jumpQ = 0; kickQ = 0;
   // Skip-ahead links: add #giant or #sensei to the page address
   if (location.hash === '#giant') kills = 24;
   if (location.hash === '#sensei') { kills = 49; bossCount = 1; nextBossAt = 50; }
@@ -313,6 +318,37 @@ function hurt(from) {
     burst(player.x, player.y - 44, 0, -300, 140);
     limbs(player, away * 200, -200);
     slow = 1.4; overT = 1.6; shake = 16;
+  }
+}
+
+function launch(e, dir, chain) {
+  e.launched = true; e.thrown = false; e.launchT = 0.6; e.chain = chain;
+  e.vx = dir * 720; e.vy = -260; e.spin = 0;
+  rings.push({x: e.x, y: e.y - 40, r: 6, life: 0.25});
+  shake = Math.max(shake, 6);
+}
+
+function kickHit(p) {
+  const f = p.kickDir, fx = p.x + f * 30, fy = p.y - 38;
+  for (const e of enemies) {
+    if (e.dead || e.launched) continue;
+    if (Math.abs(fx - e.x) < 22 && fy > e.y - 80 && fy < e.y + 4) {
+      launch(e, f, 1);
+      texts.push({x: e.x, y: e.y - 92, s: 'KICK!', life: 0.6, big:false});
+      p.kickT = 0; p.pose = null; p.tilt = 0;
+      p.vy = -300; p.vx = -f * 120; p.airKick = true;
+      return;
+    }
+  }
+  const b = boss;
+  if (b && !b.dead && !b.hidden && !(b.iframes > 0) && b.st !== 'drop') {
+    const s = b.scale;
+    if (Math.abs(fx - b.x) < 11 * s + 10 && fy > b.y - 80 * s && fy < b.y + 4) {
+      hitBoss(b, fx, fy, f, 0, 3);
+      p.kickT = 0; p.pose = null; p.tilt = 0;
+      p.vx = -f * 320; p.vy = -380; p.airKick = true;
+      shake = Math.max(shake, 8);
+    }
   }
 }
 
@@ -526,15 +562,14 @@ function updateBoss(dt) {
   else updateSensei(b, dt, dx, dy, fighting);
 }
 
-function hitBoss(b, bu, head) {
-  const dmg = head ? 2 : 1;
+function hitBoss(b, x, y, dx, dy, dmg) {
   b.hp -= dmg; b.hitT = 0.08; score += 10 * dmg;
-  const dir = Math.atan2(bu.vy, bu.vx);
-  for (let i = 0; i < 8; i++) {
+  const dir = Math.atan2(dy, dx);
+  for (let i = 0; i < 6 + dmg * 2; i++) {
     const a = dir + Math.PI + rand(-0.9, 0.9);
-    parts.push({x: bu.x, y: bu.y, vx: Math.cos(a) * rand(100, 280), vy: Math.sin(a) * rand(100, 280) - rand(60, 160), h: rand(0, 360), r: rand(1.5, 3), life: 2, spark:false});
+    parts.push({x, y, vx: Math.cos(a) * rand(100, 280), vy: Math.sin(a) * rand(100, 280) - rand(60, 160), h: rand(0, 360), r: rand(1.5, 3), life: 2, spark:false});
   }
-  if (head) texts.push({x: bu.x, y: bu.y - 14, s: 'x2', life: 0.5, big:false});
+  if (dmg > 1) texts.push({x, y: y - 14, s: 'x' + dmg, life: 0.5, big:false});
   if (b.hp <= 0) killBoss(b);
 }
 
@@ -603,18 +638,34 @@ function updateCam(rdt) {
 function updatePlayer(dt) {
   const p = player;
   const dir = ((keys.right || btn.right) ? 1 : 0) - ((keys.left || btn.left) ? 1 : 0);
-  p.vx += (dir * 270 - p.vx) * Math.min(1, dt * (p.onGround ? 14 : 5));
+  p.kickCd -= dt;
+  if (kickQ > 0 && p.kickT <= 0 && p.kickCd <= 0 && (p.onGround || p.airKick)) {
+    if (dir) p.facing = dir;
+    p.kickDir = p.facing;
+    p.kickT = 0.32; p.kickCd = 0.3; p.spinT = 0; p.spin = 0;
+    if (p.onGround) p.vy = -330; else { p.vy = -150; p.airKick = false; }
+    kickQ = 0;
+  }
+  kickQ = Math.max(0, kickQ - dt);
 
-  if (jumpQ > 0) {
+  if (p.kickT > 0) {
+    p.vx = p.kickDir * 560;
+  } else {
+    // weaker air control mid-backflip so the backward nudge carries
+    const ctl = p.onGround ? 14 : (p.spinT > 0 ? 2 : 5);
+    p.vx += (dir * 270 - p.vx) * Math.min(1, dt * ctl);
+  }
+
+  if (jumpQ > 0 && p.kickT <= 0) {
     if (p.onGround) { p.vy = -650; p.jumps = 1; jumpQ = 0; dust(p.x, p.y); }
-    else if (p.jumps > 0) { p.vy = -600; p.jumps = 0; p.spinT = 0.42; jumpQ = 0; }
+    else if (p.jumps > 0) { p.vy = -600; p.vx = -p.facing * 170; p.jumps = 0; p.spinT = 0.42; jumpQ = 0; }
   }
   jumpQ = Math.max(0, jumpQ - dt);
   if (keys.down) p.drop = 0.22;
   p.drop -= dt;
   physics(p, dt, p.drop > 0);
   p.x = clamp(p.x, 12, W - 12);
-  if (p.onGround) p.jumps = 2;
+  if (p.onGround) { p.jumps = 2; p.airKick = true; }
   p.phase += dt * Math.abs(p.vx) * 0.045;
   if (p.spinT > 0) { p.spinT -= dt; p.spin = (1 - Math.max(0, p.spinT) / 0.42) * Math.PI * 2; } else p.spin = 0;
   p.recoil = Math.max(0, p.recoil - dt * 10);
@@ -633,6 +684,14 @@ function updatePlayer(dt) {
   if (auto || pointer.active) p.facing = Math.cos(ang) >= 0 ? 1 : -1;
   p.aim = ang;
 
+  if (p.kickT > 0) {
+    p.kickT -= dt;
+    p.facing = p.kickDir; p.pose = 'kick'; p.tilt = -0.35;
+    if (Math.random() < dt * 40) parts.push({x: p.x - p.kickDir * 10, y: p.y - rand(20, 60), vx: -p.kickDir * rand(150, 260), vy: 0, h: 0, r: rand(0.8, 1.6), life: 0.15, spark: true, ink: true});
+    kickHit(p);
+    if (p.kickT <= 0) { p.pose = null; p.tilt = 0; }
+  }
+
   fireCd -= dt;
   if ((pointer.down || auto) && fireCd <= 0) {
     fireCd = 0.13;
@@ -649,6 +708,24 @@ function updateEnemies(dt) {
     e.drop -= dt; e.jumpCd -= dt;
     const dx = player.x - e.x, dy = player.y - e.y;
     const chasing = state === 'play';
+    if (e.launched) {
+      e.spin += dt * 18; e.launchT -= dt;
+      physics(e, dt, true);
+      for (const o of enemies) {
+        if (o === e || o.dead || o.launched) continue;
+        if (Math.abs(o.x - e.x) < 20 && Math.abs(o.y - e.y) < 55) { launch(o, Math.sign(e.vx) || 1, e.chain + 1); e.launchT = 0; }
+      }
+      const b = boss;
+      if (e.launchT > 0 && b && !b.dead && !b.hidden && b.st !== 'drop' && Math.abs(b.x - e.x) < 11 * b.scale + 10 && e.y - 40 > b.y - 78 * b.scale && e.y - 40 < b.y + 2) {
+        hitBoss(b, e.x, e.y - 40, e.vx, 0, 2); e.launchT = 0;
+      }
+      if (e.x < 8 || e.x > W - 8) e.launchT = 0;
+      if (e.launchT <= 0) {
+        kill(e, e.vx, -300, false);
+        if (e.chain >= 2) texts.push({x: e.x, y: e.y - 110, s: 'CHAIN x' + e.chain, life: 0.9, big:false});
+      }
+      continue;
+    }
     if (e.thrown) {
       e.spin += dt * 14;
       physics(e, dt, false);
@@ -665,7 +742,7 @@ function updateEnemies(dt) {
       physics(e, dt, e.drop > 0);
       e.phase += dt * Math.abs(e.vx) * 0.05;
     }
-    if (chasing && invuln <= 0 && Math.abs(dx) < 20 && Math.abs(dy) < 46) hurt(e);
+    if (chasing && invuln <= 0 && player.kickT <= 0 && Math.abs(dx) < 20 && Math.abs(dy) < 46) hurt(e);
   }
   enemies = enemies.filter(e => !e.dead);
 }
@@ -701,7 +778,7 @@ function updateBullets(dt) {
       if (b.life > 0 && bs && !bs.dead && !bs.hidden && !(bs.iframes > 0) && bs.st !== 'drop') {
         const sc = bs.scale;
         if (b.x > bs.x - 11 * sc && b.x < bs.x + 11 * sc && b.y > bs.y - 78 * sc && b.y < bs.y + 2) {
-          hitBoss(bs, b, b.y < bs.y - 58 * sc);
+          hitBoss(bs, b.x, b.y, b.vx, b.vy, b.y < bs.y - 58 * sc ? 2 : 1);
           b.life = 0;
         }
       }
@@ -826,7 +903,8 @@ function drawStick(e, kind) {
   ctx.save();
   ctx.translate(e.x, e.y);
   if (s !== 1) ctx.scale(s, s);
-  if (e.spin) { ctx.translate(0, -34); ctx.rotate(e.spin * f); ctx.translate(0, 34); }
+  if (e.spin) { ctx.translate(0, -34); ctx.rotate(e.spin * f * (e.flipDir || 1)); ctx.translate(0, 34); }
+  if (e.tilt) { ctx.translate(0, -30); ctx.rotate(e.tilt * f); ctx.translate(0, 30); }
   const col = e.ghost ? MUTED : (e.hitT > 0 ? ACCENT : INK);
   ctx.strokeStyle = col; ctx.lineWidth = 3.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   const pose = e.pose;
