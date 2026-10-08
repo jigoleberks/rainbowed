@@ -10,26 +10,21 @@ There is no winning. Every run ends with "You got rainbowed."
   arena's own boss at 100, then the loop starts over.
 - Each arena's 100-kill boss is deeply unserious and nearly impossible to kill, in the
   spirit of the SkiFree monster. Original designs, not copies. Ideas:
-  - The Eraser: a giant pencil eraser comes down and erases the arena, splats and you
   - The Slow One: an ordinary stickman who strolls at you with 10,000 health. Immortal
     snail energy: you can't really kill him, just keep away forever. Touch = death.
   - La Chancla: tiny, unbothered grandma with more health than the Giant. Lobs
     slippers in arcs like grenades; they burst into rainbow splats on landing.
+- Arena names and their 100-kill bosses:
+  - Arena 1, Page One: The Eraser (built)
+  - Arena 2, Grandma's House: La Chancla, plus Sophy
+  - Arena 3, The Long Hallway: The Slow One
+- Still to build: an arena picker on the start screen, and a best score per arena.
 - Arena idea, The House: shelves are real furniture (bookshelf, kitchen counter, top
   of the fridge), with mugs, plants and books on them and a ceiling light overhead.
   This is Sophy's home arena. La Chancla is the natural 100-kill boss here.
 - A better gun hidden somewhere hard to reach in each arena still fits here.
 - Difficulty currently stops ramping around 45 kills. Fine for now; revisit if it
   gets too easy or someone crushes a leaderboard.
-
-## Rainbow Mode power-up (next up)
-The hero briefly turns rainbow, like the animated title text.
-- How you get it: sometimes one of the stickmen the Giant throws glows rainbow.
-  Kill it and it drops the power-up, so his attack becomes your opening.
-- About 4-5 seconds, with a draining timer bar.
-- Invincible, and touching enemies rainbows them.
-- Gun shuts off, kicks only. Lets you kick your way up to the Giant's face,
-  but only takes off part of his health, so it's a swing, not an auto-win.
 
 ## Numpad controls (Lode Runner style)
 Keep WASD too, since many laptops have no numpad. Read the physical key so it works

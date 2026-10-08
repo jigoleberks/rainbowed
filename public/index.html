@@ -33,6 +33,7 @@ h1 .rb{background:linear-gradient(90deg,#e8384f,#f39a1f,#e9c400,#2fb866,#2b86e0,
 canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
 #overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:16px;background:color-mix(in srgb,var(--paper) 86%,transparent)}
 #overlay h2{font-family:var(--display);font-weight:400;font-size:clamp(1.3rem,5vw,2.5rem);line-height:1.05;margin:0;text-wrap:balance}
+#overlay .arena{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 #overlay p{margin:0;max-width:38ch;color:var(--muted);font-size:.82rem;line-height:1.5}
 #overlay .score{font-family:var(--display);font-size:clamp(1.6rem,6vw,3rem);color:var(--ink);font-variant-numeric:tabular-nums}
 .go{font-family:var(--display);font-size:1.15rem;padding:9px 28px;border:3px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:999px;cursor:pointer}
@@ -63,6 +64,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
   <div class="stage">
     <canvas id="game" aria-label="Game arena"></canvas>
     <div id="overlay">
+      <span class="arena">Arena 1 · Page One</span>
       <h2 id="ov-title">They keep coming.<br>Paint the town.</h2>
       <div class="score" id="ov-score" hidden></div>
       <p id="ov-text">Stickmen pour in from both sides and drop from the sky. Every third kill in a row slows time. Reach 25 kills and something big shows up.</p>
@@ -90,6 +92,8 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
 (() => {
 const W = 800, H = 450, G = 400, GRAV = 1800;
 const MAG = 12, RELOAD_TIME = 1.1;
+const RAINBOW_TIME = 4.5, EW = 170, EH = 74, ERASER_TIME = 45;
+const BOSS_LOOP = ['giant', 'sensei', 'giant', 'eraser'];
 const PLATS = [{x:90,y:305,w:170},{x:540,y:305,w:170},{x:315,y:215,w:170}];
 const INK = '#15161a', PAPER = '#fbfbf8', MUTED = '#b9bcc6', ACCENT = '#e8384f';
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -129,6 +133,7 @@ let ammo = MAG, reloadT = 0;
 let cheatSophy = false, runCheated = false, typed = '';
 let score, kills, combo, comboT, slow, shake, spawnT, hp, invuln, fireCd, flash, overT, clock = 0;
 let boss, bossWarn, nextBossAt, bossCount, bossesBeaten, cine, banner, geyser;
+let pickups = [], rainbowT = 0, erased = false;
 const cam = {x: W / 2, y: H / 2, z: 1};
 
 function reset() {
@@ -138,6 +143,8 @@ function reset() {
   score = 0; kills = 0; combo = 0; comboT = 0; slow = 0; shake = 0; spawnT = 0.8;
   hp = 5; invuln = 1; fireCd = 0; ammo = MAG; reloadT = 0; runCheated = cheatSophy; flash = 0; overT = 0;
   boss = null; bossWarn = 0; nextBossAt = 25; bossCount = 0; bossesBeaten = 0; cine = null; banner = null; geyser = null;
+  pickups = []; rainbowT = 0; erased = false;
+  for (const pl of PLATS) pl.gone = 0;
   cam.x = W / 2; cam.y = H / 2; cam.z = 1;
   sctx.clearRect(0, 0, W, H);
 }
@@ -228,8 +235,10 @@ function start() {
   reset();
   jumpQ = 0; kickQ = 0;
   // Skip-ahead links: add #giant or #sensei to the page address
-  if (location.hash === '#giant') kills = 24;
-  if (location.hash === '#sensei') { kills = 49; bossCount = 1; nextBossAt = 50; }
+  // Skip-ahead links for testing: #giant #sensei #giant2 #eraser
+  const skip = {'#giant': 0, '#sensei': 1, '#giant2': 2, '#eraser': 3}[location.hash];
+  if (skip !== undefined) { bossCount = skip; nextBossAt = 25 * (skip + 1); kills = nextBossAt - 1; }
+  banner = {title: 'PAGE ONE', sub: 'Arena 1', life: 1.8};
   state = 'play';
   overlay.hidden = true;
 }
@@ -237,7 +246,7 @@ function showOver() {
   state = 'over';
   if (!runCheated && score > best) { best = score; try { localStorage.setItem('rsb-best', String(best)); } catch (e) {} }
   bestEl.textContent = 'Best ' + pad6(best);
-  ovTitle.textContent = 'You got rainbowed.';
+  ovTitle.textContent = erased ? 'You got erased.' : 'You got rainbowed.';
   ovScore.hidden = false;
   ovScore.textContent = pad6(score);
   let msg = kills + (kills === 1 ? ' stickman' : ' stickmen') + ' turned into rainbows';
@@ -250,7 +259,7 @@ function showOver() {
 /* ---------- physics helpers ---------- */
 function landY(x, prevBottom, bottom) {
   if (bottom >= G) return G;
-  for (const p of PLATS) if (x > p.x && x < p.x + p.w && prevBottom <= p.y + 0.5 && bottom >= p.y) return p.y;
+  for (const p of PLATS) if (!(p.gone > 0) && x > p.x && x < p.x + p.w && prevBottom <= p.y + 0.5 && bottom >= p.y) return p.y;
   return null;
 }
 function physics(e, dt, dropThrough) {
@@ -262,7 +271,7 @@ function physics(e, dt, dropThrough) {
   if (e.y >= G) { e.y = G; e.vy = 0; e.onGround = true; return; }
   if (e.vy >= 0 && !dropThrough) {
     for (const p of PLATS) {
-      if (e.x > p.x && e.x < p.x + p.w && py <= p.y + 0.5 && e.y >= p.y) { e.y = p.y; e.vy = 0; e.onGround = true; return; }
+      if (!(p.gone > 0) && e.x > p.x && e.x < p.x + p.w && py <= p.y + 0.5 && e.y >= p.y) { e.y = p.y; e.vy = 0; e.onGround = true; return; }
     }
   }
 }
@@ -321,6 +330,10 @@ function limbs(e, dvx, dvy, s = 1) {
 
 function kill(e, dvx, dvy, head) {
   e.dead = true;
+  if (e.glow) {
+    pickups.push({x: e.x, y: e.y - 30, vy: -320, life: 9});
+    texts.push({x: e.x, y: e.y - 110, s: 'GRAB IT!', life: 1, big:false});
+  }
   kills++; combo++; comboT = 1.7;
   const mult = Math.min(5, combo);
   const pts = (head ? 150 : 100) * mult;
@@ -336,6 +349,7 @@ function kill(e, dvx, dvy, head) {
 }
 
 function hurt(from) {
+  if (rainbowT > 0) return;
   hp--; invuln = 1.3; combo = 0;
   const away = Math.sign(player.x - from.x) || 1;
   player.vx = away * 420; player.vy = -380;
@@ -348,6 +362,18 @@ function hurt(from) {
     limbs(player, away * 200, -200);
     slow = 1.4; overT = 1.6; shake = 16;
   }
+}
+
+// 0 = miss, 1 = body, 2 = weak spot (head, or the Eraser's worn bottom edge)
+function bossZone(b, x, y, pad) {
+  if (!b || b.dead || b.hidden || b.iframes > 0 || b.st === 'drop' || b.st === 'enter' || b.st === 'leave') return 0;
+  if (b.kind === 'eraser') {
+    if (Math.abs(x - b.x) < EW / 2 + pad && y > b.y - EH - pad && y < b.y + pad) return y > b.y - 14 ? 2 : 1;
+    return 0;
+  }
+  const s = b.scale;
+  if (Math.abs(x - b.x) < 11 * s + pad && y > b.y - 80 * s && y < b.y + 4) return y < b.y - 58 * s ? 2 : 1;
+  return 0;
 }
 
 function launch(e, dir, chain) {
@@ -369,15 +395,13 @@ function kickHit(p) {
       return;
     }
   }
-  const b = boss;
-  if (b && !b.dead && !b.hidden && !(b.iframes > 0) && b.st !== 'drop') {
-    const s = b.scale;
-    if (Math.abs(fx - b.x) < 11 * s + 10 && fy > b.y - 80 * s && fy < b.y + 4) {
-      hitBoss(b, fx, fy, f, 0, 3);
-      p.kickT = 0; p.pose = null; p.tilt = 0;
-      p.vx = -f * 320; p.vy = -380; p.airKick = true;
-      shake = Math.max(shake, 8);
-    }
+  const b = boss, zone = bossZone(b, fx, fy, 10);
+  if (zone) {
+    const dmg = b.kind === 'eraser' ? (zone === 2 ? 12 : 3) : (zone === 2 ? 4 : 3);
+    hitBoss(b, fx, fy, f, 0, dmg);
+    p.kickT = 0; p.pose = null; p.tilt = 0;
+    p.vx = -f * 320; p.vy = -380; p.airKick = true;
+    shake = Math.max(shake, 8);
   }
 }
 
@@ -396,7 +420,13 @@ function aimTarget() {
     const d = Math.hypot(e.x - player.x, (e.y - player.y) * 1.3);
     if (d < bd) { bd = d; t = {x: e.x, y: e.y - 46}; }
   }
-  if (boss && !boss.dead && !boss.hidden && boss.st !== 'drop') {
+  if (boss && boss.kind === 'eraser') {
+    if (bossZone(boss, boss.x, boss.y - 5, 0) && boss.x > -EW / 2 && boss.x < W + EW / 2) {
+      const ex = clamp(player.x, boss.x - EW / 2 + 12, boss.x + EW / 2 - 12);
+      const d = Math.hypot(ex - player.x, (boss.y - player.y) * 1.3);
+      if (d < bd) t = {x: ex, y: boss.y - 7};
+    }
+  } else if (boss && !boss.dead && !boss.hidden && boss.st !== 'drop') {
     const s = boss.scale;
     const d = Math.hypot(boss.x - player.x, (boss.y - player.y) * 1.3) - 20 * s;
     if (d < bd) t = {x: boss.x, y: boss.y - 46 * s};
@@ -405,13 +435,17 @@ function aimTarget() {
 }
 
 /* ---------- bosses ---------- */
-function nextBossKind() { return bossCount % 2 === 0 ? 'giant' : 'sensei'; }
+function nextBossKind() { return BOSS_LOOP[bossCount % BOSS_LOOP.length]; }
 
 function spawnBoss() {
-  const level = Math.floor(bossCount / 2);
-  const kind = nextBossKind();
+  const loop = Math.floor(bossCount / BOSS_LOOP.length), pos = bossCount % BOSS_LOOP.length;
+  const kind = BOSS_LOOP[pos];
+  const level = kind === 'giant' ? loop * 2 + (pos === 2 ? 1 : 0) : loop;
   bossCount++;
-  if (kind === 'giant') {
+  if (kind === 'eraser') {
+    boss = {kind, x: W / 2, y: -30, vx:0, vy:0, scale:1, facing:1, hp: 600 + level * 200, st:'enter', t:0,
+      timer: ERASER_TIME, row: null, lastRow: null, dir: 1, tx: W / 2, hitT:0, level, wob:0, name:'THE ERASER'};
+  } else if (kind === 'giant') {
     const x = player.x < W / 2 ? W - 150 : 150;
     boss = {kind, x, y:-320, vx:0, vy:0, onGround:false, facing: player.x < x ? -1 : 1, phase:0, scale:3,
       hp: 40 + level * 15, st:'drop', t:0, cd:1.2, hitT:0, level, spin:0, pose:null, name:'THE GIANT'};
@@ -439,8 +473,13 @@ function throwMinion(b) {
   const flight = 0.9;
   const vx = clamp((player.x - hx) / flight, -650, 650);
   const vy = Math.max(-900, ((player.y - hy) - 0.5 * GRAV * flight * flight) / flight);
+  b.sinceGlow = (b.sinceGlow || 0) + 1;
+  // the first throw of every Giant fight is always the glowing one
+  const glow = rainbowT <= 0 && !pickups.length && !enemies.some(e => e.glow) && (b.sinceGlow === 1 && !b.gaveGlow || b.sinceGlow >= 3 || Math.random() < 0.3);
+  if (glow) b.gaveGlow = true;
+  if (glow) b.sinceGlow = 0;
   enemies.push({x: hx, y: hy, vx, vy, onGround:false, facing: Math.sign(vx) || 1, phase:0,
-    speed: rand(90, 140), drop:0, jumpCd:0.6, thrown:true, spin:0});
+    speed: rand(90, 140), drop:0, jumpCd:0.6, thrown:true, spin:0, glow});
 }
 
 function throwStars(b) {
@@ -486,7 +525,7 @@ function updateGiant(b, dt, dx, fighting) {
       b.vx += (tv - b.vx) * Math.min(1, dt * 3);
       b.pose = null; b.cd -= dt;
       if (b.cd <= 0) {
-        if (Math.abs(dx) < 320 && Math.random() < 0.6) { b.st = 'stompWind'; b.t = 0.6; }
+        if (b.gaveGlow && Math.abs(dx) < 320 && Math.random() < 0.6) { b.st = 'stompWind'; b.t = 0.6; }
         else { b.st = 'throwWind'; b.t = 0.75; }
       }
       break;
@@ -589,13 +628,103 @@ function updateSensei(b, dt, dx, dy, fighting) {
   b.x = clamp(b.x, 15, W - 15);
 }
 
+function eraserCrumbs(x, y, n) {
+  for (let i = 0; i < n; i++) parts.push({x: x + rand(-8, 8), y: y + rand(-4, 4), vx: rand(-120, 120), vy: rand(-160, -20), h: 0, r: rand(1.2, 2.6), life: rand(0.5, 0.9), spark: true, ink: true, col: Math.random() < 0.5 ? '#e993a6' : '#9b9fab'});
+}
+
+function eraseMe() {
+  if (player.dead) return;
+  erased = true; hp = 0; player.dead = true; state = 'dying';
+  eraserCrumbs(player.x, player.y - 40, 60);
+  slow = 1.2; overT = 1.8; shake = 14;
+}
+
+function eraserBored(b) {
+  const pts = 3000 * (b.level + 1);
+  score += pts; hp = Math.min(5, hp + 1);
+  boss = null; nextBossAt += 25; spawnT = 1.8;
+  banner = {title: 'THE ERASER GOT BORED', sub: 'Survived   ·   +' + pts + '   ·   +1 life', life: 3};
+}
+
+function updateEraser(b, dt, fighting) {
+  b.wob += dt;
+  if (fighting && b.st !== 'enter' && b.st !== 'leave') {
+    b.timer -= dt;
+    if (b.timer <= 0) { b.timer = 0; b.st = 'leave'; }
+  }
+  const fast = b.timer < 20 ? 1.25 : 1, hover = 110;
+  switch (b.st) {
+    case 'enter':
+      b.y += 260 * dt;
+      if (b.y >= hover) {
+        b.y = hover; b.st = 'pick';
+        banner = {title: 'THE ERASER', sub: 'Survive ' + ERASER_TIME + ' seconds. Its worn bottom edge takes extra damage.', life: 3};
+      }
+      break;
+    case 'pick': {
+      const lowGone = PLATS[0].gone > 0 || PLATS[1].gone > 0;
+      let rows = [G, 305, 215].filter(r => r !== b.lastRow && !(r === G && lowGone));
+      if (!rows.length) rows = [305];
+      b.row = rows[Math.floor(Math.random() * rows.length)]; b.lastRow = b.row;
+      b.dir = Math.random() < 0.5 ? 1 : -1;
+      b.tx = b.dir > 0 ? -EW / 2 + 24 : W + EW / 2 - 24;
+      b.st = 'move';
+      break;
+    }
+    case 'move': {
+      const d = b.tx - b.x;
+      b.x += clamp(d, -1100 * dt, 1100 * dt);
+      b.y += (hover - b.y) * Math.min(1, dt * 8);
+      if (Math.abs(d) < 2) { b.st = 'aimWind'; b.t = 0.95 / fast; }
+      break;
+    }
+    case 'aimWind':
+      b.t -= dt;
+      if (b.t <= 0) b.st = 'slam';
+      break;
+    case 'slam':
+      b.y += 1400 * dt;
+      if (b.y >= b.row) { b.y = b.row; b.st = 'sweep'; shake = Math.max(shake, 8); eraserCrumbs(b.x, b.y, 14); }
+      break;
+    case 'sweep': {
+      b.x += b.dir * (300 + b.level * 40) * fast * dt;
+      sctx.clearRect(b.x - EW / 2, b.y - EH - 6, EW, EH + 10);
+      for (const pl of PLATS) {
+        if (Math.abs(pl.y - b.y) < 2 && !(pl.gone > 0) && b.x + EW / 2 > pl.x && b.x - EW / 2 < pl.x + pl.w) {
+          pl.gone = 4.5;
+          eraserCrumbs(clamp(b.x, pl.x, pl.x + pl.w), pl.y, 20);
+        }
+      }
+      for (const e of enemies) {
+        if (!e.dead && Math.abs(e.x - b.x) < EW / 2 && e.y - 40 > b.y - EH && e.y - 40 < b.y) { e.dead = true; eraserCrumbs(e.x, e.y - 40, 20); }
+      }
+      if (Math.random() < dt * 30) eraserCrumbs(b.x - b.dir * EW / 2, b.y - 4, 2);
+      if ((b.dir > 0 && b.x > W + EW / 2) || (b.dir < 0 && b.x < -EW / 2)) b.st = 'lift';
+      break;
+    }
+    case 'lift':
+      b.y -= 900 * dt;
+      if (b.y <= hover) { b.y = hover; b.st = 'pick'; }
+      break;
+    case 'leave':
+      b.y -= 500 * dt;
+      if (b.y < -EH - 30) eraserBored(b);
+      return;
+  }
+  // only the slam and the scrub erase you; hovering overhead is harmless
+  if (fighting && rainbowT <= 0 && (b.st === 'slam' || b.st === 'sweep')) {
+    if (Math.abs(player.x - b.x) < EW / 2 + 4 && player.y - 74 < b.y - 6 && player.y > b.y - EH + 6) eraseMe();
+  }
+}
+
 function updateBoss(dt) {
   const b = boss;
   if (!b || b.dead) return;
   b.hitT = Math.max(0, b.hitT - dt);
   const fighting = state === 'play';
   const dx = player.x - b.x, dy = player.y - b.y;
-  if (b.kind === 'giant') updateGiant(b, dt, dx, fighting);
+  if (b.kind === 'eraser') updateEraser(b, dt, fighting);
+  else if (b.kind === 'giant') updateGiant(b, dt, dx, fighting);
   else updateSensei(b, dt, dx, dy, fighting);
 }
 
@@ -614,14 +743,23 @@ function killBoss(b) {
   b.dead = true; b.hp = 0; b.pose = null; b.spin = 0; b.hidden = false; b.hitT = 0;
   eproj = []; waves = [];
   const s = b.scale;
-  const pts = (b.kind === 'giant' ? 5000 : 7500) * (b.level + 1);
+  const pts = ({giant: 5000, sensei: 7500, eraser: 50000})[b.kind] * (b.level + 1);
   score += pts; b.pts = pts;
   nextBossAt += 25; bossesBeaten++;
-  cine = {kind:'ko', t:0, dur:1.7, x:b.x, y:b.y - 40 * s, z: b.kind === 'giant' ? 1.45 : 2.3, boss:b, burst:false};
+  const ky = b.kind === 'eraser' ? b.y - EH / 2 : b.y - 40 * s;
+  cine = {kind:'ko', t:0, dur:1.7, x: clamp(b.x, 0, W), y: ky, z: ({giant: 1.45, sensei: 2.3, eraser: 1.6})[b.kind], boss:b, burst:false};
 }
 
 function bossExplode(b) {
   b.exploded = true;
+  if (b.kind === 'eraser') {
+    const cx = clamp(b.x, 0, W), cy = b.y - EH / 2;
+    burst(cx, cy, 0, -300, 160); burst(cx, cy, 0, -100, 80);
+    eraserCrumbs(cx, cy, 140);
+    shake = 22;
+    for (let i = 0; i < 4; i++) rings.push({x: cx, y: cy, r: 6 + i * 30, life: 0.35 + i * 0.1});
+    return;
+  }
   const s = b.scale;
   burst(b.x, b.y - 44 * s, 0, -300, b.kind === 'giant' ? 150 : 110);
   burst(b.x, b.y - 44 * s, 0, -100, 60);
@@ -656,7 +794,7 @@ function updateCine(rdt) {
       const b = c.boss;
       cine = null; boss = null;
       hp = Math.min(5, hp + 1);
-      banner = {title: b.kind === 'giant' ? 'GIANT DOWN' : 'SENSEI DEFEATED', sub: '+' + b.pts + '   ·   +1 life', life: 2.6};
+      banner = {title: ({giant: 'GIANT DOWN', sensei: 'SENSEI DEFEATED', eraser: 'THE ERASER IS ERASED'})[b.kind], sub: '+' + b.pts + '   ·   +1 life', life: 2.6};
       spawnT = 1.8;
     }
   }
@@ -739,6 +877,12 @@ function updatePlayer(dt) {
     if (p.kickT <= 0) { p.pose = null; p.tilt = 0; }
   }
 
+  if (rainbowT > 0) {
+    rainbowT = Math.max(0, rainbowT - dt);
+    if (Math.random() < dt * 60) parts.push({x: p.x + rand(-8, 8), y: p.y - rand(5, 70), vx: -p.vx * 0.2 + rand(-30, 30), vy: rand(-40, 20), h: (clock * 700) % 360, r: rand(1.5, 3), life: 0.5, spark: true});
+    if (rainbowT === 0) texts.push({x: p.x, y: p.y - 92, s: 'back to normal', life: 0.8, big:false});
+  }
+
   if (reloadT > 0) {
     reloadT -= dt;
     p.aim = p.facing > 0 ? 1.1 : Math.PI - 1.1;
@@ -746,7 +890,7 @@ function updatePlayer(dt) {
   }
 
   fireCd -= dt;
-  if ((pointer.down || auto) && fireCd <= 0 && reloadT <= 0 && ammo > 0) {
+  if ((pointer.down || auto) && fireCd <= 0 && reloadT <= 0 && ammo > 0 && rainbowT <= 0) {
     fireCd = 0.13;
     if (!cheatSophy) ammo--;
     parts.push({x: p.x + Math.cos(ang) * 10, y: p.y - 54, vx: -p.facing * rand(60, 130), vy: -rand(140, 220), h: 0, r: 1.6, life: 0.5, spark: true, ink: true});
@@ -772,7 +916,7 @@ function updateEnemies(dt) {
         if (Math.abs(o.x - e.x) < 20 && Math.abs(o.y - e.y) < 55) { launch(o, Math.sign(e.vx) || 1, e.chain + 1); e.launchT = 0; }
       }
       const b = boss;
-      if (e.launchT > 0 && b && !b.dead && !b.hidden && b.st !== 'drop' && Math.abs(b.x - e.x) < 11 * b.scale + 10 && e.y - 40 > b.y - 78 * b.scale && e.y - 40 < b.y + 2) {
+      if (e.launchT > 0 && bossZone(b, e.x, e.y - 40, 10)) {
         hitBoss(b, e.x, e.y - 40, e.vx, 0, 2); e.launchT = 0;
       }
       if (e.x < 8 || e.x > W - 8) e.launchT = 0;
@@ -798,6 +942,7 @@ function updateEnemies(dt) {
       physics(e, dt, e.drop > 0);
       e.phase += dt * Math.abs(e.vx) * 0.05;
     }
+    if (chasing && rainbowT > 0 && Math.abs(dx) < 24 && Math.abs(dy) < 50) { kill(e, -dx * 8 || 200, -300, false); continue; }
     if (chasing && invuln <= 0 && player.kickT <= 0 && Math.abs(dx) < 20 && Math.abs(dy) < 46) hurt(e);
   }
   enemies = enemies.filter(e => !e.dead);
@@ -830,13 +975,10 @@ function updateBullets(dt) {
           b.life = 0; break;
         }
       }
-      const bs = boss;
-      if (b.life > 0 && bs && !bs.dead && !bs.hidden && !(bs.iframes > 0) && bs.st !== 'drop') {
-        const sc = bs.scale;
-        if (b.x > bs.x - 11 * sc && b.x < bs.x + 11 * sc && b.y > bs.y - 78 * sc && b.y < bs.y + 2) {
-          hitBoss(bs, b.x, b.y, b.vx, b.vy, b.y < bs.y - 58 * sc ? 2 : 1);
-          b.life = 0;
-        }
+      const bs = boss, zone = b.life > 0 ? bossZone(bs, b.x, b.y, 0) : 0;
+      if (zone) {
+        hitBoss(bs, b.x, b.y, b.vx, b.vy, bs.kind === 'eraser' ? (zone === 2 ? 4 : 1) : zone);
+        b.life = 0;
       }
     }
     if (b.y > G || b.x < -30 || b.x > W + 30 || b.y < -30) {
@@ -927,6 +1069,19 @@ function update(rdt) {
       }
     }
   }
+  for (const pl of PLATS) if (pl.gone > 0) pl.gone = Math.max(0, pl.gone - dt);
+  for (const k of pickups) {
+    k.life -= dt;
+    const pb = k.y;
+    k.vy += 1100 * dt; k.y += k.vy * dt;
+    if (k.vy > 0) { const ly = landY(k.x, pb + 10, k.y + 10); if (ly !== null) { k.y = ly - 10; k.vy = 0; } }
+    if (state === 'play' && !player.dead && Math.abs(player.x - k.x) < 24 && k.y > player.y - 85 && k.y < player.y + 12) {
+      k.life = 0; rainbowT = RAINBOW_TIME;
+      burst(k.x, k.y, 0, -200, 40);
+      banner = {title: 'RAINBOW MODE', sub: 'Kicks only. Nothing can hurt you. Go kick him in the face.', life: 2.2};
+    }
+  }
+  pickups = pickups.filter(k => k.life > 0);
   updateEnemies(dt);
   updateBoss(dt);
   updateHazards(dt);
@@ -946,6 +1101,13 @@ function drawStage() {
   ctx.strokeStyle = INK; ctx.lineWidth = 4;
   line(0, G, W, G);
   for (const p of PLATS) {
+    if (p.gone > 0) {
+      // erased: a faint pencil guide shows where it will be redrawn
+      ctx.save(); ctx.setLineDash([4, 9]); ctx.strokeStyle = MUTED; ctx.lineWidth = 2;
+      ctx.globalAlpha = p.gone < 1 ? 1 : 0.6;
+      line(p.x, p.y, p.x + p.w, p.y); ctx.restore();
+      continue;
+    }
     ctx.strokeStyle = INK; ctx.lineWidth = 4;
     line(p.x, p.y, p.x + p.w, p.y);
     ctx.strokeStyle = MUTED; ctx.lineWidth = 1.5;
@@ -961,7 +1123,8 @@ function drawStick(e, kind) {
   if (s !== 1) ctx.scale(s, s);
   if (e.spin) { ctx.translate(0, -34); ctx.rotate(e.spin * (e.flipSign !== undefined ? e.flipSign : f)); ctx.translate(0, 34); }
   if (e.tilt) { ctx.translate(0, -30); ctx.rotate(e.tilt * f); ctx.translate(0, 30); }
-  const col = e.ghost ? MUTED : (e.hitT > 0 ? ACCENT : INK);
+  let col = e.ghost ? MUTED : (e.hitT > 0 ? ACCENT : INK);
+  if ((kind === 'player' && rainbowT > 0 && !(rainbowT < 1 && Math.floor(clock * 14) % 2)) || e.glow) col = `hsl(${(clock * 600 + (e.glow ? 180 : 0)) % 360} 85% 50%)`;
   ctx.strokeStyle = col; ctx.lineWidth = 3.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   const pose = e.pose;
   const crouch = pose === 'crouch';
@@ -1067,9 +1230,45 @@ function drawStick(e, kind) {
   ctx.restore();
 }
 
+function drawEraser(b) {
+  if (b.st === 'aimWind') {
+    const a = 0.5 + 0.5 * Math.sin(clock * 20);
+    ctx.save();
+    ctx.globalAlpha = 0.35 + 0.4 * a;
+    ctx.setLineDash([10, 8]); ctx.strokeStyle = ACCENT; ctx.lineWidth = 3;
+    line(0, b.row - EH / 2, W, b.row - EH / 2);
+    ctx.setLineDash([]);
+    ctx.fillStyle = ACCENT; ctx.font = '26px "Permanent Marker", cursive'; ctx.textAlign = 'center';
+    const ax = b.dir > 0 ? 40 : W - 40;
+    ctx.fillText(b.dir > 0 ? '\u2192 !' : '! \u2190', ax, b.row - EH / 2 - 10);
+    ctx.restore();
+  }
+  const tilt = b.st === 'sweep' ? Math.sin(b.wob * 18) * 0.04 - b.dir * 0.05 : 0;
+  ctx.save();
+  ctx.translate(b.x, b.y - EH / 2);
+  ctx.rotate(tilt);
+  const x0 = -EW / 2, y0 = -EH / 2;
+  ctx.beginPath();
+  ctx.moveTo(x0 + 22, y0); ctx.lineTo(x0 + EW - 22, y0); ctx.lineTo(x0 + EW, y0 + 18); ctx.lineTo(x0 + EW, y0 + EH - 6);
+  ctx.quadraticCurveTo(x0 + EW, y0 + EH, x0 + EW - 8, y0 + EH); ctx.lineTo(x0 + 8, y0 + EH);
+  ctx.quadraticCurveTo(x0, y0 + EH, x0, y0 + EH - 6); ctx.lineTo(x0, y0 + 18); ctx.closePath();
+  ctx.fillStyle = b.hitT > 0 ? '#f7c3cf' : '#f0a3b4'; ctx.fill();
+  // worn bottom edge (the weak spot)
+  ctx.fillStyle = '#b9a2a8';
+  ctx.fillRect(x0 + 3, y0 + EH - 13, EW - 6, 10);
+  ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.lineJoin = 'round'; ctx.stroke();
+  ctx.lineWidth = 2;
+  line(x0 + 22, y0, x0 + 22, y0 + EH - 13); line(x0 + EW - 22, y0, x0 + EW - 22, y0 + EH - 13);
+  line(x0 + 2, y0 + EH - 13, x0 + EW - 2, y0 + EH - 13);
+  ctx.fillStyle = INK; ctx.font = '22px "Permanent Marker", cursive'; ctx.textAlign = 'center';
+  ctx.fillText('ERASE', 0, 8);
+  ctx.restore();
+}
+
 function drawBoss() {
   const b = boss;
   if (!b || b.exploded) return;
+  if (b.kind === 'eraser') { drawEraser(b); return; }
   if (b.ghosts) for (const g of b.ghosts) { ctx.globalAlpha = Math.max(0, g.life / 0.3) * 0.55; drawStick(g, 'sensei'); }
   ctx.globalAlpha = 1;
   if (b.kind === 'giant' && b.st === 'drop') {
@@ -1125,7 +1324,14 @@ function drawHUD() {
     ctx.font = '600 12px "IBM Plex Mono", monospace';
     ctx.fillStyle = '#5f6370';
     ctx.fillText(kills + ' RAINBOWED', 20, 58);
-    if (cheatSophy) {
+    if (rainbowT > 0) {
+      const g = ctx.createLinearGradient(20, 0, 20 + MAG * 7, 0);
+      for (let k = 0; k <= 6; k++) g.addColorStop(k / 6, `hsl(${(k * 60 + clock * 300) % 360} 88% 55%)`);
+      ctx.fillStyle = g; ctx.fillRect(20, 66, (MAG * 7 - 3) * (rainbowT / RAINBOW_TIME), 11);
+      ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.strokeRect(20, 66, MAG * 7 - 3, 11);
+      ctx.fillStyle = INK; ctx.font = '600 11px "IBM Plex Mono", monospace';
+      ctx.fillText('RAINBOW MODE', 20 + MAG * 7 + 6, 76);
+    } else if (cheatSophy) {
       ctx.fillStyle = ACCENT;
       ctx.font = '600 11px "IBM Plex Mono", monospace';
       ctx.fillText('\u221E SOPHY MODE', 20, 76);
@@ -1134,7 +1340,7 @@ function drawHUD() {
       ctx.fillStyle = on ? INK : '#c9ccd4';
       ctx.fillRect(20 + i * 7, 66, 4, 11);
     }
-    if (reloadT > 0) {
+    if (reloadT > 0 && rainbowT <= 0) {
       ctx.fillStyle = ACCENT;
       ctx.font = '600 11px "IBM Plex Mono", monospace';
       ctx.fillText('RELOADING', 20 + MAG * 7 + 6, 76);
@@ -1161,6 +1367,12 @@ function drawHUD() {
       for (let k = 0; k <= 6; k++) g.addColorStop(k / 6, `hsl(${k * 55} 85% 56%)`);
       ctx.fillStyle = g; ctx.fillRect(bx, by, bw * r, 10);
       ctx.lineWidth = 2.5; ctx.strokeStyle = INK; ctx.strokeRect(bx, by, bw, 10);
+      if (boss.kind === 'eraser' && boss.st !== 'leave') {
+        const sec = Math.ceil(boss.timer);
+        ctx.font = '600 12px "IBM Plex Mono", monospace';
+        ctx.fillStyle = sec <= 10 ? ACCENT : INK;
+        ctx.fillText('SURVIVE 0:' + String(sec).padStart(2, '0'), W / 2, by + 26);
+      }
     }
     if (bossWarn > 0) {
       const a = 0.55 + 0.45 * Math.sin(clock * 18);
@@ -1176,7 +1388,7 @@ function drawHUD() {
       ctx.globalAlpha = 1;
       ctx.font = '600 13px "IBM Plex Mono", monospace';
       ctx.fillStyle = INK;
-      ctx.fillText(nextBossKind() === 'giant' ? 'Something huge is falling.' : 'A master approaches.', W / 2, 232);
+      ctx.fillText(({giant: 'Something huge is falling.', sensei: 'A master approaches.', eraser: 'Someone is unhappy with this drawing.'})[nextBossKind()], W / 2, 232);
     }
   }
   if (banner && !cine) {
@@ -1246,6 +1458,17 @@ function draw() {
 
   drawHazards();
   drawBoss();
+  for (const k of pickups) {
+    if (k.life < 2 && Math.floor(clock * 10) % 2) continue;
+    const r = 11 + Math.sin(clock * 8) * 1.5;
+    ctx.lineWidth = 4;
+    for (let i = 0; i < 6; i++) {
+      ctx.strokeStyle = `hsl(${(i * 60 + clock * 300) % 360} 88% 55%)`;
+      ctx.beginPath(); ctx.arc(k.x, k.y, r, i * Math.PI / 3 + clock * 4, (i + 1) * Math.PI / 3 + clock * 4); ctx.stroke();
+    }
+    ctx.fillStyle = PAPER; ctx.beginPath(); ctx.arc(k.x, k.y, r - 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = INK; ctx.font = '14px "Permanent Marker", cursive'; ctx.textAlign = 'center'; ctx.fillText('\u2605', k.x, k.y + 5);
+  }
   for (const e of enemies) drawStick(e, 'enemy');
   if (!player.dead && !(state === 'play' && invuln > 0 && !cine && Math.floor(clock * 18) % 2)) drawStick(player, 'player');
 
@@ -1254,7 +1477,7 @@ function draw() {
 
   for (const p of parts) {
     ctx.globalAlpha = Math.min(1, p.life * 2.5);
-    ctx.fillStyle = p.ink ? INK : `hsl(${p.h} 88% 56%)`;
+    ctx.fillStyle = p.col || (p.ink ? INK : `hsl(${p.h} 88% 56%)`);
     ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
   }
   ctx.globalAlpha = 1;
