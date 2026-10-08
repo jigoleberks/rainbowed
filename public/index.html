@@ -126,6 +126,7 @@ fit();
 let state = 'title';
 let player, enemies, bullets, parts, debris, rings, texts, eproj, waves;
 let ammo = MAG, reloadT = 0;
+let cheatSophy = false, runCheated = false, typed = '';
 let score, kills, combo, comboT, slow, shake, spawnT, hp, invuln, fireCd, flash, overT, clock = 0;
 let boss, bossWarn, nextBossAt, bossCount, bossesBeaten, cine, banner, geyser;
 const cam = {x: W / 2, y: H / 2, z: 1};
@@ -135,7 +136,7 @@ function reset() {
     kickT:0, kickCd:0, airKick:true, kickDir:1, pose:null, tilt:0, flipSign:-1, wallT:0, wallSide:0};
   enemies = []; bullets = []; parts = []; debris = []; rings = []; texts = []; eproj = []; waves = [];
   score = 0; kills = 0; combo = 0; comboT = 0; slow = 0; shake = 0; spawnT = 0.8;
-  hp = 5; invuln = 1; fireCd = 0; ammo = MAG; reloadT = 0; flash = 0; overT = 0;
+  hp = 5; invuln = 1; fireCd = 0; ammo = MAG; reloadT = 0; runCheated = cheatSophy; flash = 0; overT = 0;
   boss = null; bossWarn = 0; nextBossAt = 25; bossCount = 0; bossesBeaten = 0; cine = null; banner = null; geyser = null;
   cam.x = W / 2; cam.y = H / 2; cam.z = 1;
   sctx.clearRect(0, 0, W, H);
@@ -155,6 +156,16 @@ addEventListener('keydown', e => {
   if (k === 'kick' && !e.repeat) kickQ = 0.12;
   if (k === 'reload' && !e.repeat && state === 'play') startReload();
   keys[k] = true;
+});
+// Secret: type "sophy" to toggle bottomless magazines. Cheated runs don't save a best score.
+addEventListener('keydown', e => {
+  if (!e.key || e.key.length !== 1) return;
+  typed = (typed + e.key.toLowerCase()).slice(-5);
+  if (typed !== 'sophy') return;
+  typed = '';
+  cheatSophy = !cheatSophy;
+  if (cheatSophy) { runCheated = true; reloadT = 0; ammo = MAG; }
+  texts.push({x: W / 2, y: 150, s: cheatSophy ? 'SOPHY MODE' : 'SOPHY MODE OFF', life: 1.3, big: true});
 });
 addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) keys[k] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
@@ -224,14 +235,14 @@ function start() {
 }
 function showOver() {
   state = 'over';
-  if (score > best) { best = score; try { localStorage.setItem('rsb-best', String(best)); } catch (e) {} }
+  if (!runCheated && score > best) { best = score; try { localStorage.setItem('rsb-best', String(best)); } catch (e) {} }
   bestEl.textContent = 'Best ' + pad6(best);
   ovTitle.textContent = 'You got rainbowed.';
   ovScore.hidden = false;
   ovScore.textContent = pad6(score);
   let msg = kills + (kills === 1 ? ' stickman' : ' stickmen') + ' turned into rainbows';
   if (bossesBeaten) msg += ', ' + bossesBeaten + (bossesBeaten === 1 ? ' boss' : ' bosses') + ' beaten';
-  ovText.textContent = msg + '. Best run: ' + pad6(best) + '.';
+  ovText.textContent = msg + '. Best run: ' + pad6(best) + '.' + (runCheated ? ' Sophy mode was on, so this run is not saved.' : '');
   goBtn.textContent = 'Again';
   overlay.hidden = false;
 }
@@ -371,7 +382,7 @@ function kickHit(p) {
 }
 
 function startReload() {
-  if (reloadT > 0 || ammo >= MAG || player.dead) return;
+  if (cheatSophy || reloadT > 0 || ammo >= MAG || player.dead) return;
   reloadT = RELOAD_TIME;
   const f = player.facing;
   debris.push({x: player.x + f * 14, y: player.y - 44, ang: Math.PI / 2, len: 7, lw: 4, vx: f * rand(30, 80), vy: -rand(60, 140), va: rand(-8, 8), life: 2.5, head:false});
@@ -737,7 +748,7 @@ function updatePlayer(dt) {
   fireCd -= dt;
   if ((pointer.down || auto) && fireCd <= 0 && reloadT <= 0 && ammo > 0) {
     fireCd = 0.13;
-    ammo--;
+    if (!cheatSophy) ammo--;
     parts.push({x: p.x + Math.cos(ang) * 10, y: p.y - 54, vx: -p.facing * rand(60, 130), vy: -rand(140, 220), h: 0, r: 1.6, life: 0.5, spark: true, ink: true});
     if (ammo === 0) startReload();
     const a = ang + rand(-0.035, 0.035);
@@ -1114,7 +1125,11 @@ function drawHUD() {
     ctx.font = '600 12px "IBM Plex Mono", monospace';
     ctx.fillStyle = '#5f6370';
     ctx.fillText(kills + ' RAINBOWED', 20, 58);
-    for (let i = 0; i < MAG; i++) {
+    if (cheatSophy) {
+      ctx.fillStyle = ACCENT;
+      ctx.font = '600 11px "IBM Plex Mono", monospace';
+      ctx.fillText('\u221E SOPHY MODE', 20, 76);
+    } else for (let i = 0; i < MAG; i++) {
       const on = reloadT > 0 ? i < Math.floor((1 - reloadT / RELOAD_TIME) * MAG) : i < ammo;
       ctx.fillStyle = on ? INK : '#c9ccd4';
       ctx.fillRect(20 + i * 7, 66, 4, 11);
