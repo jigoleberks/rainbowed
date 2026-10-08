@@ -16,6 +16,16 @@ The hero briefly turns rainbow, like the animated title text.
 - Gun shuts off, kicks only. Lets you kick your way up to the Giant's face,
   but only takes off part of his health, so it's a swing, not an auto-win.
 
+## Numpad controls (Lode Runner style)
+Keep WASD too, since many laptops have no numpad. Read the physical key so it works
+with Num Lock on or off.
+- 4 / 6: move left / right
+- 8: jump (press again in the air to backflip)
+- 2: crouch / drop through a shelf
+- 5: fire, auto-aimed at the nearest enemy (no mouse in this layout)
+- 7 / 9: rising kick up-left / up-right. Good for reaching the Giant's face.
+- 1 / 3: low sweep kick left / right that trips enemies
+
 ## Better guns that change the reload
 The base gun holds 12 shots and pauses to reload. Hidden or hard-to-reach guns on
 each level could improve on that: a bigger magazine, a faster reload, or a gun that
