@@ -82,13 +82,14 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
     </div>
   </div>
 
-  <p class="help help-desk"><b>A / D</b> move · <b>W</b> jump, press again mid-air to flip · <b>S</b> drop through a ledge · <b>K</b> kick, in the air for a flying kick · <b>Mouse</b> aims, hold click to fire · <b>J</b> fires at the nearest enemy</p>
-  <p class="help help-touch"><b>Fire</b> auto-aims at the nearest stickman. You can also press and hold the arena to shoot where your finger is. Tap <b>Jump</b> twice to backflip. <b>Kick</b> launches stickmen into each other. Turn your phone sideways for a bigger arena.</p>
+  <p class="help help-desk"><b>A / D</b> move · <b>W</b> jump, press again mid-air to flip · <b>S</b> drop through a ledge · <b>K</b> kick, in the air for a flying kick · <b>R</b> reload · <b>Mouse</b> aims, hold click to fire · <b>J</b> fires at the nearest enemy</p>
+  <p class="help help-touch"><b>Fire</b> auto-aims at the nearest stickman. You can also press and hold the arena to shoot where your finger is. The gun holds 12 shots and reloads on its own, so kick while it does. Tap <b>Jump</b> twice to backflip. <b>Kick</b> launches stickmen into each other. Turn your phone sideways for a bigger arena.</p>
 </main>
 
 <script>
 (() => {
 const W = 800, H = 450, G = 400, GRAV = 1800;
+const MAG = 12, RELOAD_TIME = 1.1;
 const PLATS = [{x:90,y:305,w:170},{x:540,y:305,w:170},{x:315,y:215,w:170}];
 const INK = '#15161a', PAPER = '#fbfbf8', MUTED = '#b9bcc6', ACCENT = '#e8384f';
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -124,6 +125,7 @@ fit();
 /* ---------- state ---------- */
 let state = 'title';
 let player, enemies, bullets, parts, debris, rings, texts, eproj, waves;
+let ammo = MAG, reloadT = 0;
 let score, kills, combo, comboT, slow, shake, spawnT, hp, invuln, fireCd, flash, overT, clock = 0;
 let boss, bossWarn, nextBossAt, bossCount, bossesBeaten, cine, banner, geyser;
 const cam = {x: W / 2, y: H / 2, z: 1};
@@ -133,7 +135,7 @@ function reset() {
     kickT:0, kickCd:0, airKick:true, kickDir:1, pose:null, tilt:0, flipDir:-1};
   enemies = []; bullets = []; parts = []; debris = []; rings = []; texts = []; eproj = []; waves = [];
   score = 0; kills = 0; combo = 0; comboT = 0; slow = 0; shake = 0; spawnT = 0.8;
-  hp = 5; invuln = 1; fireCd = 0; flash = 0; overT = 0;
+  hp = 5; invuln = 1; fireCd = 0; ammo = MAG; reloadT = 0; flash = 0; overT = 0;
   boss = null; bossWarn = 0; nextBossAt = 25; bossCount = 0; bossesBeaten = 0; cine = null; banner = null; geyser = null;
   cam.x = W / 2; cam.y = H / 2; cam.z = 1;
   sctx.clearRect(0, 0, W, H);
@@ -143,7 +145,7 @@ reset();
 /* ---------- input ---------- */
 const keys = {}, btn = {};
 let jumpQ = 0, kickQ = 0;
-const KEYMAP = {ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'jump',KeyW:'jump',Space:'jump',ArrowDown:'down',KeyS:'down',KeyJ:'fire',KeyK:'kick',KeyL:'kick'};
+const KEYMAP = {ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'jump',KeyW:'jump',Space:'jump',ArrowDown:'down',KeyS:'down',KeyJ:'fire',KeyK:'kick',KeyL:'kick',KeyR:'reload'};
 addEventListener('keydown', e => {
   if (state !== 'play' && (e.code === 'Enter' || e.code === 'Space') && state !== 'dying' && document.activeElement !== goBtn) { e.preventDefault(); start(); return; }
   const k = KEYMAP[e.code];
@@ -151,6 +153,7 @@ addEventListener('keydown', e => {
   e.preventDefault();
   if (k === 'jump' && !e.repeat) jumpQ = 0.12;
   if (k === 'kick' && !e.repeat) kickQ = 0.12;
+  if (k === 'reload' && !e.repeat && state === 'play') startReload();
   keys[k] = true;
 });
 addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) keys[k] = false; });
@@ -351,6 +354,14 @@ function kickHit(p) {
       shake = Math.max(shake, 8);
     }
   }
+}
+
+function startReload() {
+  if (reloadT > 0 || ammo >= MAG || player.dead) return;
+  reloadT = RELOAD_TIME;
+  const f = player.facing;
+  debris.push({x: player.x + f * 14, y: player.y - 44, ang: Math.PI / 2, len: 7, lw: 4, vx: f * rand(30, 80), vy: -rand(60, 140), va: rand(-8, 8), life: 2.5, head:false});
+  texts.push({x: player.x, y: player.y - 92, s: 'RELOAD', life: 0.7, big:false});
 }
 
 function aimTarget() {
@@ -693,9 +704,18 @@ function updatePlayer(dt) {
     if (p.kickT <= 0) { p.pose = null; p.tilt = 0; }
   }
 
+  if (reloadT > 0) {
+    reloadT -= dt;
+    p.aim = p.facing > 0 ? 1.1 : Math.PI - 1.1;
+    if (reloadT <= 0) { reloadT = 0; ammo = MAG; for (let i = 0; i < 4; i++) parts.push({x: p.x + p.facing * 12, y: p.y - 48, vx: rand(-60, 60), vy: rand(-80, -20), h: 0, r: 1.2, life: 0.25, spark: true, ink: true}); }
+  }
+
   fireCd -= dt;
-  if ((pointer.down || auto) && fireCd <= 0) {
+  if ((pointer.down || auto) && fireCd <= 0 && reloadT <= 0 && ammo > 0) {
     fireCd = 0.13;
+    ammo--;
+    parts.push({x: p.x + Math.cos(ang) * 10, y: p.y - 54, vx: -p.facing * rand(60, 130), vy: -rand(140, 220), h: 0, r: 1.6, life: 0.5, spark: true, ink: true});
+    if (ammo === 0) startReload();
     const a = ang + rand(-0.035, 0.035);
     const sx = p.x + Math.cos(a) * 32, sy = p.y - 52 + Math.sin(a) * 32;
     bullets.push({x:sx, y:sy, vx:Math.cos(a) * 1150, vy:Math.sin(a) * 1150, life:0.8});
@@ -1070,6 +1090,16 @@ function drawHUD() {
     ctx.font = '600 12px "IBM Plex Mono", monospace';
     ctx.fillStyle = '#5f6370';
     ctx.fillText(kills + ' RAINBOWED', 20, 58);
+    for (let i = 0; i < MAG; i++) {
+      const on = reloadT > 0 ? i < Math.floor((1 - reloadT / RELOAD_TIME) * MAG) : i < ammo;
+      ctx.fillStyle = on ? INK : '#c9ccd4';
+      ctx.fillRect(20 + i * 7, 66, 4, 11);
+    }
+    if (reloadT > 0) {
+      ctx.fillStyle = ACCENT;
+      ctx.font = '600 11px "IBM Plex Mono", monospace';
+      ctx.fillText('RELOADING', 20 + MAG * 7 + 6, 76);
+    }
     for (let i = 0; i < 5; i++) {
       ctx.beginPath(); ctx.arc(W - 24 - i * 22, 30, 7, 0, Math.PI * 2);
       ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
