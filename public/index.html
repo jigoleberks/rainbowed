@@ -130,7 +130,8 @@ fit();
 let state = 'title';
 let player, enemies, bullets, parts, debris, rings, texts, eproj, waves;
 let ammo = MAG, reloadT = 0;
-let cheatSophy = false, runCheated = false, typed = '';
+let cheatSophy = false, cheatLoaf = false, runCheated = false, typed = '';
+const maxHp = () => cheatLoaf ? 10 : 5;
 let score, kills, combo, comboT, slow, shake, spawnT, hp, invuln, fireCd, flash, overT, clock = 0;
 let boss, bossWarn, nextBossAt, bossCount, bossesBeaten, cine, banner, geyser;
 let pickups = [], rainbowT = 0, erased = false;
@@ -141,7 +142,7 @@ function reset() {
     kickT:0, kickCd:0, airKick:true, kickDir:1, pose:null, tilt:0, flipSign:-1, wallT:0, wallSide:0};
   enemies = []; bullets = []; parts = []; debris = []; rings = []; texts = []; eproj = []; waves = [];
   score = 0; kills = 0; combo = 0; comboT = 0; slow = 0; shake = 0; spawnT = 0.8;
-  hp = 5; invuln = 1; fireCd = 0; ammo = MAG; reloadT = 0; runCheated = cheatSophy; flash = 0; overT = 0;
+  hp = maxHp(); invuln = 1; fireCd = 0; ammo = MAG; reloadT = 0; runCheated = cheatSophy || cheatLoaf; flash = 0; overT = 0;
   boss = null; bossWarn = 0; nextBossAt = 25; bossCount = 0; bossesBeaten = 0; cine = null; banner = null; geyser = null;
   pickups = []; rainbowT = 0; erased = false;
   for (const pl of PLATS) pl.gone = 0;
@@ -164,15 +165,23 @@ addEventListener('keydown', e => {
   if (k === 'reload' && !e.repeat && state === 'play') startReload();
   keys[k] = true;
 });
-// Secret: type "sophy" to toggle bottomless magazines. Cheated runs don't save a best score.
+// Secret codes, typed on the keyboard. Cheated runs don't save a best score.
+//   sophy: bottomless magazine    loaf: 10 hearts, and the Eraser costs 5 instead of the run
 addEventListener('keydown', e => {
   if (!e.key || e.key.length !== 1) return;
   typed = (typed + e.key.toLowerCase()).slice(-5);
-  if (typed !== 'sophy') return;
-  typed = '';
-  cheatSophy = !cheatSophy;
-  if (cheatSophy) { runCheated = true; reloadT = 0; ammo = MAG; }
-  texts.push({x: W / 2, y: 150, s: cheatSophy ? 'SOPHY MODE' : 'SOPHY MODE OFF', life: 1.3, big: true});
+  if (typed.endsWith('sophy')) {
+    typed = '';
+    cheatSophy = !cheatSophy;
+    if (cheatSophy) { runCheated = true; reloadT = 0; ammo = MAG; }
+    texts.push({x: W / 2, y: 150, s: cheatSophy ? 'SOPHY MODE' : 'SOPHY MODE OFF', life: 1.3, big: true});
+  } else if (typed.endsWith('loaf')) {
+    typed = '';
+    cheatLoaf = !cheatLoaf;
+    if (cheatLoaf) { runCheated = true; if (!player.dead) hp = Math.min(10, hp + 5); }
+    else hp = Math.min(hp, 5);
+    texts.push({x: W / 2, y: 200, s: cheatLoaf ? 'LOAF MODE' : 'LOAF MODE OFF', life: 1.3, big: true});
+  }
 });
 addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) keys[k] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
@@ -251,7 +260,7 @@ function showOver() {
   ovScore.textContent = pad6(score);
   let msg = kills + (kills === 1 ? ' stickman' : ' stickmen') + ' turned into rainbows';
   if (bossesBeaten) msg += ', ' + bossesBeaten + (bossesBeaten === 1 ? ' boss' : ' bosses') + ' beaten';
-  ovText.textContent = msg + '. Best run: ' + pad6(best) + '.' + (runCheated ? ' Sophy mode was on, so this run is not saved.' : '');
+  ovText.textContent = msg + '. Best run: ' + pad6(best) + '.' + (runCheated ? ' A cheat code was on, so this run is not saved.' : '');
   goBtn.textContent = 'Again';
   overlay.hidden = false;
 }
@@ -634,6 +643,13 @@ function eraserCrumbs(x, y, n) {
 
 function eraseMe() {
   if (player.dead) return;
+  if (cheatLoaf && hp > 5) {
+    hp -= 5; invuln = 1.5;
+    player.vy = -560; player.vx = (player.x < W / 2 ? 1 : -1) * 300;
+    eraserCrumbs(player.x, player.y - 40, 30); shake = 12;
+    texts.push({x: player.x, y: player.y - 100, s: 'THE LOAF PROTECTS', life: 1.2, big: false});
+    return;
+  }
   erased = true; hp = 0; player.dead = true; state = 'dying';
   eraserCrumbs(player.x, player.y - 40, 60);
   slow = 1.2; overT = 1.8; shake = 14;
@@ -641,7 +657,7 @@ function eraseMe() {
 
 function eraserBored(b) {
   const pts = 3000 * (b.level + 1);
-  score += pts; hp = Math.min(5, hp + 1);
+  score += pts; hp = Math.min(maxHp(), hp + 1);
   boss = null; nextBossAt += 25; spawnT = 1.8;
   banner = {title: 'THE ERASER GOT BORED', sub: 'Survived   ·   +' + pts + '   ·   +1 life', life: 3};
 }
@@ -712,7 +728,7 @@ function updateEraser(b, dt, fighting) {
       return;
   }
   // only the slam and the scrub erase you; hovering overhead is harmless
-  if (fighting && rainbowT <= 0 && (b.st === 'slam' || b.st === 'sweep')) {
+  if (fighting && rainbowT <= 0 && invuln <= 0 && (b.st === 'slam' || b.st === 'sweep')) {
     if (Math.abs(player.x - b.x) < EW / 2 + 4 && player.y - 74 < b.y - 6 && player.y > b.y - EH + 6) eraseMe();
   }
 }
@@ -793,7 +809,7 @@ function updateCine(rdt) {
     if (c.t >= c.dur) {
       const b = c.boss;
       cine = null; boss = null;
-      hp = Math.min(5, hp + 1);
+      hp = Math.min(maxHp(), hp + 1);
       banner = {title: ({giant: 'GIANT DOWN', sensei: 'SENSEI DEFEATED', eraser: 'THE ERASER IS ERASED'})[b.kind], sub: '+' + b.pts + '   ·   +1 life', life: 2.6};
       spawnT = 1.8;
     }
@@ -1345,7 +1361,7 @@ function drawHUD() {
       ctx.font = '600 11px "IBM Plex Mono", monospace';
       ctx.fillText('RELOADING', 20 + MAG * 7 + 6, 76);
     }
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < maxHp(); i++) {
       ctx.beginPath(); ctx.arc(W - 24 - i * 22, 30, 7, 0, Math.PI * 2);
       ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
       if (i < hp) { ctx.fillStyle = INK; ctx.fill(); }
