@@ -38,6 +38,19 @@ with Num Lock on or off.
 - 7 / 9: rising kick up-left / up-right. Good for reaching the Giant's face.
 - 1 / 3: low sweep kick left / right that trips enemies
 
+## Sophy (the cat), chaotic neutral
+Sophy is a real cat: a torbie (tortoiseshell tabby), brown tabby stripes with warm
+orange patches, dark stripes down her forehead, round face, solid loaf build.
+- Drawn as an ink-outlined loaf with her orange patches. The only colored character
+  besides the rainbows, so she stands out on the paper.
+- Untouchable: bullets and rainbows go around her, enemies leave her alone.
+- Now and then "SOPHY TIME" appears in big text and she rolls one of:
+  - Nothing. Curls up on a shelf and naps. The most common outcome.
+  - Swats the nearest stickman across the arena.
+  - Knocks something off a shelf onto a crowd, or knocks the good gun down to you.
+  - Very rare: a lamp hangs over the arena the whole time, for no reason, until one
+    day she climbs it and drags the chandelier down on everyone.
+
 ## Better guns that change the reload
 The base gun holds 12 shots and pauses to reload. Hidden or hard-to-reach guns on
 each level could improve on that: a bigger magazine, a faster reload, or a gun that
