@@ -60,5 +60,4 @@ barely needs to reload at all. That gives players a reason to go climb for them.
 - Shared leaderboard so friends can compete for the top score
 - Power-ups dropped by enemies: shotgun, dual pistols, a "prism beam" laser
 - Daily challenge: same enemy waves for everyone each day
-- Favicon (a tiny rainbow stickman) for the browser tab
 - More bosses: the Ink Blob (splits when hit), the Rainbow Thief (eats floor splats to heal)
