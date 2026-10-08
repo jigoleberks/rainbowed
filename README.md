@@ -2,4 +2,4 @@
 
 A Flash-era stickman shooter where every enemy bursts into rainbows. Play it at https://rainbowed.ca
 
-One self-contained `index.html`, no build step.
+The game is one self-contained `public/index.html`, served by a Cloudflare Worker (see `wrangler.jsonc`). Pushing to `main` redeploys it.
