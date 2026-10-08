@@ -15,6 +15,9 @@ There is no winning. Every run ends with "You got rainbowed."
     snail energy: you can't really kill him, just keep away forever. Touch = death.
   - La Chancla: tiny, unbothered grandma with more health than the Giant. Lobs
     slippers in arcs like grenades; they burst into rainbow splats on landing.
+- Arena idea, The House: shelves are real furniture (bookshelf, kitchen counter, top
+  of the fridge), with mugs, plants and books on them and a ceiling light overhead.
+  This is Sophy's home arena. La Chancla is the natural 100-kill boss here.
 - A better gun hidden somewhere hard to reach in each arena still fits here.
 - Difficulty currently stops ramping around 45 kills. Fine for now; revisit if it
   gets too easy or someone crushes a leaderboard.
@@ -39,6 +42,7 @@ with Num Lock on or off.
 - 1 / 3: low sweep kick left / right that trips enemies
 
 ## Sophy (the cat), chaotic neutral
+Only appears in The House arena, not every arena.
 Sophy is a real cat: a torbie (tortoiseshell tabby), brown tabby stripes with warm
 orange patches, dark stripes down her forehead, round face, solid loaf build.
 - Drawn as an ink-outlined loaf with her orange patches. The only colored character
@@ -48,8 +52,8 @@ orange patches, dark stripes down her forehead, round face, solid loaf build.
   - Nothing. Curls up on a shelf and naps. The most common outcome.
   - Swats the nearest stickman across the arena.
   - Knocks something off a shelf onto a crowd, or knocks the good gun down to you.
-  - Very rare: a lamp hangs over the arena the whole time, for no reason, until one
-    day she climbs it and drags the chandelier down on everyone.
+  - Very rare: she climbs the ceiling light that's been hanging there all along and
+    drags it down on everyone.
 
 ## Better guns that change the reload
 The base gun holds 12 shots and pauses to reload. Hidden or hard-to-reach guns on
