@@ -2,10 +2,20 @@
 
 Things to build later. Not started yet.
 
-## Levels with different shelf layouts
-Different stages, each with its own arrangement of platforms ("shelves") to stand on.
-Put a better gun somewhere hard to reach on each level, so getting it is a little
-platforming challenge in the middle of the fight.
+## Arenas (instead of levels)
+There is no winning. Every run ends with "You got rainbowed."
+- Pick an arena at the start. Each has its own shelf layout (maybe a center pillar
+  to wall-flip off) and its own best score.
+- Runs stay endless. Bosses loop: Giant at 25, Sensei at 50, Giant at 75, then the
+  arena's own boss at 100, then the loop starts over.
+- Each arena's 100-kill boss is deeply unserious and nearly impossible to kill, in the
+  spirit of the SkiFree monster. Original designs, not copies. Ideas:
+  - The Eraser: a giant pencil eraser comes down and erases the arena, splats and you
+  - The Slow One: an ordinary stickman who strolls at you with 10,000 health
+  - Grandma: tiny, unbothered, one slipper, more health than the Giant
+- A better gun hidden somewhere hard to reach in each arena still fits here.
+- Difficulty currently stops ramping around 45 kills. Fine for now; revisit if it
+  gets too easy or someone crushes a leaderboard.
 
 ## Rainbow Mode power-up (next up)
 The hero briefly turns rainbow, like the animated title text.
