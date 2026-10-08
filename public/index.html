@@ -167,19 +167,24 @@ function toWorld(e) {
 }
 // Mouse: left button fires, right button kicks. Track the left button from
 // e.buttons because a second button press arrives as a move, not a down.
+// A right press arrives as pointerdown when it's the first button held,
+// or as pointermove (button 2) when left is already held.
+const rightPress = e => e.pointerType === 'mouse' && e.button === 2 && (e.buttons & 2) === 2;
 cv.addEventListener('pointermove', e => {
-  if (e.pointerType === 'mouse') { toWorld(e); pointer.active = true; pointer.down = state === 'play' && (e.buttons & 1) === 1; }
+  if (e.pointerType === 'mouse') {
+    toWorld(e); pointer.active = true;
+    pointer.down = state === 'play' && (e.buttons & 1) === 1;
+    if (state === 'play' && rightPress(e)) kickQ = 0.12;
+  }
   else if (pointer.down) toWorld(e);
 });
 cv.addEventListener('pointerdown', e => {
   if (state !== 'play') return;
   e.preventDefault();
   toWorld(e); pointer.active = true;
+  if (rightPress(e)) kickQ = 0.12;
   pointer.down = e.pointerType === 'mouse' ? (e.buttons & 1) === 1 : true;
   try { cv.setPointerCapture(e.pointerId); } catch (_) {}
-});
-cv.addEventListener('mousedown', e => {
-  if (e.button === 2 && state === 'play') { e.preventDefault(); kickQ = 0.12; }
 });
 const pUp = e => {
   if (e.pointerType === 'mouse') { pointer.down = (e.buttons & 1) === 1; return; }
