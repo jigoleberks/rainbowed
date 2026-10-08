@@ -160,6 +160,16 @@ test('Eraser: survive 45 seconds and it gets bored', () => {
   ok(g.saw(/THE ERASER GOT BORED/), 'eraser never left');
 });
 
+test('Eraser: first sweep is the floor, and the floor comes up every round', () => {
+  for (let run = 0; run < 5; run++) {
+    const g = boot('#eraser'); g.start(); g.godMode(); g.run('eraseMe = function () {};'); g.key('KeyJ');
+    const rows = [];
+    g.seconds(60, () => { const r = g.get("boss && boss.kind === 'eraser' && boss.st === 'sweep' ? boss.row : null"); if (r !== null && rows[rows.length - 1] !== r) rows.push(r); });
+    ok(rows[0] === 400, 'first sweep row ' + rows[0]);
+    for (let k = 0; k + 4 <= rows.length; k++) ok(rows.slice(k, k + 4).includes(400), 'no floor sweep in ' + rows.slice(k, k + 4));
+  }
+});
+
 test('Eraser: touching it ends the run with its own message', () => {
   const g = boot('#eraser'); g.start(); g.godMode(); g.key('KeyJ');
   g.seconds(60, () => {});

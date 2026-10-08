@@ -42,13 +42,19 @@ function updateEraser(b, dt, fighting) {
       }
       break;
     case 'pick': {
-      // rows: the floor plus every shelf height. Skip the floor while the lowest shelves are
-      // erased, so there's always somewhere to stand.
+      // Rows are the floor plus every shelf height, dealt from a shuffled bag so every row
+      // (the floor included) comes up once per round. The first sweep is always the floor.
+      // Never scrub the floor while the lowest shelves are erased: there must be somewhere to stand.
       const shelfRows = [...new Set(PLATS.map(p => p.y))].sort((p, q) => q - p);
       const lowGone = PLATS.some(p => p.y === shelfRows[0] && p.gone > 0);
-      let rows = [G, ...shelfRows].filter(r => r !== b.lastRow && !(r === G && lowGone));
-      if (!rows.length) rows = [shelfRows[0]];
-      b.row = rows[Math.floor(Math.random() * rows.length)]; b.lastRow = b.row;
+      const okRow = r => r !== b.lastRow && !(r === G && lowGone);
+      if (!b.bag) b.bag = [G];
+      if (!b.bag.length) b.bag = [G, ...shelfRows].sort(() => Math.random() - 0.5);
+      const i = b.bag.findIndex(okRow);
+      // the floor is next but the shelves are still erased: hover and wait for them to be redrawn
+      if (i < 0) break;
+      b.row = b.bag.splice(i, 1)[0];
+      b.lastRow = b.row;
       b.dir = Math.random() < 0.5 ? 1 : -1;
       b.tx = b.dir > 0 ? -EW / 2 + 24 : W + EW / 2 - 24;
       b.st = 'move';
