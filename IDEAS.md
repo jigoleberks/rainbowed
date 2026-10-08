@@ -11,8 +11,10 @@ There is no winning. Every run ends with "You got rainbowed."
 - Each arena's 100-kill boss is deeply unserious and nearly impossible to kill, in the
   spirit of the SkiFree monster. Original designs, not copies. Ideas:
   - The Eraser: a giant pencil eraser comes down and erases the arena, splats and you
-  - The Slow One: an ordinary stickman who strolls at you with 10,000 health
-  - Grandma: tiny, unbothered, one slipper, more health than the Giant
+  - The Slow One: an ordinary stickman who strolls at you with 10,000 health. Immortal
+    snail energy: you can't really kill him, just keep away forever. Touch = death.
+  - La Chancla: tiny, unbothered grandma with more health than the Giant. Lobs
+    slippers in arcs like grenades; they burst into rainbow splats on landing.
 - A better gun hidden somewhere hard to reach in each arena still fits here.
 - Difficulty currently stops ramping around 45 kills. Fine for now; revisit if it
   gets too easy or someone crushes a leaderboard.
