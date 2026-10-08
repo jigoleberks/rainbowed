@@ -1,0 +1,71 @@
+/* Engine core: constants, canvas, shared state, registries, reset. */
+const W = 800, H = 450, G = 400, GRAV = 1800;
+const MAG = 12, RELOAD_TIME = 1.1;
+const RAINBOW_TIME = 4.5;
+
+// Registries. Each file in js/arenas/ adds one arena, each file in js/bosses/ one boss.
+const ARENAS = {}, BOSSES = {};
+let arena = null, PLATS = [];
+function setArena(id) {
+  arena = ARENAS[id];
+  PLATS = arena.plats.map(p => ({...p, gone: 0}));
+}
+const INK = '#15161a', PAPER = '#fbfbf8', MUTED = '#b9bcc6', ACCENT = '#e8384f';
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const cv = document.getElementById('game');
+const ctx = cv.getContext('2d');
+const stain = document.createElement('canvas');
+stain.width = W * 2; stain.height = H * 2;
+const sctx = stain.getContext('2d');
+sctx.scale(2, 2);
+
+const overlay = document.getElementById('overlay');
+const ovTitle = document.getElementById('ov-title');
+const ovText = document.getElementById('ov-text');
+const ovScore = document.getElementById('ov-score');
+const goBtn = document.getElementById('go');
+const bestEl = document.getElementById('best');
+
+let best = 0;
+// Page One keeps the original key so existing best scores carry over.
+const bestKey = () => arena.id === 'page-one' ? 'rsb-best' : 'rsb-best-' + arena.id;
+function loadBest() {
+  best = 0;
+  try { best = parseInt(localStorage.getItem(bestKey()) || '0', 10) || 0; } catch (e) {}
+}
+const pad6 = n => String(n).padStart(6, '0');
+bestEl.textContent = 'Best ' + pad6(best);
+
+function fit() {
+  const r = cv.getBoundingClientRect();
+  const d = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = Math.max(1, Math.round(r.width * d));
+  cv.height = Math.max(1, Math.round(r.height * d));
+}
+new ResizeObserver(fit).observe(cv);
+fit();
+
+/* ---------- state ---------- */
+let state = 'title';
+let player, enemies, bullets, parts, debris, rings, texts, eproj, waves;
+let ammo = MAG, reloadT = 0;
+let cheatSophy = false, cheatLoaf = false, runCheated = false, typed = '';
+const maxHp = () => cheatLoaf ? 10 : 5;
+let score, kills, combo, comboT, slow, shake, spawnT, hp, invuln, fireCd, flash, overT, clock = 0;
+let boss, bossWarn, nextBossAt, bossCount, bossesBeaten, cine, banner, geyser;
+let pickups = [], rainbowT = 0, deathTitle = null;
+const cam = {x: W / 2, y: H / 2, z: 1};
+
+function reset() {
+  player = {x:W/2, y:G, vx:0, vy:0, onGround:true, facing:1, phase:0, jumps:2, spin:0, spinT:0, drop:0, recoil:0, aim:0, dead:false,
+    kickT:0, kickCd:0, airKick:true, kickDir:1, pose:null, tilt:0, flipSign:-1, wallT:0, wallSide:0};
+  enemies = []; bullets = []; parts = []; debris = []; rings = []; texts = []; eproj = []; waves = [];
+  score = 0; kills = 0; combo = 0; comboT = 0; slow = 0; shake = 0; spawnT = 0.8;
+  hp = maxHp(); invuln = 1; fireCd = 0; ammo = MAG; reloadT = 0; runCheated = cheatSophy || cheatLoaf; flash = 0; overT = 0;
+  boss = null; bossWarn = 0; nextBossAt = 25; bossCount = 0; bossesBeaten = 0; cine = null; banner = null; geyser = null;
+  pickups = []; rainbowT = 0; deathTitle = null;
+  for (const pl of PLATS) pl.gone = 0;
+  cam.x = W / 2; cam.y = H / 2; cam.z = 1;
+  sctx.clearRect(0, 0, W, H);
+}

@@ -33,8 +33,7 @@ There is no winning. Every run ends with "You got rainbowed."
 - Ink Blob: spreads instead of splitting. Oozes along the floor leaving ink puddles
   that slow you, drips from the ceiling, swallows the hallway lights and lurks in
   the dark between flickers. Your rainbow splats are the only light.
-- When Grandma's House is built, split the code into a shared engine plus one file
-  per arena and boss (still plain static files, no build step).
+- Code is split into a shared engine plus one file per arena and boss (see README).
 - Still to build: a start/splash screen with an arena picker, and a best score per arena.
   Comes with Grandma's House, since that's the second arena.
 
