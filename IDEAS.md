@@ -23,10 +23,18 @@ There is no winning. Every run ends with "You got rainbowed."
     Survive the timer and a TV flickers on; she shuffles back to her armchair. If her
     health hits zero she doesn't get rainbowed, she just sits down: "Fine. Wipe your
     feet next time." Death message: "You got chancla'd."
-- Arena names and their 100-kill bosses:
-  - Arena 1, Page One: The Eraser (built)
-  - Arena 2, Grandma's House: La Chancla, plus Sophy
-  - Arena 3, The Long Hallway: The Slow One
+- Boss loop per arena: the Giant at 25 and 75 in every arena (with Rainbow Mode),
+  the arena's own sub-boss at 50, and its joke finale at 100.
+  - Arena 1, Page One: Sensei (50), The Eraser (100). Built.
+  - Arena 2, Grandma's House: Dust Bunny (50), La Chancla (100), plus Sophy
+  - Arena 3, The Long Hallway: Ink Blob (50), The Slow One (100). The darker arena.
+- Dust Bunny: a huge dust ball rolls out from under the couch. Every hit splits it
+  into smaller, faster dust bunnies until the floor is a fluffy swarm.
+- Ink Blob: spreads instead of splitting. Oozes along the floor leaving ink puddles
+  that slow you, drips from the ceiling, swallows the hallway lights and lurks in
+  the dark between flickers. Your rainbow splats are the only light.
+- When Grandma's House is built, split the code into a shared engine plus one file
+  per arena and boss (still plain static files, no build step).
 - Still to build: a start/splash screen with an arena picker, and a best score per arena.
   Comes with Grandma's House, since that's the second arena.
 
@@ -74,4 +82,4 @@ barely needs to reload at all. That gives players a reason to go climb for them.
 - Shared leaderboard so friends can compete for the top score
 - Power-ups dropped by enemies: shotgun, dual pistols, a "prism beam" laser
 - Daily challenge: same enemy waves for everyone each day
-- More bosses: the Ink Blob (splits when hit), the Rainbow Thief (eats floor splats to heal)
+- Spare boss: the Rainbow Thief (eats floor splats to heal)
