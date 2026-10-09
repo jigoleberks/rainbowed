@@ -1,6 +1,7 @@
 /* The Dust Bunny: Grandma's House sub-boss. Rolls out from under the couch; every time a
    bunny runs out of health it splits into two smaller, faster ones, down to a swarm of tiny
-   ones that get rainbowed. The boss's health bar is the whole family's health. */
+   ones that get rainbowed. Jump on a bunny to squish it; the tiny ones only bowl you over.
+   The boss's health bar is the whole family's health. */
 
 const BUNNY_R = [16, 27, 44];                  // radius by size: tiny, medium, big
 const bunnyHp = (tier, level) => Math.round([3, 8, 20][tier] * (1 + 0.3 * level));
@@ -32,14 +33,31 @@ function updateDustBunny(b, dt, fighting) {
       bun.vy = -(380 + small * 110 + rand(0, 140));
       bun.hopCd = rand(0.9, 1.5) - small * 0.25;
     }
-    if (fighting && invuln <= 0 && player.kickT <= 0 && rainbowT <= 0 &&
-        Math.hypot(player.x - bun.x, (player.y - 40) - (bun.y - bun.r)) < bun.r + 12) hurt(bun);
+    if (!fighting || player.dead) continue;
+    const dx = player.x - bun.x, top = bun.y - bun.r * 2;
+    // coming down on top of a bunny squishes it and bounces you back up, Mario style:
+    // tiny ones go in one stomp, bigger ones take a kick's worth of damage
+    if (player.vy > 0 && bun.iT <= 0 && Math.abs(dx) < bun.r + 8 && player.y >= top - 6 && player.y <= top + bun.r * 0.9) {
+      player.vy = -560; player.jumps = 1; player.airKick = true;
+      b.hitBunny = bun;
+      hitBoss(b, bun.x, top, 0, 1, bun.tier === 0 ? bun.hp : 4);
+      dustPoof(bun.x, top, 10);
+      texts.push({x: bun.x, y: top - 14, s: 'SQUISH!', life: 0.5, big: false});
+      continue;
+    }
+    if (invuln <= 0 && player.kickT <= 0 && rainbowT <= 0 && Math.hypot(dx, (player.y - 40) - (bun.y - bun.r)) < bun.r + 12) {
+      if (bun.tier === 0) {
+        // the tiny ones just get bowled over
+        bun.vx = -(Math.sign(dx) || 1) * 320; bun.vy = -280; bun.hopCd = 0.8;
+        dustPoof(bun.x, bun.y - bun.r, 6);
+      } else hurt(bun);
+    }
   }
   if (b.st === 'enter') {
     b.t -= dt;
     if (b.t <= 0) {
       b.st = 'fight';
-      banner = {title: 'THE DUST BUNNY', sub: 'Every hit splits it. Clean up the whole swarm.', life: 2.8};
+      banner = {title: 'THE DUST BUNNY', sub: 'Every hit splits it. Jump on them to squish them.', life: 2.8};
     }
   }
   // the boss's position follows its biggest bunny (for the camera and auto-aim)

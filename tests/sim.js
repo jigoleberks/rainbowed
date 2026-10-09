@@ -437,6 +437,27 @@ test('Rainbow Time stacks during a big combo instead of restarting', () => {
   ok(g.get('slow') <= 4, 'capped at 4s: ' + g.get('slow'));
 });
 
+test('Dust Bunny: stomping squishes, and the tiny ones do not hurt', () => {
+  const g = boot('#dustbunny'); g.start(); g.run('spawn = function () {}; enemies = []; dropCrate = function () {};');
+  g.run('kills = 50;'); g.seconds(6, () => {});
+  ok(g.get("boss && boss.kind === 'dustbunny' && boss.st === 'fight'"), 'no dust bunny fight');
+  // land on the big one from above
+  g.run('{ const bun = boss.bunnies[0]; bun.hopCd = 9; bun.iT = 0; player.x = bun.x; player.y = bun.y - bun.r * 2 - 2; player.vy = 300; }');
+  const hp0 = g.get('boss.bunnies[0].hp');
+  g.step(1);
+  ok(g.get('player.vy') < 0, 'should bounce off');
+  ok(g.get('boss.bunnies[0].hp') < hp0, 'big bunny should take damage');
+  // a tiny bunny walks into you: no heart lost
+  g.run('boss.bunnies = [makeBunny(0, player.x + 5, G, 0)]; boss.bunnies[0].iT = 0; boss.bunnies[0].hopCd = 9; player.y = G; player.vy = 0; player.onGround = true; invuln = 0;');
+  const hearts = g.get('hp');
+  g.step(2);
+  ok(g.get('hp') === hearts, 'tiny bunny took a heart');
+  // and stomping a tiny one finishes it
+  g.run('{ const bun = boss.bunnies[0]; bun.x = player.x; bun.vx = 0; bun.y = G; bun.onGround = true; player.y = G - bun.r * 2 - 2; player.vy = 300; }');
+  g.step(1);
+  ok(g.get('boss.bunnies.length') === 0 || g.get('boss.dead'), 'tiny bunny should be squished');
+});
+
 let failed = 0;
 for (const [pass, name] of results) { console.log((pass ? 'PASS  ' : 'FAIL  ') + name); if (!pass) failed++; }
 console.log(`\n${results.length - failed}/${results.length} passed`);
