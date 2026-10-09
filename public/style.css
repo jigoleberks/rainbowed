@@ -43,6 +43,33 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
 #overlay .stats{display:flex;gap:6px 18px;flex-wrap:wrap;justify-content:center;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums}
 @media (max-width:560px){#overlay.picking h2{display:none}.arena-card .num{font-size:.55rem}#overlay p{display:none}#overlay .score{font-size:1.5rem}#overlay .arena{font-size:.6rem}#overlay .stats{gap:2px 12px;font-size:.62rem}}
 #overlay .stats b{color:var(--ink);font-weight:600;letter-spacing:.04em}
+#overlay .initials{display:flex;flex-direction:column;align-items:center;gap:4px}
+#overlay .initials .hs{font-family:var(--display);font-size:1rem;color:var(--accent)}
+#overlay .slots{display:flex;gap:14px}
+#overlay .slot{display:flex;flex-direction:column;align-items:center}
+#overlay .slot button{background:none;border:0;color:var(--ink);font-size:.85rem;padding:2px 12px;cursor:pointer;touch-action:manipulation}
+#overlay .slot b{font-family:var(--display);font-weight:400;font-size:2rem;line-height:1.1;width:1.3em;border-bottom:3px solid var(--muted);cursor:pointer}
+#overlay .slot.on b{border-color:var(--accent);color:var(--accent)}
+#overlay .initials .go{font-size:.95rem;padding:4px 22px}
+#overlay .ini-row{display:flex;align-items:center;gap:22px}
+/* short screens (a phone on its side): make room for the initials and the board */
+@media (max-height:520px){
+  #overlay.ranked{gap:5px}
+  #overlay.ranked .arena{display:none}
+  #overlay.ranked h2{font-size:1.15rem}
+  #overlay.ranked .score{font-size:1.5rem;line-height:1}
+  #overlay.ranked .initials .hs{font-size:.85rem}
+  #overlay.ranked .slot b{font-size:1.5rem}
+  #overlay.ranked .slot button{padding:0 12px;font-size:.75rem}
+  #overlay.ranked .board{font-size:.68rem}
+  #overlay.ranked .go{font-size:.95rem;padding:4px 18px}
+}
+#overlay .board{list-style:none;margin:0;padding:0;display:grid;grid-auto-flow:column;grid-template-rows:repeat(5,auto);gap:1px 28px;font-size:.78rem;font-variant-numeric:tabular-nums}
+#overlay .board li{display:flex;gap:10px;color:var(--ink)}
+#overlay .board .r{color:var(--muted);min-width:2ch;text-align:right}
+#overlay .board .n{font-weight:600;letter-spacing:.12em}
+#overlay .board li.me{color:var(--accent)}
+#overlay .board li.empty{color:var(--muted)}
 #overlay .score{font-family:var(--display);font-size:clamp(1.6rem,6vw,3rem);color:var(--ink);font-variant-numeric:tabular-nums}
 .go{font-family:var(--display);font-size:1.15rem;padding:9px 28px;border:3px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:999px;cursor:pointer}
 .go:hover{background:var(--accent);border-color:var(--accent)}

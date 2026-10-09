@@ -91,7 +91,8 @@ each level could improve on that: a bigger magazine, a faster reload, or a gun t
 barely needs to reload at all. That gives players a reason to go climb for them.
 
 ## Other ideas from the first night
-- Shared leaderboard so friends can compete for the top score
+- Shared leaderboard so friends can compete for the top score: built (arcade style,
+  top 10 per arena, three initials)
 - Power-ups dropped by enemies: shotgun, dual pistols, a "prism beam" laser
 - Daily challenge: same enemy waves for everyone each day
 - Spare boss: the Rainbow Thief (eats floor splats to heal)

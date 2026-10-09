@@ -4,6 +4,8 @@ A Flash-era stickman shooter where every enemy bursts into rainbows. Play it at 
 
 Plain static files, no build step. Cloudflare serves the `public/` folder (see `wrangler.jsonc`), and every push to `main` redeploys it.
 
+The one bit of server code is `src/worker.js`: the arcade-style leaderboard (top 10 per arena, three initials) at `/api/scores`, stored in a Workers KV namespace that Wrangler creates on the first deploy. To remove a bad entry, open the SCORES namespace in the Cloudflare dashboard (Storage & Databases > KV) and edit the `top:<arena>` key. Opened as a file or from the offline bundle, the game just skips the leaderboard.
+
 ## Layout
 
 ```
@@ -19,10 +21,13 @@ public/
     update.js         the per-frame update
     draw.js           drawing and HUD
     padlayout.js      the Move buttons editor for touch controls
+    board.js          the leaderboard on the game-over screen (initials entry, top 10)
   js/arenas/          one file per arena (shelves, name, boss loop)
   js/bosses/          one file per boss
   js/main.js          picks the arena and starts the game
+src/worker.js         the Worker: static files plus the /api/scores leaderboard
 tests/sim.js          headless gameplay tests
+tests/worker.mjs      leaderboard Worker tests
 tools/bundle.py       bundles everything into one HTML file (previews, offline play)
 IDEAS.md              what's next
 ```
@@ -62,6 +67,7 @@ A boss with a `timer` field gets a "SURVIVE 0:45" countdown under its health bar
 
 ```
 node tests/sim.js
+node tests/worker.mjs
 ```
 
 Runs scripted games against the real files and checks the boss loop, Rainbow Mode, kicks, right-click, wall flips, reloading, the secret codes and the Eraser. Run it before pushing.

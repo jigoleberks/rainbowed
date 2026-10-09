@@ -38,6 +38,12 @@
       <h2 id="ov-title">They keep coming.<br>Paint the town.</h2>
       <div class="score" id="ov-score" hidden></div>
       <div class="stats" id="ov-stats" hidden></div>
+      <!-- the leaderboard: initials entry when a run makes the top 10, then the board -->
+      <div class="initials" id="ov-initials" hidden>
+        <span class="hs" id="ini-msg">New high score! Enter your initials</span>
+        <div class="ini-row"><div class="slots" id="ini-slots"></div><button class="go" id="ini-ok" type="button">OK</button></div>
+      </div>
+      <ol class="board" id="ov-board" hidden></ol>
       <p id="ov-text">Stickmen pour in from both sides and drop from the sky. Every third kill in a row slows time. Reach 25 kills and something big shows up.</p>
       <div class="arenas" id="arena-list"></div>
       <button class="go ghost" id="edit-pad" type="button">Move buttons</button>
@@ -93,6 +99,7 @@
 <script src="js/engine/update.js"></script>
 <script src="js/engine/draw.js"></script>
 <script src="js/engine/padlayout.js"></script>
+<script src="js/engine/board.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

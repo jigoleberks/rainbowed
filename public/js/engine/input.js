@@ -4,7 +4,7 @@ const keys = {}, btn = {};
 let jumpQ = 0, kickQ = 0;
 const KEYMAP = {ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'jump',KeyW:'jump',Space:'jump',ArrowDown:'down',KeyS:'down',KeyJ:'fire',KeyK:'kick',KeyL:'kick',KeyR:'reload'};
 addEventListener('keydown', e => {
-  if (isTyping(e)) return;
+  if (isTyping(e) || ini) return;   // ini: typing initials for the leaderboard (board.js)
   if (state !== 'play' && (e.code === 'Enter' || e.code === 'Space') && state !== 'dying' && document.activeElement !== goBtn) { e.preventDefault(); start(); return; }
   const k = KEYMAP[e.code];
   if (!k) return;
@@ -41,7 +41,7 @@ function applyCode(raw) {
 }
 const isTyping = e => e.target && e.target.tagName === 'INPUT';
 addEventListener('keydown', e => {
-  if (isTyping(e) || !e.key || e.key.length !== 1) return;
+  if (isTyping(e) || ini || !e.key || e.key.length !== 1) return;
   typed = (typed + e.key.toLowerCase()).slice(-5);
   if (typed.endsWith('sophy')) { typed = ''; toggleSophy(); }
   else if (typed.endsWith('loaf')) { typed = ''; toggleLoaf(); }
@@ -131,7 +131,8 @@ function showPicker() {
   overlay.classList.add('picking');
   ovArena.textContent = 'Pick an arena';
   if (PICK_TITLE !== undefined) ovTitle.innerHTML = PICK_TITLE;
-  ovText.textContent = PICK_TEXT;
+  ovText.textContent = PICK_TEXT; ovText.hidden = false;
+  hideBoard();
   ovScore.hidden = true; ovStats.hidden = true; ovActions.hidden = true; arenaList.hidden = false;
   arenaList.textContent = '';
   const cards = Object.values(ARENAS).map(a => ({...a, ready: true})).concat(COMING_SOON)
@@ -163,6 +164,7 @@ function start(skipTo) {
     if (other) { setArena(other.id); loadBest(); bestEl.textContent = 'Best ' + pad6(best); }
   }
   reset();
+  hideBoard();
   jumpQ = 0; kickQ = 0;
   // Skip-ahead links for testing: #giant, #sensei, #giant2, #eraser ... (any boss in this arena's loop)
   if (m) {
@@ -201,5 +203,7 @@ function showOver() {
   let msg = kills + (kills === 1 ? ' stickman' : ' stickmen') + ' turned into rainbows';
   if (bossesBeaten) msg += ', ' + bossesBeaten + (bossesBeaten === 1 ? ' boss' : ' bosses') + ' beaten';
   ovText.textContent = msg + '. Best run: ' + pad6(best) + '.' + (runCheated ? ' A cheat code was on, so this run is not saved.' : '');
+  ovText.hidden = false;
   overlay.hidden = false;
+  boardAfterRun();
 }
