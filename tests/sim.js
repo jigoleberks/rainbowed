@@ -424,6 +424,19 @@ test('the rainbow launcher: 6 grenades that rainbow a crowd, then back to the pi
   ok(g.get('grenades') === 0 && g.get('nades.length') === 0, 'should be out of grenades');
 });
 
+test('Rainbow Time stacks during a big combo instead of restarting', () => {
+  const g = boot(); g.start(); g.godMode(); g.run('spawn = function () {}; PLATS = []; dropCrate = function () {};');
+  const mk = "enemies.push({x: 600, y: G, vx: 0, vy: 0, onGround: true, facing: -1, phase: 0, speed: 0, drop: 0, jumpCd: 9}); kill(enemies[enemies.length - 1], 1, 0, false);";
+  g.run(mk + mk + mk);
+  ok(Math.abs(g.get('slow') - 1) < 0.01, 'first combo starts it: ' + g.get('slow'));
+  g.step(20);
+  g.run(mk + mk + mk);
+  ok(g.get('slow') > 1.5, 'second combo should add on: ' + g.get('slow'));
+  ok(g.get("texts.filter(t => t.s === 'RAINBOW TIME').length") <= 1, 'only one RAINBOW TIME banner');
+  g.run('for (let i = 0; i < 30; i++) { ' + mk + ' }');
+  ok(g.get('slow') <= 4, 'capped at 4s: ' + g.get('slow'));
+});
+
 let failed = 0;
 for (const [pass, name] of results) { console.log((pass ? 'PASS  ' : 'FAIL  ') + name); if (!pass) failed++; }
 console.log(`\n${results.length - failed}/${results.length} passed`);

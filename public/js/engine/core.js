@@ -2,6 +2,8 @@
 const W = 800, H = 450, G = 400, GRAV = 1800;
 const MAG = 12, RELOAD_TIME = 1.1;
 const RAINBOW_TIME = 4.5;
+// Rainbow Time (slow motion every 3-kill combo): seconds added per combo, and the most it can bank
+const RT_ADD = 1, RT_MAX = 4;
 const GRENADES = 6, CRATE_EVERY = 15;   // launcher shots per crate; a supply crate every 15 kills
 
 // Registries. Each file in js/arenas/ adds one arena, each file in js/bosses/ one boss.
@@ -64,6 +66,7 @@ let ammo = MAG, reloadT = 0, dual = false;
 const magSize = () => dual ? MAG * 2 : MAG;
 let cheatSophy = false, cheatLoaf = false, runCheated = false, typed = '';
 const maxHp = () => cheatLoaf ? 10 : 5;
+let timeScale = 1;   // eases in and out of slow motion
 let score, kills, combo, comboT, slow, shake, spawnT, hp, invuln, fireCd, flash, overT, clock = 0;
 let boss, bossWarn, nextBossAt, bossCount, bossesBeaten, cine, banner, geyser;
 // grenades: launcher shots left; nades: grenades in the air
@@ -77,7 +80,7 @@ function reset() {
   player = {x:W/2, y:G, vx:0, vy:0, onGround:true, facing:1, phase:0, jumps:2, spin:0, spinT:0, drop:0, recoil:0, aim:0, dead:false,
     kickT:0, kickCd:0, airKick:true, kickDir:1, pose:null, tilt:0, flipSign:-1, wallT:0, wallSide:0};
   enemies = []; bullets = []; parts = []; debris = []; rings = []; texts = []; eproj = []; waves = [];
-  score = 0; kills = 0; combo = 0; comboT = 0; slow = 0; shake = 0; spawnT = 0.8;
+  score = 0; kills = 0; combo = 0; comboT = 0; slow = 0; timeScale = 1; shake = 0; spawnT = 0.8;
   hp = maxHp(); invuln = 1; fireCd = 0; dual = false; ammo = MAG; reloadT = 0; runCheated = cheatSophy || cheatLoaf; flash = 0; overT = 0;
   boss = null; bossWarn = 0; nextBossAt = 25; bossCount = 0; bossesBeaten = 0; cine = null; banner = null; geyser = null;
   pickups = []; rainbowT = 0; deathTitle = null;

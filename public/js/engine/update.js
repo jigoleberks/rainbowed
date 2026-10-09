@@ -265,7 +265,8 @@ function update(rdt) {
   if (banner) { banner.life -= rdt; if (banner.life <= 0) banner = null; }
   if (cine) { updateCine(rdt); updateFx(rdt * 0.25); updateCam(rdt); return; }
   slow = Math.max(0, slow - rdt);
-  const dt = rdt * (slow > 0 ? 0.3 : 1);
+  timeScale += ((slow > 0 ? 0.3 : 1) - timeScale) * Math.min(1, rdt * 7);
+  const dt = rdt * timeScale;
   if (state === 'play') {
     invuln = Math.max(0, invuln - dt);
     comboT -= dt; if (comboT <= 0) combo = 0;

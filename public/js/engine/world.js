@@ -90,8 +90,15 @@ function kill(e, dvx, dvy, head) {
   shake = Math.max(shake, head ? 9 : 6);
   texts.push({x: e.x, y: e.y - 92, s: head ? 'HEADSHOT +' + pts : '+' + pts, life: 0.9, big:false});
   if (combo >= 3 && combo % 3 === 0) {
-    slow = 0.9;
-    texts.push({x: W / 2, y: 150, s: 'RAINBOW TIME', life: 1.1, big:true});
+    // already in Rainbow Time? keep it going instead of starting it over
+    if (slow > 0) {
+      slow = Math.min(RT_MAX, slow + RT_ADD);
+      texts = texts.filter(t => t.s !== '+1s');
+      texts.push({x: W / 2, y: 175, s: '+1s', life: 0.7, big: false});
+    } else {
+      slow = RT_ADD;
+      texts.push({x: W / 2, y: 150, s: 'RAINBOW TIME', life: 1.1, big:true});
+    }
   }
 }
 
