@@ -32,6 +32,11 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
 .arena-card:disabled{border-style:dashed;box-shadow:none;background:transparent;color:var(--muted);cursor:default}
 .arena-card:disabled:hover{border-color:var(--ink)}
 #overlay .actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.code{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px}
+.code input{font:600 .9rem "IBM Plex Mono",ui-monospace,monospace;padding:7px 10px;width:10em;border:3px solid var(--ink);border-radius:6px;background:var(--paper);color:var(--ink)}
+.code input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.code-msg{flex-basis:100%;font-size:.75rem;color:var(--muted);min-height:1em}
+#ov-arena{cursor:default;user-select:none;-webkit-user-select:none}
 .go.ghost{background:transparent;color:var(--ink)}
 .go.ghost:hover{background:var(--ink);border-color:var(--ink);color:var(--paper)}
 @media (max-width:560px),(max-height:520px){#overlay{gap:8px;padding:10px}#overlay h2{font-size:clamp(1.1rem,4vw,1.6rem)}#overlay.picking p{display:none}.arena-card{min-width:0;padding:6px 10px}.arena-card .name{font-size:1rem}.go{font-size:1rem;padding:6px 18px}}

@@ -52,7 +52,7 @@ function boot(hash = '') {
     step(n = 1) { for (let i = 0; i < n; i++) { now += 1000 / 60; raf(now); } },
     seconds(s, each) { for (let i = 0; i < s * 60; i++) { now += 1000 / 60; raf(now); if (each) each(i); } },
     start() { (listeners['go:click'] || []).forEach(f => f()); },
-    key(code, down = true, key = '') { (winListeners[down ? 'keydown' : 'keyup'] || []).forEach(f => f({code, key, repeat: false, preventDefault() {}})); },
+    key(code, down = true, key = '', target) { (winListeners[down ? 'keydown' : 'keyup'] || []).forEach(f => f({code, key, target, repeat: false, preventDefault() {}})); },
     tap(code) { this.key(code, true); this.key(code, false); },
     type(word) { for (const c of word) this.key('Key' + c.toUpperCase(), true, c); },
     pointer(type, o) { (listeners['game:' + type] || []).forEach(f => f(Object.assign({pointerType: 'mouse', clientX: 500, clientY: 200, pointerId: 1, preventDefault() {}}, o))); },
@@ -154,6 +154,22 @@ test('wall flip pushes you away from the wall', () => {
 test('the gun reloads after 12 shots', () => {
   const g = boot(); g.start(); g.key('KeyJ'); g.step(100);
   ok(g.saw(/^RELOADING$/), 'never reloaded');
+});
+
+test('hidden code box: five taps reveal it; codes and boss names work; typing in it is ignored by the game', () => {
+  const g = boot();
+  ok(g.el('code-form').hidden === true, 'code box should start hidden');
+  for (let i = 0; i < 5; i++) g.click('ov-arena');
+  ok(g.el('code-form').hidden === false, 'five taps did not reveal the code box');
+  ok(/Sophy mode on/.test(g.get("applyCode('SOPHY')")) && g.get('cheatSophy') === true, 'sophy via the box');
+  g.get("applyCode('sophy')");
+  ok(g.get('applyCode("banana")') === 'Nothing happened.', 'unknown code');
+  g.get("applyCode('chancla')");
+  ok(g.get('state') === 'play' && g.get('arena.id') === 'grandmas-house' && g.get('kills') === 99, 'chancla code: ' + g.get('arena.id') + ' ' + g.get('kills'));
+  ok(g.el('code-form').hidden === true, 'code box should hide once a run starts');
+  const h = boot(); h.start();
+  h.key('KeyS', true, 's', {tagName: 'INPUT'});
+  ok(h.get('keys.down') !== true, 'typing in the code box moved the player');
 });
 
 test('sophy code: bottomless magazine and no saved score', () => {

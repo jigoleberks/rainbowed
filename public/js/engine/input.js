@@ -4,6 +4,7 @@ const keys = {}, btn = {};
 let jumpQ = 0, kickQ = 0;
 const KEYMAP = {ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'jump',KeyW:'jump',Space:'jump',ArrowDown:'down',KeyS:'down',KeyJ:'fire',KeyK:'kick',KeyL:'kick',KeyR:'reload'};
 addEventListener('keydown', e => {
+  if (isTyping(e)) return;
   if (state !== 'play' && (e.code === 'Enter' || e.code === 'Space') && state !== 'dying' && document.activeElement !== goBtn) { e.preventDefault(); start(); return; }
   const k = KEYMAP[e.code];
   if (!k) return;
@@ -13,25 +14,55 @@ addEventListener('keydown', e => {
   if (k === 'reload' && !e.repeat && state === 'play') startReload();
   keys[k] = true;
 });
-// Secret codes, typed on the keyboard. Cheated runs don't save a best score.
+// Secret codes. Cheated runs don't save a best score.
 //   sophy: bottomless magazine    loaf: 10 hearts, and the Eraser costs 5 instead of the run
+// Typed anywhere on a keyboard, or in the hidden code box (tap the line above the title 5 times),
+// which also takes a boss name (chancla, eraser, giant2...) to start a run one kill before it.
+function toggleSophy() {
+  cheatSophy = !cheatSophy;
+  if (cheatSophy) { runCheated = true; reloadT = 0; ammo = magSize(); }
+  texts.push({x: W / 2, y: 150, s: cheatSophy ? 'SOPHY MODE' : 'SOPHY MODE OFF', life: 1.3, big: true});
+  return cheatSophy ? 'Sophy mode on: no reloading.' : 'Sophy mode off.';
+}
+function toggleLoaf() {
+  cheatLoaf = !cheatLoaf;
+  if (cheatLoaf) { runCheated = true; if (!player.dead) hp = Math.min(10, hp + 5); }
+  else hp = Math.min(hp, 5);
+  texts.push({x: W / 2, y: 200, s: cheatLoaf ? 'LOAF MODE' : 'LOAF MODE OFF', life: 1.3, big: true});
+  return cheatLoaf ? 'Loaf mode on: 10 hearts.' : 'Loaf mode off.';
+}
+function applyCode(raw) {
+  const word = String(raw).trim().toLowerCase().replace(/^#/, '');
+  if (word === 'sophy') return toggleSophy();
+  if (word === 'loaf') return toggleLoaf();
+  const m = word.match(/^([a-z]+?)(\d*)$/);
+  if (m && Object.values(ARENAS).some(a => a.bossLoop.includes(m[1]))) { start(word); return 'Here we go.'; }
+  return 'Nothing happened.';
+}
+const isTyping = e => e.target && e.target.tagName === 'INPUT';
 addEventListener('keydown', e => {
-  if (!e.key || e.key.length !== 1) return;
+  if (isTyping(e) || !e.key || e.key.length !== 1) return;
   typed = (typed + e.key.toLowerCase()).slice(-5);
-  if (typed.endsWith('sophy')) {
-    typed = '';
-    cheatSophy = !cheatSophy;
-    if (cheatSophy) { runCheated = true; reloadT = 0; ammo = magSize(); }
-    texts.push({x: W / 2, y: 150, s: cheatSophy ? 'SOPHY MODE' : 'SOPHY MODE OFF', life: 1.3, big: true});
-  } else if (typed.endsWith('loaf')) {
-    typed = '';
-    cheatLoaf = !cheatLoaf;
-    if (cheatLoaf) { runCheated = true; if (!player.dead) hp = Math.min(10, hp + 5); }
-    else hp = Math.min(hp, 5);
-    texts.push({x: W / 2, y: 200, s: cheatLoaf ? 'LOAF MODE' : 'LOAF MODE OFF', life: 1.3, big: true});
-  }
+  if (typed.endsWith('sophy')) { typed = ''; toggleSophy(); }
+  else if (typed.endsWith('loaf')) { typed = ''; toggleLoaf(); }
 });
-addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) keys[k] = false; });
+
+// the hidden code box
+const codeForm = document.getElementById('code-form'), codeInput = document.getElementById('code-input'), codeMsg = document.getElementById('code-msg');
+codeForm.hidden = true;
+let codeTaps = 0, codeTapT = 0;
+ovArena.addEventListener('click', () => {
+  const now = performance.now();
+  codeTaps = now - codeTapT < 700 ? codeTaps + 1 : 1; codeTapT = now;
+  if (codeTaps >= 5) { codeTaps = 0; codeForm.hidden = false; codeMsg.textContent = ''; try { codeInput.focus(); } catch (_) {} }
+});
+codeForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const msg = applyCode(codeInput.value);
+  codeInput.value = '';
+  codeMsg.textContent = msg;
+});
+addEventListener('keyup', e => { if (isTyping(e)) return; const k = KEYMAP[e.code]; if (k) keys[k] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 
 const pointer = {x:0, y:0, active:false, down:false};
@@ -121,9 +152,11 @@ function pickArena(id) {
   start();
 }
 
-function start() {
-  // a boss skip link for another arena (#eraser, #chancla...) switches to that arena
-  const m = location.hash.match(/^#([a-z]+?)(\d*)$/);
+function start(skipTo) {
+  // a boss name (from the link, like #chancla, or the code box) starts one kill before that boss,
+  // switching to the arena it lives in
+  const want = typeof skipTo === 'string' ? skipTo : location.hash.slice(1);
+  const m = want.match(/^([a-z]+?)(\d*)$/);
   if (m && !arena.bossLoop.includes(m[1])) {
     const other = Object.values(ARENAS).find(a => a.bossLoop.includes(m[1]));
     if (other) { setArena(other.id); loadBest(); bestEl.textContent = 'Best ' + pad6(best); }
@@ -139,6 +172,7 @@ function start() {
   banner = {title: arena.name.toUpperCase(), sub: 'Arena ' + arena.number, life: 1.8};
   state = 'play';
   overlay.hidden = true;
+  codeForm.hidden = true;
   overlay.classList.remove('picking');
 }
 function showOver() {

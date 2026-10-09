@@ -32,6 +32,12 @@
         <button class="go" id="go" type="button">Again</button>
         <button class="go ghost" id="to-arenas" type="button">Arenas</button>
       </div>
+      <!-- hidden: tap the line above the title five times -->
+      <form class="code" id="code-form" hidden>
+        <input id="code-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="20" placeholder="secret code" aria-label="Secret code">
+        <button class="go ghost" type="submit">Enter</button>
+        <span class="code-msg" id="code-msg"></span>
+      </form>
     </div>
   </div>
 
