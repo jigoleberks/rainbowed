@@ -98,6 +98,12 @@ function kill(e, dvx, dvy, head) {
 function hurt(from) {
   if (rainbowT > 0) return;
   hp--; invuln = 1.3; combo = 0;
+  if (dual) {
+    // getting hit knocks the second gun out of your hand
+    dual = false; ammo = Math.min(ammo, MAG);
+    debris.push({x: player.x, y: player.y - 50, ang: 0, len: 13, lw: 5.5, vx: rand(-200, 200), vy: -rand(300, 450), va: rand(-15, 15), life: 2.5, head: false});
+    texts.push({x: player.x, y: player.y - 110, s: 'DROPPED IT', life: 0.9, big: false});
+  }
   const away = Math.sign(player.x - from.x) || 1;
   player.vx = away * 420; player.vy = -380;
   shake = 12;
@@ -159,7 +165,7 @@ function kickHit(p) {
 }
 
 function startReload() {
-  if (cheatSophy || reloadT > 0 || ammo >= MAG || player.dead) return;
+  if (cheatSophy || reloadT > 0 || ammo >= magSize() || player.dead) return;
   reloadT = RELOAD_TIME;
   const f = player.facing;
   debris.push({x: player.x + f * 14, y: player.y - 44, ang: Math.PI / 2, len: 7, lw: 4, vx: f * rand(30, 80), vy: -rand(60, 140), va: rand(-8, 8), life: 2.5, head:false});

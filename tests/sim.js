@@ -270,6 +270,23 @@ test('La Chancla: knocking her to zero makes her sit down, not explode', () => {
   ok(g.get('props.some(p => p.sitting !== undefined)'), 'grandma did not retire to the couch');
 });
 
+test('Sophy brings a second gun: double fire rate, 24 rounds, dropped when hit', () => {
+  const g = boot(); g.run("pickArena('grandmas-house')");
+  g.run('spawn = function () {}; enemies = [];');
+  g.seconds(2, () => {});
+  g.run("banner = null; arena.sophyTime('gift')");
+  let gun = false;
+  g.seconds(5, () => { if (g.get("pickups.some(k => k.kind === 'gun')")) gun = true; });
+  ok(gun, 'Sophy never dropped a gun');
+  g.run("{ const k = pickups.find(k => k.kind === 'gun'); if (k) { player.x = k.x; player.y = G; } }");
+  g.seconds(2, () => {});
+  ok(g.get('dual') === true && g.get('ammo') === 24, 'dual ' + g.get('dual') + ' ammo ' + g.get('ammo'));
+  const before = g.get('bullets.length'); g.key('KeyJ'); g.step(30); g.key('KeyJ', false);
+  ok(g.get('24 - ammo') >= 8, 'fired only ' + g.get('24 - ammo') + ' shots in half a second');
+  g.run('invuln = 0; hurt({x: player.x + 10});');
+  ok(g.get('dual') === false && g.get('ammo') <= 12, 'still dual after getting hit');
+});
+
 test("Sophy: every kind of SOPHY TIME works, including the chandelier", () => {
   const g = boot(); g.run("pickArena('grandmas-house')"); g.godMode();
   g.seconds(3, () => {});

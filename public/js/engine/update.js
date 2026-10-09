@@ -76,17 +76,20 @@ function updatePlayer(dt) {
   if (reloadT > 0) {
     reloadT -= dt;
     p.aim = p.facing > 0 ? 1.1 : Math.PI - 1.1;
-    if (reloadT <= 0) { reloadT = 0; ammo = MAG; for (let i = 0; i < 4; i++) parts.push({x: p.x + p.facing * 12, y: p.y - 48, vx: rand(-60, 60), vy: rand(-80, -20), h: 0, r: 1.2, life: 0.25, spark: true, ink: true}); }
+    if (reloadT <= 0) { reloadT = 0; ammo = magSize(); for (let i = 0; i < 4; i++) parts.push({x: p.x + p.facing * 12, y: p.y - 48, vx: rand(-60, 60), vy: rand(-80, -20), h: 0, r: 1.2, life: 0.25, spark: true, ink: true}); }
   }
 
   fireCd -= dt;
   if ((pointer.down || auto) && fireCd <= 0 && reloadT <= 0 && ammo > 0 && rainbowT <= 0) {
-    fireCd = 0.13;
+    fireCd = dual ? 0.065 : 0.13;
     if (!cheatSophy) ammo--;
+    p.side = dual ? -(p.side || 1) : 0;
     parts.push({x: p.x + Math.cos(ang) * 10, y: p.y - 54, vx: -p.facing * rand(60, 130), vy: -rand(140, 220), h: 0, r: 1.6, life: 0.5, spark: true, ink: true});
     if (ammo === 0) startReload();
     const a = ang + rand(-0.035, 0.035);
-    const sx = p.x + Math.cos(a) * 32, sy = p.y - 52 + Math.sin(a) * 32;
+    // with two guns, shots alternate between the hands
+    const off = p.side * 4;
+    const sx = p.x + Math.cos(a) * 32 - Math.sin(a) * off, sy = p.y - 52 + Math.sin(a) * 32 + Math.cos(a) * off;
     bullets.push({x:sx, y:sy, vx:Math.cos(a) * 1150, vy:Math.sin(a) * 1150, life:0.8});
     flash = 0.05; p.recoil = 1;
     if (!reduceMotion) shake = Math.max(shake, 1.5);
@@ -267,9 +270,16 @@ function update(rdt) {
     k.vy += 1100 * dt; k.y += k.vy * dt;
     if (k.vy > 0) { const ly = landY(k.x, pb + 10, k.y + 10); if (ly !== null) { k.y = ly - 10; k.vy = 0; } }
     if (state === 'play' && !player.dead && Math.abs(player.x - k.x) < 24 && k.y > player.y - 85 && k.y < player.y + 12) {
-      k.life = 0; rainbowT = RAINBOW_TIME;
-      burst(k.x, k.y, 0, -200, 40);
-      banner = {title: 'RAINBOW MODE', sub: 'Kicks only. Nothing can hurt you. Go kick him in the face.', life: 2.2};
+      k.life = 0;
+      if (k.kind === 'gun') {
+        dual = true; ammo = magSize(); reloadT = 0;
+        rings.push({x: k.x, y: k.y, r: 6, life: 0.3});
+        banner = {title: 'TWO GUNS', sub: 'Double fire rate. Drop it if you get hit.', life: 2.6};
+      } else {
+        rainbowT = RAINBOW_TIME;
+        burst(k.x, k.y, 0, -200, 40);
+        banner = {title: 'RAINBOW MODE', sub: 'Kicks only. Nothing can hurt you. Go kick him in the face.', life: 2.2};
+      }
     }
   }
   pickups = pickups.filter(k => k.life > 0);

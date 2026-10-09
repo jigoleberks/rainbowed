@@ -267,7 +267,7 @@
       c.hop = {x0: c.x, y0: c.y, x1: x, y1: y, t: 0, dur: 0.45 + Math.hypot(x - c.x, y - c.y) / 900, then};
       c.mode = 'hop';
     };
-    const announce = sub => { banner = {title: 'SOPHY TIME', sub, life: 2.2}; };
+    const announce = sub => { banner = {title: 'SOPHY TIME', sub, life: 4.5}; };
     const pick = list => list[Math.floor(Math.random() * list.length)];
 
     function nap() {
@@ -321,7 +321,17 @@
         });
       });
     }
-    const EVENTS = {nap, swat, knock, light: chandelier};
+    function gift() {
+      if (dual || pickups.some(k => k.kind === 'gun')) return nap();
+      announce(pick(["It's not a dead mouse this time.", 'She brought you something.', 'She found this under the couch.']));
+      const tx = clamp(player.x + (player.x > W / 2 ? -40 : 40), 30, W - 30);
+      const ty = player.onGround ? player.y : G;
+      hopTo(tx, ty, () => {
+        c.mode = 'swat'; c.facing = player.x >= c.x ? 1 : -1; c.t = 0.3;
+        c.task = () => { pickups.push({kind: 'gun', x: c.x + c.facing * 16, y: c.y - 14, vy: -220, life: 14}); c.mode = 'sit'; };
+      });
+    }
+    const EVENTS = {nap, swat, knock, gift, light: chandelier};
     // for tests and curious players: arena.sophyTime('light')
     arena.sophyTime = kind => (EVENTS[kind] || nap)();
 
@@ -342,9 +352,10 @@
       c.timer = rand(20, 32);
       const r = Math.random();
       if (!c.lightTried && light.st === 'hang' && kills >= 10 && r < 0.05) chandelier();
-      else if (r < 0.5) nap();
-      else if (r < 0.75) swat();
-      else knock();
+      else if (r < 0.38) nap();
+      else if (r < 0.58) swat();
+      else if (r < 0.78) knock();
+      else gift();
     };
     c.draw = () => drawSophy(c);
     return c;

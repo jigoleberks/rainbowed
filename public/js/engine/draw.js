@@ -92,12 +92,18 @@ function drawStick(e, kind) {
   if (kind === 'player') {
     const ca = Math.cos(e.aim), sa = Math.sin(e.aim), rec = e.recoil * 4;
     const hx = ca * (21 - rec), hy = shY + sa * (21 - rec);
-    poly([0, shY, ca * 9 + sa * 5 * f, shY + sa * 9 + 5, ca * (15 - rec), shY + sa * (15 - rec) + 2]);
+    if (dual) {
+      // second arm and gun, a little below and behind the first
+      const ox = -sa * 6, oy = ca * 6;
+      ctx.save(); ctx.lineWidth = 3.5; line(0, shY + 2, hx + ox, hy + oy);
+      ctx.lineWidth = 5.5; line(hx + ox - ca * 2, hy + oy - sa * 2, hx + ox + ca * 13, hy + oy + sa * 13); ctx.restore();
+    } else poly([0, shY, ca * 9 + sa * 5 * f, shY + sa * 9 + 5, ca * (15 - rec), shY + sa * (15 - rec) + 2]);
     line(0, shY, hx, hy);
     ctx.lineWidth = 5.5;
     line(hx - ca * 2, hy - sa * 2, hx + ca * 13, hy + sa * 13);
     if (flash > 0) {
-      const mx = hx + ca * 19, my = hy + sa * 19;
+      const sideOff = (e.side || 0) > 0 ? 6 : 0;
+      const mx = hx + ca * 19 - sa * sideOff, my = hy + sa * 19 + ca * sideOff;
       ctx.fillStyle = '#f6b81c';
       ctx.beginPath();
       for (let k = 0; k < 10; k++) {
@@ -206,15 +212,16 @@ function drawHUD() {
       ctx.fillStyle = ACCENT;
       ctx.font = '600 11px "IBM Plex Mono", monospace';
       ctx.fillText('\u221E SOPHY MODE', 20, 76);
-    } else for (let i = 0; i < MAG; i++) {
-      const on = reloadT > 0 ? i < Math.floor((1 - reloadT / RELOAD_TIME) * MAG) : i < ammo;
-      ctx.fillStyle = on ? INK : '#c9ccd4';
-      ctx.fillRect(20 + i * 7, 66, 4, 11);
-    }
-    if (reloadT > 0 && rainbowT <= 0) {
-      ctx.fillStyle = ACCENT;
+    } else {
+      const n = magSize(), step = dual ? 5 : 7;
+      for (let i = 0; i < n; i++) {
+        const on = reloadT > 0 ? i < Math.floor((1 - reloadT / RELOAD_TIME) * n) : i < ammo;
+        ctx.fillStyle = on ? INK : '#c9ccd4';
+        ctx.fillRect(20 + i * step, 66, dual ? 3 : 4, 11);
+      }
       ctx.font = '600 11px "IBM Plex Mono", monospace';
-      ctx.fillText('RELOADING', 20 + MAG * 7 + 6, 76);
+      if (reloadT > 0) { ctx.fillStyle = ACCENT; ctx.fillText('RELOADING', 20 + n * step + 6, 76); }
+      else if (dual) { ctx.fillStyle = INK; ctx.fillText('x2', 20 + n * step + 6, 76); }
     }
     for (let i = 0; i < maxHp(); i++) {
       ctx.beginPath(); ctx.arc(W - 24 - i * 22, 30, 7, 0, Math.PI * 2);
@@ -332,6 +339,19 @@ function draw() {
   drawBoss();
   for (const k of pickups) {
     if (k.life < 2 && Math.floor(clock * 10) % 2) continue;
+    if (k.kind === 'gun') {
+      // a pistol with a little sparkle
+      const bob = Math.sin(clock * 5) * 2;
+      ctx.save(); ctx.translate(k.x, k.y + bob); ctx.rotate(-0.2);
+      ctx.fillStyle = INK; ctx.fillRect(-11, -4, 22, 6); ctx.fillRect(-11, 0, 7, 10);
+      ctx.restore();
+      ctx.fillStyle = ACCENT; ctx.font = '13px "Permanent Marker", cursive'; ctx.textAlign = 'center';
+      ctx.fillText('x2', k.x + 15, k.y - 10 + bob);
+      ctx.strokeStyle = `hsl(${(clock * 300) % 360} 88% 55%)`; ctx.lineWidth = 2;
+      const s = 4 + Math.sin(clock * 9) * 2;
+      line(k.x - 14 - s, k.y - 12, k.x - 14 + s, k.y - 12); line(k.x - 14, k.y - 12 - s, k.x - 14, k.y - 12 + s);
+      continue;
+    }
     const r = 11 + Math.sin(clock * 8) * 1.5;
     ctx.lineWidth = 4;
     for (let i = 0; i < 6; i++) {

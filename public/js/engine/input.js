@@ -21,7 +21,7 @@ addEventListener('keydown', e => {
   if (typed.endsWith('sophy')) {
     typed = '';
     cheatSophy = !cheatSophy;
-    if (cheatSophy) { runCheated = true; reloadT = 0; ammo = MAG; }
+    if (cheatSophy) { runCheated = true; reloadT = 0; ammo = magSize(); }
     texts.push({x: W / 2, y: 150, s: cheatSophy ? 'SOPHY MODE' : 'SOPHY MODE OFF', life: 1.3, big: true});
   } else if (typed.endsWith('loaf')) {
     typed = '';
