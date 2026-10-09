@@ -273,6 +273,8 @@ function update(rdt) {
     }
   }
   pickups = pickups.filter(k => k.life > 0);
+  for (const pr of props) if (pr.update) pr.update(dt);
+  props = props.filter(pr => !pr.done);
   updateEnemies(dt);
   updateBoss(dt);
   updateHazards(dt);

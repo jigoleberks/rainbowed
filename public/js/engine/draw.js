@@ -291,7 +291,7 @@ function drawHUD() {
       ctx.globalAlpha = Math.min(1, (c.t - 0.45) * 4, outA);
       ctx.font = '30px "Permanent Marker", cursive';
       ctx.fillStyle = PAPER;
-      ctx.fillText('K.O.', W / 2, H - 14);
+      ctx.fillText(BOSSES[c.boss.kind].koCaption || 'K.O.', W / 2, H - 14);
       ctx.globalAlpha = 1;
     }
   }
@@ -307,6 +307,7 @@ function draw() {
 
   if (arena.drawStage) arena.drawStage(); else drawStage();
   ctx.drawImage(stain, 0, 0, W, H);
+  for (const pr of props) if (!pr.front && pr.draw) pr.draw();
 
   for (const r of rings) {
     ctx.globalAlpha = Math.max(0, Math.min(1, r.life / 0.35));
@@ -342,6 +343,7 @@ function draw() {
   }
   for (const e of enemies) drawStick(e, 'enemy');
   if (!player.dead && !(state === 'play' && invuln > 0 && !cine && Math.floor(clock * 18) % 2)) drawStick(player, 'player');
+  for (const pr of props) if (pr.front && pr.draw) pr.draw();
 
   ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
   for (const b of bullets) line(b.x - b.vx * 0.018, b.y - b.vy * 0.018, b.x, b.y);

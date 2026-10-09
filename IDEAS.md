@@ -26,7 +26,7 @@ There is no winning. Every run ends with "You got rainbowed."
 - Boss loop per arena: the Giant at 25 and 75 in every arena (with Rainbow Mode),
   the arena's own sub-boss at 50, and its joke finale at 100.
   - Arena 1, Page One: Sensei (50), The Eraser (100). Built.
-  - Arena 2, Grandma's House: Dust Bunny (50), La Chancla (100), plus Sophy
+  - Arena 2, Grandma's House: Dust Bunny (50), La Chancla (100), plus Sophy. Built.
   - Arena 3, The Long Hallway: Ink Blob (50), The Slow One (100). The darker arena.
 - Dust Bunny: a huge dust ball rolls out from under the couch. Every hit splits it
   into smaller, faster dust bunnies until the floor is a fluffy swarm.
@@ -34,8 +34,7 @@ There is no winning. Every run ends with "You got rainbowed."
   that slow you, drips from the ceiling, swallows the hallway lights and lurks in
   the dark between flickers. Your rainbow splats are the only light.
 - Code is split into a shared engine plus one file per arena and boss (see README).
-- Still to build: a start/splash screen with an arena picker, and a best score per arena.
-  Comes with Grandma's House, since that's the second arena.
+- Start screen with an arena picker and a best score per arena: built.
 
 ## Share results button (zero maintenance)
 On the game-over screen, a Share button that copies text (or opens the phone's share

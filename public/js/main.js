@@ -1,6 +1,6 @@
 /* Boot: show the arena picker and start the frame loop. */
 // Arenas that appear on the start screen as "Coming soon" until their file exists.
-const COMING_SOON = [{number: 2, name: "Grandma's House", ready: false}];
+const COMING_SOON = [];
 
 setArena('page-one');
 loadBest();

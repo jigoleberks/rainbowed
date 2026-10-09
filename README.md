@@ -64,4 +64,4 @@ node tests/sim.js
 
 Runs scripted games against the real files and checks the boss loop, Rainbow Mode, kicks, right-click, wall flips, reloading, the secret codes and the Eraser. Run it before pushing.
 
-For playtesting, add a boss name to the address to start one kill before it: `#giant`, `#sensei`, `#giant2`, `#eraser`. Secret codes, typed during a run: `sophy` (no reloading), `loaf` (10 hearts). Runs with a code on don't save a best score.
+For playtesting, add a boss name to the address to start one kill before it: `#giant`, `#sensei`, `#giant2`, `#eraser` on Page One, or `#dustbunny`, `#chancla` for Grandma's House (the link switches arenas). In Grandma's House, `arena.sophyTime('light')` in the browser console makes Sophy go for the ceiling light. Secret codes, typed during a run: `sophy` (no reloading), `loaf` (10 hearts). Runs with a code on don't save a best score.

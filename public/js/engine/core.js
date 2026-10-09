@@ -58,7 +58,7 @@ let cheatSophy = false, cheatLoaf = false, runCheated = false, typed = '';
 const maxHp = () => cheatLoaf ? 10 : 5;
 let score, kills, combo, comboT, slow, shake, spawnT, hp, invuln, fireCd, flash, overT, clock = 0;
 let boss, bossWarn, nextBossAt, bossCount, bossesBeaten, cine, banner, geyser;
-let pickups = [], rainbowT = 0, deathTitle = null;
+let pickups = [], rainbowT = 0, deathTitle = null, props = [];
 const cam = {x: W / 2, y: H / 2, z: 1};
 
 function reset() {
@@ -69,6 +69,9 @@ function reset() {
   hp = maxHp(); invuln = 1; fireCd = 0; ammo = MAG; reloadT = 0; runCheated = cheatSophy || cheatLoaf; flash = 0; overT = 0;
   boss = null; bossWarn = 0; nextBossAt = 25; bossCount = 0; bossesBeaten = 0; cine = null; banner = null; geyser = null;
   pickups = []; rainbowT = 0; deathTitle = null;
+  // props: arena extras like Sophy and knockable objects, each {update(dt), draw(), front, done}
+  props = [];
+  if (arena && arena.setup) arena.setup();
   for (const pl of PLATS) pl.gone = 0;
   cam.x = W / 2; cam.y = H / 2; cam.z = 1;
   sctx.clearRect(0, 0, W, H);

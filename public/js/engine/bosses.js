@@ -22,6 +22,9 @@ function updateBoss(dt) {
 }
 
 function hitBoss(b, x, y, dx, dy, dmg) {
+  // bosses made of several parts (the Dust Bunny) route the hit and return the damage that counted
+  const def = BOSSES[b.kind];
+  if (def.onHit) dmg = def.onHit(b, dmg, x, y);
   b.hp -= dmg; b.hitT = 0.08; score += 10 * dmg;
   const dir = Math.atan2(dy, dx);
   for (let i = 0; i < 6 + dmg * 2; i++) {
@@ -67,7 +70,8 @@ function updateCine(rdt) {
       const b = c.boss;
       cine = null; boss = null;
       hp = Math.min(maxHp(), hp + 1);
-      banner = {title: BOSSES[b.kind].ko, sub: '+' + b.pts + '   ·   +1 life', life: 2.6};
+      const def = BOSSES[b.kind];
+      banner = {title: def.ko, sub: (def.koSub ? def.koSub + '   ·   ' : '') + '+' + b.pts + '   ·   +1 life', life: 2.6};
       spawnT = 1.8;
     }
   }

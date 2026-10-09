@@ -78,12 +78,12 @@ test('boots to the title screen on Page One', () => {
   ok(g.get('PLATS.length') === 3, 'expected 3 shelves');
 });
 
-test('start screen lists Page One and a coming-soon card, and Arenas goes back to it', () => {
+test('start screen lists the arenas, and Arenas goes back to it', () => {
   const g = boot();
   const cards = g.el('arena-list').children;
   ok(cards.length >= 2, 'cards: ' + cards.length);
   ok(cards[0].disabled === false && cards[0].children[1].textContent === 'Page One', 'first card should be a playable Page One');
-  ok(cards.some(c => c.disabled && c.children[2].textContent === 'Coming soon'), 'no coming-soon card');
+  ok(cards.some(c => !c.disabled && c.children[1].textContent === "Grandma's House"), "Grandma's House should be playable");
   g.run("pickArena('page-one')");
   ok(g.get('state') === 'play', 'picking an arena did not start a run');
   g.run('showOver()');
@@ -191,6 +191,96 @@ test('Eraser: touching it ends the run with its own message', () => {
   const g = boot('#eraser'); g.start(); g.godMode(); g.key('KeyJ');
   g.seconds(60, () => {});
   ok(g.get('deathTitle') === 'You got erased.', 'deathTitle ' + g.get('deathTitle'));
+});
+
+/* ---------- Grandma's House ---------- */
+
+test("Grandma's House: picking it loads its furniture, Sophy and the boss loop", () => {
+  const g = boot(); g.run("pickArena('grandmas-house')");
+  ok(g.get('state') === 'play', 'did not start');
+  ok(g.get('PLATS.length') === 5, 'expected 5 pieces of furniture, got ' + g.get('PLATS.length'));
+  ok(g.get("arena.bossLoop.join()") === 'giant,dustbunny,giant,chancla', 'boss loop ' + g.get('arena.bossLoop.join()'));
+  ok(g.get('props.some(p => p.front)'), 'Sophy is missing');
+  g.seconds(20, () => {});
+  ok(g.get('enemies.length') > 0, 'no stickmen came in');
+});
+
+test("Grandma's House: skip links switch arenas", () => {
+  const g = boot('#chancla'); g.start();
+  ok(g.get('arena.id') === 'grandmas-house' && g.get('kills') === 99, 'arena ' + g.get('arena.id') + ' kills ' + g.get('kills'));
+  const h = boot('#dustbunny'); h.start();
+  ok(h.get('arena.id') === 'grandmas-house' && h.get('kills') === 49, 'dustbunny link');
+});
+
+test("Grandma's House: full boss loop, Giant, Dust Bunny, Giant, La Chancla, Giant", () => {
+  const g = boot('#giant'); g.run("pickArena('grandmas-house')"); g.godMode(); g.type('sophy'); g.key('KeyJ');
+  const order = [];
+  g.seconds(420, i => {
+    const k = g.get('boss && boss.kind');
+    if (k && order[order.length - 1] !== k) order.push(k);
+    if (i % 45 === 0) g.tap('KeyW');
+  });
+  const want = ['giant', 'dustbunny', 'giant', 'chancla', 'giant'];
+  ok(want.every((k, i) => order[i] === k), 'got ' + order.join(','));
+});
+
+test('Dust Bunny splits into smaller bunnies and the swarm can be cleared', () => {
+  const g = boot('#dustbunny'); g.start(); g.godMode(); g.type('sophy'); g.key('KeyJ');
+  let most = 0, split = false;
+  g.seconds(90, () => { const n = g.get("boss && boss.kind === 'dustbunny' ? boss.bunnies.length : 0"); most = Math.max(most, n); if (g.saw(/^SPLIT!$/)) split = true; });
+  ok(split && most >= 3, 'max bunnies at once ' + most);
+  ok(g.saw(/^DUST BUSTED$/), 'never cleared the swarm');
+});
+
+test("La Chancla: survive and her show comes on", () => {
+  const g = boot('#chancla'); g.start(); g.godMode(); g.key('KeyJ');
+  g.seconds(70, () => {});
+  ok(g.saw(/^HER SHOW CAME ON$/), 'show never came on');
+  ok(g.get('arena.tvT') > 0 || g.saw(/^HER SHOW CAME ON$/), 'tv');
+});
+
+test("La Chancla: her slippers rainbow stickmen, and can chancla you", () => {
+  const g = boot('#chancla'); g.start();
+  g.seconds(3, () => {});
+  g.run('enemies = []; kills = 100; hp = 1; invuln = 0;');
+  for (let i = 0; i < 40 * 60 && g.get('state') === 'play'; i++) { g.run('enemies = []'); g.step(1); }
+  ok(g.get('deathTitle') === "You got chancla'd.", 'death title ' + g.get('deathTitle'));
+  const h = boot('#chancla'); h.start(); h.godMode();
+  h.run('kills = 100;');
+  let k0 = null;
+  for (let i = 0; i < 20 * 60; i++) {
+    h.step(1);
+    // when a slipper is in the air, put a stickman right where it will land
+    if (k0 === null && h.get('boss && boss.slippers && boss.slippers.length > 0')) {
+      k0 = h.get('kills');
+      h.run("{ const s = boss.slippers[0]; enemies.push({x: s.tx + 20, y: s.ty, vx:0, vy:0, onGround:true, facing:-1, phase:0, speed:0, drop:0, jumpCd:9}); }");
+    }
+  }
+  ok(k0 !== null, 'no slipper thrown');
+  ok(h.get('kills') > k0, 'slippers never rainbowed a stickman');
+});
+
+test('La Chancla: knocking her to zero makes her sit down, not explode', () => {
+  const g = boot('#chancla'); g.start(); g.godMode(); g.key('KeyJ');
+  g.seconds(6, () => {});
+  g.run('if (boss) { boss.hp = 1; hitBoss(boss, boss.x, boss.y - 30, 1, 0, 1); }');
+  g.seconds(4, () => {});
+  ok(g.saw(/^FINE\.$/), 'no FINE. banner');
+  ok(g.get('props.some(p => p.sitting !== undefined)'), 'grandma did not retire to the couch');
+});
+
+test("Sophy: every kind of SOPHY TIME works, including the chandelier", () => {
+  const g = boot(); g.run("pickArena('grandmas-house')"); g.godMode();
+  g.seconds(3, () => {});
+  for (const kind of ['nap', 'knock', 'swat']) { g.run("banner = null; arena.sophyTime('" + kind + "')"); g.seconds(4, () => {}); }
+  ok(g.saw(/^SOPHY TIME$/), 'no SOPHY TIME');
+  ok(g.saw(/^CRASH!$/), 'knock never crashed anything');
+  for (let i = 0; i < 5; i++) g.run("enemies.push({x: 470 + " + i * 12 + ", y: G, vx:0, vy:0, onGround:true, facing:-1, phase:0, speed:0, drop:0, jumpCd:9})");
+  const k0 = g.get('kills');
+  g.run("banner = null; arena.sophyTime('light')");
+  g.seconds(8, () => {});
+  ok(g.saw(/^CHANDELIERED/), 'chandelier never fell');
+  ok(g.get('kills') > k0, 'chandelier hit nobody');
 });
 
 let failed = 0;

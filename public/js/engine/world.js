@@ -23,11 +23,15 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 /* ---------- spawning & effects ---------- */
 function spawn() {
-  const sky = Math.random() < 0.25;
-  const side = Math.random() < 0.5 ? -1 : 1;
+  // arenas can choose where stickmen come in (doors, windows); default is both sides and the sky
+  let sp;
+  if (arena.spawnPoint) sp = arena.spawnPoint();
+  else {
+    const sky = Math.random() < 0.25, side = Math.random() < 0.5 ? -1 : 1;
+    sp = {x: sky ? rand(60, W - 60) : (side < 0 ? -15 : W + 15), y: sky ? -20 : G, air: sky};
+  }
   enemies.push({
-    x: sky ? rand(60, W - 60) : (side < 0 ? -15 : W + 15),
-    y: sky ? -20 : G, vx:0, vy:0, onGround:!sky, facing:1,
+    x: sp.x, y: sp.y, vx: sp.vx || 0, vy: sp.vy || 0, onGround: !sp.air, facing:1,
     phase: rand(0, 6), speed: rand(80, 150) + Math.min(70, kills * 1.6),
     drop:0, jumpCd: rand(0.3, 1)
   });
