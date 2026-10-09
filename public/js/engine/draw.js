@@ -384,6 +384,14 @@ function draw() {
   };
   for (const e of enemies) drawWrapped(e, 'enemy');
   if (!player.dead && !(state === 'play' && invuln > 0 && !cine && Math.floor(clock * 18) % 2)) drawWrapped(player, 'player');
+  // seeing stars after a bonk
+  if (!player.dead && player.stunT > 0) {
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.8;
+    for (let i = 0; i < 3; i++) {
+      const a = clock * 9 + i * Math.PI * 2 / 3, sx = player.x + Math.cos(a) * 14, sy = player.y - 84 + Math.sin(a) * 4;
+      for (let k = 0; k < 3; k++) { const b = k * Math.PI / 3; line(sx - Math.cos(b) * 4, sy - Math.sin(b) * 4, sx + Math.cos(b) * 4, sy + Math.sin(b) * 4); }
+    }
+  }
   for (const pr of props) if (pr.front && pr.draw) pr.draw();
 
   ctx.strokeStyle = INK; ctx.lineWidth = 2.5;

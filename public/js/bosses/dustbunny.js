@@ -1,6 +1,6 @@
 /* The Dust Bunny: Grandma's House sub-boss. Rolls out from under the couch; every time a
    bunny runs out of health it splits into two smaller, faster ones, down to a swarm of tiny
-   ones that get rainbowed. Jump on a bunny to squish it; the tiny ones only bowl you over.
+   ones that get rainbowed. Jump on a bunny to squish it; the tiny ones only bonk you (a short stun).
    The boss's health bar is the whole family's health. */
 
 const BUNNY_R = [16, 27, 44];                  // radius by size: tiny, medium, big
@@ -47,9 +47,11 @@ function updateDustBunny(b, dt, fighting) {
     }
     if (invuln <= 0 && player.kickT <= 0 && rainbowT <= 0 && Math.hypot(dx, (player.y - 40) - (bun.y - bun.r)) < bun.r + 12) {
       if (bun.tier === 0) {
-        // the tiny ones just get bowled over
-        bun.vx = -(Math.sign(dx) || 1) * 320; bun.vy = -280; bun.hopCd = 0.8;
-        dustPoof(bun.x, bun.y - bun.r, 6);
+        // the tiny ones don't cost a heart, they just bonk you (a quarter-second stun) and bounce off
+        if (stun(bun)) {
+          bun.vx = -(Math.sign(dx) || 1) * 320; bun.vy = -280; bun.hopCd = 0.8;
+          dustPoof(bun.x, bun.y - bun.r, 6);
+        }
       } else hurt(bun);
     }
   }

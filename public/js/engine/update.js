@@ -2,7 +2,10 @@
 /* ---------- update ---------- */
 function updatePlayer(dt) {
   const p = player;
-  const dir = ((keys.right || btn.right) ? 1 : 0) - ((keys.left || btn.left) ? 1 : 0);
+  p.stunImm = Math.max(0, p.stunImm - dt);
+  const stunned = p.stunT > 0;
+  if (stunned) { p.stunT -= dt; jumpQ = 0; kickQ = 0; }
+  const dir = stunned ? 0 : ((keys.right || btn.right) ? 1 : 0) - ((keys.left || btn.left) ? 1 : 0);
   p.kickCd -= dt;
   if (kickQ > 0 && p.kickT <= 0 && p.kickCd <= 0 && (p.onGround || p.airKick)) {
     if (dir) p.facing = dir;
@@ -85,7 +88,8 @@ function updatePlayer(dt) {
   }
 
   fireCd -= dt;
-  if ((pointer.down || auto) && fireCd <= 0 && rainbowT <= 0 && grenades > 0) fireGrenade(ang, aimD);
+  if (stunned) {}
+  else if ((pointer.down || auto) && fireCd <= 0 && rainbowT <= 0 && grenades > 0) fireGrenade(ang, aimD);
   else if ((pointer.down || auto) && fireCd <= 0 && reloadT <= 0 && ammo > 0 && rainbowT <= 0) {
     fireCd = dual ? 0.065 : 0.13;
     if (!cheatSophy) ammo--;

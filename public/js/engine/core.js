@@ -78,7 +78,7 @@ const cam = {x: W / 2, y: H / 2, z: 1};
 
 function reset() {
   player = {x:W/2, y:G, vx:0, vy:0, onGround:true, facing:1, phase:0, jumps:2, spin:0, spinT:0, drop:0, recoil:0, aim:0, dead:false,
-    kickT:0, kickCd:0, airKick:true, kickDir:1, pose:null, tilt:0, flipSign:-1, wallT:0, wallSide:0};
+    kickT:0, kickCd:0, airKick:true, kickDir:1, pose:null, tilt:0, flipSign:-1, wallT:0, wallSide:0, stunT:0, stunImm:0};
   enemies = []; bullets = []; parts = []; debris = []; rings = []; texts = []; eproj = []; waves = [];
   score = 0; kills = 0; combo = 0; comboT = 0; slow = 0; timeScale = 1; shake = 0; spawnT = 0.8;
   hp = maxHp(); invuln = 1; fireCd = 0; dual = false; ammo = MAG; reloadT = 0; runCheated = cheatSophy || cheatLoaf; flash = 0; overT = 0;

@@ -437,7 +437,7 @@ test('Rainbow Time stacks during a big combo instead of restarting', () => {
   ok(g.get('slow') <= 4, 'capped at 4s: ' + g.get('slow'));
 });
 
-test('Dust Bunny: stomping squishes, and the tiny ones do not hurt', () => {
+test('Dust Bunny: stomping squishes, and the tiny ones only stun', () => {
   const g = boot('#dustbunny'); g.start(); g.run('spawn = function () {}; enemies = []; dropCrate = function () {};');
   g.run('kills = 50;'); g.seconds(6, () => {});
   ok(g.get("boss && boss.kind === 'dustbunny' && boss.st === 'fight'"), 'no dust bunny fight');
@@ -452,6 +452,9 @@ test('Dust Bunny: stomping squishes, and the tiny ones do not hurt', () => {
   const hearts = g.get('hp');
   g.step(2);
   ok(g.get('hp') === hearts, 'tiny bunny took a heart');
+  ok(g.get('player.stunT') > 0, 'tiny bunny should stun you');
+  g.seconds(1, () => {});
+  ok(g.get('player.stunT') <= 0, 'stun should wear off');
   // and stomping a tiny one finishes it
   g.run('{ const bun = boss.bunnies[0]; bun.x = player.x; bun.vx = 0; bun.y = G; bun.onGround = true; player.y = G - bun.r * 2 - 2; player.vy = 300; }');
   g.step(1);

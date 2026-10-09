@@ -172,6 +172,17 @@ function kickHit(p) {
   }
 }
 
+// a light bonk (tiny Dust Bunnies): a quarter second where you can't move or shoot, no heart lost
+function stun(from, t = 0.25) {
+  const p = player;
+  if (p.stunImm > 0 || p.dead || rainbowT > 0) return false;
+  p.stunT = t; p.stunImm = t + 0.6;
+  const away = Math.sign(p.x - from.x) || 1;
+  p.vx = away * 240; if (p.onGround) p.vy = -200;
+  texts.push({x: p.x, y: p.y - 96, s: 'BONK', life: 0.5, big: false});
+  return true;
+}
+
 function startReload() {
   if (cheatSophy || reloadT > 0 || ammo >= magSize() || player.dead) return;
   reloadT = RELOAD_TIME;
