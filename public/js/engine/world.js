@@ -129,6 +129,7 @@ function bossZone(b, x, y, pad) {
 
 // Damage by source ('bullet', 'kick', 'launch') and zone. Bosses can override with damage().
 function bossDamage(b, zone, src) {
+  if (src === 'grenade') return 6;
   const def = BOSSES[b.kind];
   if (def.damage) return def.damage(zone, src);
   if (src === 'kick') return zone === 2 ? 4 : 3;

@@ -84,6 +84,8 @@ orange patches, dark stripes down her forehead, round face, solid loaf build.
     drags it down on everyone.
 
 ## Better guns that change the reload
+Started: supply crates parachute in every 15 kills with two guns or the rainbow
+grenade launcher (6 shots). More crate contents can go in engine/weapons.js.
 The base gun holds 12 shots and pauses to reload. Hidden or hard-to-reach guns on
 each level could improve on that: a bigger magazine, a faster reload, or a gun that
 barely needs to reload at all. That gives players a reason to go climb for them.
@@ -93,3 +95,8 @@ barely needs to reload at all. That gives players a reason to go climb for them.
 - Power-ups dropped by enemies: shotgun, dual pistols, a "prism beam" laser
 - Daily challenge: same enemy waves for everyone each day
 - Spare boss: the Rainbow Thief (eats floor splats to heal)
+
+## Google Play (maybe)
+Wrap the web app as a Trusted Web Activity (PWABuilder or Bubblewrap). Needs a $25
+developer account, 12 testers for 14 days, a privacy page and an assetlinks.json on the
+site. Rename Sophy for the public build.

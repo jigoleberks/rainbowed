@@ -72,7 +72,7 @@ function makeSlowOne(x, y) {
     return 0;
   };
   s.hit = (z, src, x, y) => {
-    const dmg = src === 'kick' ? (z === 2 ? 4 : 3) : z;
+    const dmg = src === 'grenade' ? 25 : src === 'kick' ? (z === 2 ? 4 : 3) : z;
     s.health -= dmg; s.hitT = 0.08; score += 2 * dmg;
     parts.push({x, y, vx: rand(-80, 80), vy: rand(-120, -20), h: rand(0, 360), r: 2, life: 0.6, spark: true});
     if (s.health <= 0 && !s.leaving) {

@@ -49,12 +49,14 @@ function updatePlayer(dt) {
   p.recoil = Math.max(0, p.recoil - dt * 10);
 
   const auto = btn.fire || keys.fire;
-  let ang;
+  let ang, aimD = 250;   // aimD: how far away the aim point is, so grenades can lob onto it
   if (auto) {
     const n = aimTarget();
     ang = n ? Math.atan2(n.y - (p.y - 52), n.x - p.x) : (p.facing > 0 ? 0 : Math.PI);
+    if (n) aimD = Math.hypot(n.x - p.x, n.y - (p.y - 52));
   } else if (pointer.active) {
     ang = Math.atan2(pointer.y - (p.y - 52), pointer.x - p.x);
+    aimD = Math.hypot(pointer.x - p.x, pointer.y - (p.y - 52));
   } else {
     if (dir) p.facing = dir;
     ang = p.facing > 0 ? 0 : Math.PI;
@@ -83,7 +85,8 @@ function updatePlayer(dt) {
   }
 
   fireCd -= dt;
-  if ((pointer.down || auto) && fireCd <= 0 && reloadT <= 0 && ammo > 0 && rainbowT <= 0) {
+  if ((pointer.down || auto) && fireCd <= 0 && rainbowT <= 0 && grenades > 0) fireGrenade(ang, aimD);
+  else if ((pointer.down || auto) && fireCd <= 0 && reloadT <= 0 && ammo > 0 && rainbowT <= 0) {
     fireCd = dual ? 0.065 : 0.13;
     if (!cheatSophy) ammo--;
     p.side = dual ? -(p.side || 1) : 0;
@@ -267,6 +270,7 @@ function update(rdt) {
     invuln = Math.max(0, invuln - dt);
     comboT -= dt; if (comboT <= 0) combo = 0;
     updatePlayer(dt);
+    if (kills >= nextCrateAt) { nextCrateAt = (Math.floor(kills / CRATE_EVERY) + 1) * CRATE_EVERY; dropCrate(); }
     if (!boss && bossWarn <= 0 && kills >= nextBossAt) bossWarn = 2;
     if (bossWarn > 0) { bossWarn -= rdt; if (bossWarn <= 0) spawnBoss(); }
     else if (!boss) {
@@ -281,11 +285,14 @@ function update(rdt) {
   for (const k of pickups) {
     k.life -= dt;
     const pb = k.y;
-    k.vy += 1100 * dt; k.y += k.vy * dt;
-    if (k.vy > 0) { const ly = landY(k.x, pb + 10, k.y + 10); if (ly !== null) { k.y = ly - 10; k.vy = 0; } }
-    if (state === 'play' && !player.dead && Math.abs(player.x - k.x) < 24 && k.y > player.y - 85 && k.y < player.y + 12) {
+    k.vy += 1100 * dt;
+    if (k.chute) { k.vy = Math.min(k.vy, 75); k.x += Math.cos(clock * 2.2) * 9 * dt; }   // drifting down on its parachute
+    k.y += k.vy * dt;
+    if (k.vy > 0) { const ly = landY(k.x, pb + 10, k.y + 10); if (ly !== null) { k.y = ly - 10; k.vy = 0; if (k.chute) { k.chute = false; dust(k.x, ly); } } }
+    if (state === 'play' && !player.dead && Math.abs(wrapDx(player.x - k.x)) < 24 && k.y > player.y - 85 && k.y < player.y + 12) {
       k.life = 0;
-      if (k.kind === 'gun') {
+      if (k.kind === 'crate') openCrate(k);
+      else if (k.kind === 'gun') {
         dual = true; ammo = magSize(); reloadT = 0;
         rings.push({x: k.x, y: k.y, r: 6, life: 0.3});
         banner = {title: 'TWO GUNS', sub: 'Double fire rate. Drop it if you get hit.', life: 2.6};
@@ -303,6 +310,7 @@ function update(rdt) {
   updateBoss(dt);
   updateHazards(dt);
   updateBullets(dt);
+  updateNades(dt);
   updateFx(dt);
   updateCam(rdt);
   if (state === 'dying') { overT -= rdt; if (overT <= 0) showOver(); }

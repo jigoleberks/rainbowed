@@ -12,7 +12,7 @@ function throwMinion(b) {
   const vy = Math.max(-900, ((player.y - hy) - 0.5 * GRAV * flight * flight) / flight);
   b.sinceGlow = (b.sinceGlow || 0) + 1;
   // the first throw of every Giant fight is always the glowing one
-  const glow = rainbowT <= 0 && !pickups.length && !enemies.some(e => e.glow) && (b.sinceGlow === 1 && !b.gaveGlow || b.sinceGlow >= 3 || Math.random() < 0.3);
+  const glow = rainbowT <= 0 && !pickups.some(k => !k.kind) && !enemies.some(e => e.glow) && (b.sinceGlow === 1 && !b.gaveGlow || b.sinceGlow >= 3 || Math.random() < 0.3);
   if (glow) b.gaveGlow = true;
   if (glow) b.sinceGlow = 0;
   enemies.push({x: hx, y: hy, vx, vy, onGround:false, facing: Math.sign(vx) || 1, phase:0,

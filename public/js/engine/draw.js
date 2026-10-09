@@ -101,6 +101,12 @@ function drawStick(e, kind) {
     line(0, shY, hx, hy);
     ctx.lineWidth = 5.5;
     line(hx - ca * 2, hy - sa * 2, hx + ca * 13, hy + sa * 13);
+    if (grenades > 0) {
+      // the launcher: a fat tube with a rainbow band at the muzzle
+      ctx.save(); ctx.lineWidth = 9; line(hx - ca * 5, hy - sa * 5, hx + ca * 19, hy + sa * 19);
+      ctx.strokeStyle = `hsl(${(clock * 300) % 360} 88% 55%)`; ctx.lineWidth = 4; line(hx + ca * 15, hy + sa * 15, hx + ca * 18, hy + sa * 18);
+      ctx.restore();
+    }
     if (flash > 0) {
       const sideOff = (e.side || 0) > 0 ? 6 : 0;
       const mx = hx + ca * 19 - sa * sideOff, my = hy + sa * 19 + ca * sideOff;
@@ -223,6 +229,15 @@ function drawHUD() {
       if (reloadT > 0) { ctx.fillStyle = ACCENT; ctx.fillText('RELOADING', 20 + n * step + 6, 76); }
       else if (dual) { ctx.fillStyle = INK; ctx.fillText('x2', 20 + n * step + 6, 76); }
     }
+    if (grenades > 0) {
+      for (let i = 0; i < GRENADES; i++) {
+        ctx.beginPath(); ctx.arc(25 + i * 12, 90, 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = i < grenades ? `hsl(${i * 60} 85% 56%)` : '#c9ccd4'; ctx.fill();
+        ctx.lineWidth = 1.5; ctx.strokeStyle = INK; ctx.stroke();
+      }
+      ctx.fillStyle = INK; ctx.font = '600 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'left';
+      ctx.fillText('LAUNCHER', 20 + GRENADES * 12 + 6, 94);
+    }
     for (let i = 0; i < maxHp(); i++) {
       ctx.beginPath(); ctx.arc(W - 24 - i * 22, 30, 7, 0, Math.PI * 2);
       ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
@@ -339,6 +354,7 @@ function draw() {
   drawBoss();
   for (const k of pickups) {
     if (k.life < 2 && Math.floor(clock * 10) % 2) continue;
+    if (k.kind === 'crate') { drawCrate(k); continue; }
     if (k.kind === 'gun') {
       // a pistol with a little sparkle
       const bob = Math.sin(clock * 5) * 2;
@@ -372,6 +388,7 @@ function draw() {
 
   ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
   for (const b of bullets) line(b.x - b.vx * 0.018, b.y - b.vy * 0.018, b.x, b.y);
+  drawNades();
 
   for (const p of parts) {
     ctx.globalAlpha = Math.min(1, p.life * 2.5);

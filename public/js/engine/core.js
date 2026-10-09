@@ -2,6 +2,7 @@
 const W = 800, H = 450, G = 400, GRAV = 1800;
 const MAG = 12, RELOAD_TIME = 1.1;
 const RAINBOW_TIME = 4.5;
+const GRENADES = 6, CRATE_EVERY = 15;   // launcher shots per crate; a supply crate every 15 kills
 
 // Registries. Each file in js/arenas/ adds one arena, each file in js/bosses/ one boss.
 const ARENAS = {}, BOSSES = {};
@@ -65,6 +66,8 @@ let cheatSophy = false, cheatLoaf = false, runCheated = false, typed = '';
 const maxHp = () => cheatLoaf ? 10 : 5;
 let score, kills, combo, comboT, slow, shake, spawnT, hp, invuln, fireCd, flash, overT, clock = 0;
 let boss, bossWarn, nextBossAt, bossCount, bossesBeaten, cine, banner, geyser;
+// grenades: launcher shots left; nades: grenades in the air
+let grenades = 0, nades = [], nextCrateAt = CRATE_EVERY;
 let pickups = [], rainbowT = 0, deathTitle = null, props = [];
 // end-of-run stats
 let runTime = 0, shotsFired = 0, shotsHit = 0;
@@ -78,6 +81,7 @@ function reset() {
   hp = maxHp(); invuln = 1; fireCd = 0; dual = false; ammo = MAG; reloadT = 0; runCheated = cheatSophy || cheatLoaf; flash = 0; overT = 0;
   boss = null; bossWarn = 0; nextBossAt = 25; bossCount = 0; bossesBeaten = 0; cine = null; banner = null; geyser = null;
   pickups = []; rainbowT = 0; deathTitle = null;
+  grenades = 0; nades = []; nextCrateAt = CRATE_EVERY;
   runTime = 0; shotsFired = 0; shotsHit = 0;
   // props: arena extras like Sophy and knockable objects, each {update(dt), draw(), front, done}
   props = [];

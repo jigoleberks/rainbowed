@@ -200,14 +200,14 @@ test('loaf code: 10 hearts, and the Eraser costs 5 instead of the run', () => {
 });
 
 test('Eraser: survive 45 seconds and it gets bored', () => {
-  const g = boot('#eraser'); g.start(); g.godMode(); g.run('eraseMe = function () {};'); g.key('KeyJ');
+  const g = boot('#eraser'); g.start(); g.godMode(); g.run('eraseMe = function () {}; dropCrate = function () {};'); g.key('KeyJ');
   g.seconds(60, () => {});
   ok(g.saw(/THE ERASER GOT BORED/), 'eraser never left');
 });
 
 test('Eraser: first sweep is the floor, and the floor comes up every round', () => {
   for (let run = 0; run < 5; run++) {
-    const g = boot('#eraser'); g.start(); g.godMode(); g.run('eraseMe = function () {};'); g.key('KeyJ');
+    const g = boot('#eraser'); g.start(); g.godMode(); g.run('eraseMe = function () {}; dropCrate = function () {};'); g.key('KeyJ');
     const rows = [];
     g.seconds(60, () => { const r = g.get("boss && boss.kind === 'eraser' && boss.st === 'sweep' ? boss.row : null"); if (r !== null && rows[rows.length - 1] !== r) rows.push(r); });
     ok(rows[0] === 400, 'first sweep row ' + rows[0]);
@@ -395,6 +395,33 @@ test('The Slow One: loaf costs 5 hearts instead of the run', () => {
   g.seconds(5, () => {});
   g.run('{ const s = props.find(p => p.slowOne); player.x = s.x; player.y = s.y; invuln = 0; }'); g.step(2);
   ok(g.get('state') === 'play' && g.get('hp') === 5, 'hp ' + g.get('hp') + ' state ' + g.get('state'));
+});
+
+test('a supply crate parachutes in every 15 kills and can hold two guns', () => {
+  const g = boot(); g.start(); g.godMode(); g.run('spawn = function () {}; PLATS = []; kills = 15;');
+  g.step(2);
+  ok(g.get("pickups.some(k => k.kind === 'crate' && k.chute)"), 'no crate falling');
+  ok(g.get('nextCrateAt') === 30, 'nextCrateAt ' + g.get('nextCrateAt'));
+  g.seconds(7, () => {});
+  ok(g.get("pickups.some(k => k.kind === 'crate' && !k.chute && k.y === G - 10)"), 'crate should land on the floor');
+  g.run("{ const k = pickups.find(k => k.kind === 'crate'); k.what = 'gun'; player.x = k.x; player.y = G; }"); g.step(2);
+  ok(g.get('dual') === true && g.get('pickups.length') === 0, 'crate should give two guns');
+});
+
+test('the rainbow launcher: 6 grenades that rainbow a crowd, then back to the pistol', () => {
+  const g = boot(); g.start(); g.godMode(); g.run('spawn = function () {}; PLATS = []; kills = 15;');
+  g.step(2);
+  g.run("{ const k = pickups.find(k => k.kind === 'crate'); k.what = 'launcher'; k.chute = false; k.y = G - 10; player.x = k.x; player.y = G; }"); g.step(2);
+  ok(g.get('grenades') === 6, 'grenades ' + g.get('grenades'));
+  g.run(`enemies = []; player.x = 200; player.facing = 1;
+    for (const x of [330, 345, 360]) enemies.push({x, y: G, vx: 0, vy: 0, onGround: true, facing: -1, phase: 0, speed: 0, drop: 0, jumpCd: 9});`);
+  const k0 = g.get('kills');
+  g.run('fireGrenade(0);');
+  g.seconds(1, () => {});
+  ok(g.get('kills') - k0 === 3, 'one grenade should rainbow all three, got ' + (g.get('kills') - k0));
+  ok(g.get('grenades') === 5 && g.get('ammo') === 12, 'pistol ammo should be untouched');
+  g.run('for (let i = 0; i < 5; i++) fireGrenade(0);'); g.seconds(2, () => {});
+  ok(g.get('grenades') === 0 && g.get('nades.length') === 0, 'should be out of grenades');
 });
 
 let failed = 0;

@@ -14,9 +14,11 @@ public/
     core.js           constants, canvas, state, the ARENAS and BOSSES registries
     input.js          keyboard, mouse, touch, secret codes, start and game-over screens
     world.js          physics, spawning, effects, damage, kicks, aiming
+    weapons.js        supply crates (every 15 kills) and the rainbow grenade launcher
     bosses.js         boss loop, spawning, knockouts, cutscene camera
     update.js         the per-frame update
     draw.js           drawing and HUD
+    padlayout.js      the Move buttons editor for touch controls
   js/arenas/          one file per arena (shelves, name, boss loop)
   js/bosses/          one file per boss
   js/main.js          picks the arena and starts the game
