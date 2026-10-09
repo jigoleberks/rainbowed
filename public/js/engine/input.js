@@ -104,6 +104,7 @@ cv.addEventListener('contextmenu', e => e.preventDefault());
 document.querySelectorAll('[data-k]').forEach(b => {
   const k = b.dataset.k;
   b.addEventListener('pointerdown', e => {
+    if (document.body && document.body.classList.contains('editing')) return;   // moving the racks, not pressing
     e.preventDefault();
     try { b.setPointerCapture(e.pointerId); } catch (_) {}
     btn[k] = true; b.classList.add('on');

@@ -37,7 +37,7 @@ function updatePlayer(dt) {
     else if (p.jumps > 0) { p.vy = -600; p.vx = -p.facing * 170; p.flipSign = -p.facing; p.jumps = 0; p.spinT = 0.42; jumpQ = 0; }
   }
   jumpQ = Math.max(0, jumpQ - dt);
-  if (keys.down) p.drop = 0.22;
+  if (keys.down || btn.down) p.drop = 0.22;
   p.drop -= dt;
   physics(p, dt, p.drop > 0);
   p.x = arena.wrap ? wrapX(p.x) : clamp(p.x, 12, W - 12);

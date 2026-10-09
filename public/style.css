@@ -47,14 +47,26 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
 .go{font-family:var(--display);font-size:1.15rem;padding:9px 28px;border:3px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:999px;cursor:pointer}
 .go:hover{background:var(--accent);border-color:var(--accent)}
 .go:focus-visible,.pad button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-.pad{display:none;justify-content:space-between;align-items:center;gap:8px;user-select:none;-webkit-user-select:none;touch-action:none}
-.grp{display:flex;gap:8px;align-items:center}
-.grp-act{display:grid;grid-template-columns:auto auto;gap:8px;align-items:center;justify-items:center}
-.pad button{width:clamp(48px,14vw,66px);height:clamp(48px,14vw,66px);border-radius:50%;border:3px solid var(--ink);background:var(--paper);color:var(--ink);font-family:var(--display);font-size:clamp(.8rem,3.4vw,1rem);touch-action:none;padding:0;box-shadow:3px 3px 0 var(--ink)}
+.pad{display:none;justify-content:space-between;align-items:center;gap:8px;user-select:none;-webkit-user-select:none;touch-action:none;--bs:clamp(46px,13vw,58px)}
+/* each rack is a diamond of four round buttons, like a D-pad or the SNES A/B/X/Y */
+.rack{position:relative;flex:none;width:calc(var(--bs) * 2.44);height:calc(var(--bs) * 2.44)}
+.pad button{position:absolute;box-sizing:border-box;width:var(--bs);height:var(--bs);border-radius:50%;border:3px solid var(--ink);background:var(--paper);color:var(--ink);font-family:var(--display);font-size:calc(var(--bs) * .27);touch-action:none;padding:0;box-shadow:3px 3px 0 var(--ink)}
+.rack .n{left:calc(var(--bs) * .72);top:0}
+.rack .w{left:0;top:calc(var(--bs) * .72)}
+.rack .e{left:calc(var(--bs) * 1.44);top:calc(var(--bs) * .72)}
+.rack .s{left:calc(var(--bs) * .72);top:calc(var(--bs) * 1.44)}
+.dpad button{font-size:calc(var(--bs) * .36)}
 .pad button.on{background:var(--ink);color:var(--paper);transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
-.pad .fire{width:clamp(58px,17vw,80px);height:clamp(58px,17vw,80px);background:var(--accent);color:var(--paper);font-size:1.15rem}
+.pad .fire{background:var(--accent);color:var(--paper)}
 .pad .fire.on{background:var(--ink)}
-.pad .small{font-size:clamp(.66rem,2.8vw,.82rem)}
+.pad .small{font-size:calc(var(--bs) * .22)}
+#edit-pad{display:none}
+.pad-editor{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:12px;background:color-mix(in srgb,var(--paper) 80%,transparent)}
+.pad-editor p{margin:0;font-size:.85rem;color:var(--ink)}
+.pad-editor .row{display:flex;gap:10px;align-items:center}
+.pad-editor .row span{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pad-editor #pad-smaller,.pad-editor #pad-bigger{padding:2px 16px;font-size:1.3rem}
+body.editing .rack{outline:3px dashed var(--accent);outline-offset:6px;border-radius:12px;cursor:ns-resize}
 .help{margin:0;font-size:.78rem;line-height:1.55;color:var(--muted);max-width:70ch}
 .help b{color:var(--ink);font-weight:600}
 @media (pointer:coarse){.pad{display:flex}.help-desk{display:none}}
@@ -63,18 +75,14 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
 @media (pointer:coarse) and (orientation:landscape){
   .wrap{max-width:none;min-height:100dvh;display:grid;grid-template-columns:1fr auto 1fr;grid-template-areas:"move stage act";align-items:center;gap:10px;padding-block:6px;padding-left:max(24px,calc(env(safe-area-inset-left,0px) + 12px));padding-right:max(24px,calc(env(safe-area-inset-right,0px) + 12px))}
   .bar,.help{display:none}
-  .stage{grid-area:stage;width:min(calc(100vw - 300px),calc((100dvh - 16px) * 16 / 9));max-width:none;margin:0}
+  .stage{grid-area:stage;max-width:none;margin:0}
   .pad{display:contents}
-  .grp-move{grid-area:move;align-self:start;justify-self:start;padding-top:max(10px,14dvh)}
-  .grp-move button{width:66px;height:66px;font-size:1.05rem}
-  /* right thumb: big Fire up high against the arena frame, Jump and Kick under it, Reload last */
-  .grp-act{grid-area:act;align-self:start;justify-self:start;padding-top:max(8px,9dvh);grid-template-areas:"fire fire" "jump kick" "reload reload"}
-  .grp-act .fire{grid-area:fire;justify-self:start;width:80px;height:80px;font-size:1.1rem}
-  .grp-act [data-k="jump"]{grid-area:jump}
-  .grp-act [data-k="kick"]{grid-area:kick}
-  .grp-act [data-k="reload"]{grid-area:reload}
-  .pad button{width:52px;height:52px;font-size:.85rem}
-  .pad .small{font-size:.68rem}
+  .wrap,.pad{--bs:calc(52px * var(--pad-scale, 1))}
+  .stage{width:min(calc(100vw - var(--bs) * 4.88 - 84px),calc((100dvh - 16px) * 16 / 9))}
+  /* each side's height is set by the Move buttons editor (--pad-left / --pad-right, in % of screen height) */
+  .rack-l{grid-area:move;align-self:start;justify-self:center;margin-top:calc(var(--pad-left, 18) * 1dvh)}
+  .rack-r{grid-area:act;align-self:start;justify-self:center;margin-top:calc(var(--pad-right, 14) * 1dvh)}
+  #overlay.picking #edit-pad{display:inline-block;font-size:.8rem;padding:4px 14px}
 }
 
 /* page reset */
