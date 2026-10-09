@@ -7,6 +7,15 @@ const iniOk = document.getElementById('ini-ok'), iniMsg = document.getElementByI
 const boardEl = document.getElementById('ov-board');
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const BOARD_SIZE = 10;
+// what you hear when the server refuses your initials
+const SCOLDS = [
+  'Degenerate behaviour detected. Try again.',
+  'Grandma saw that. Pick other letters.',
+  'Sophy is disappointed in you.',
+  'The Eraser would like a word.',
+  'The Slow One saw that. He will remember.',
+  'Absolutely not. Other letters, please.',
+];
 let ini = null;        // while entering initials: {letters, at, run, seq}
 let boardSeq = 0;      // bumps every run, so a slow reply from an old run is ignored
 
@@ -78,7 +87,7 @@ function submitInitials() {
     .then(({ok, b}) => {
       if (seq !== boardSeq) return;
       iniOk.disabled = false;
-      if (!ok && b.error === 'blocked') { iniMsg.textContent = 'Nice try. Pick some other letters.'; return; }
+      if (!ok && b.error === 'blocked') { iniMsg.textContent = SCOLDS[Math.floor(Math.random() * SCOLDS.length)]; return; }
       ini = null; iniBox.hidden = true;
       if (!ok) { ovText.hidden = false; overlay.classList.remove('ranked'); return; }
       try { localStorage.setItem('rsb-initials', n); } catch (e) {}
