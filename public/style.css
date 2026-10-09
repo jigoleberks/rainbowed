@@ -65,10 +65,15 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
   .bar,.help{display:none}
   .stage{grid-area:stage;width:min(calc(100vw - 300px),calc((100dvh - 16px) * 16 / 9));max-width:none;margin:0}
   .pad{display:contents}
-  .grp-move{grid-area:move;align-self:center;justify-self:start}
-  .grp-act{grid-area:act;align-self:center;justify-self:end}
+  .grp-move{grid-area:move;align-self:start;justify-self:start;padding-top:max(10px,14dvh)}
+  .grp-move button{width:66px;height:66px;font-size:1.05rem}
+  /* right thumb: big Fire up high against the arena frame, Jump and Kick under it, Reload last */
+  .grp-act{grid-area:act;align-self:start;justify-self:start;padding-top:max(8px,9dvh);grid-template-areas:"fire fire" "jump kick" "reload reload"}
+  .grp-act .fire{grid-area:fire;justify-self:start;width:80px;height:80px;font-size:1.1rem}
+  .grp-act [data-k="jump"]{grid-area:jump}
+  .grp-act [data-k="kick"]{grid-area:kick}
+  .grp-act [data-k="reload"]{grid-area:reload}
   .pad button{width:52px;height:52px;font-size:.85rem}
-  .pad .fire{width:62px;height:62px;font-size:1rem}
   .pad .small{font-size:.68rem}
 }
 
