@@ -13,6 +13,6 @@ html = re.sub(r'<script src="([^"]+)"></script>\n?', lambda m: '<script>\n' + (r
 if '--fragment' in sys.argv:
     head = re.search(r'<head>(.*?)</head>', html, re.S).group(1)
     body = re.search(r'<body>(.*?)</body>', html, re.S).group(1)
-    head = re.sub(r'<meta[^>]*>\n?|<link rel="icon"[^>]*>\n?', '', head)
+    head = re.sub(r'<meta[^>]*>\n?|<link rel="(?:icon|manifest|apple-touch-icon)"[^>]*>\n?', '', head)
     html = head.strip() + '\n' + body.strip() + '\n'
 pathlib.Path(sys.argv[1]).write_text(html)
