@@ -27,8 +27,8 @@ There is no winning. Every run ends with "You got rainbowed."
   the arena's own sub-boss at 50, and its joke finale at 100.
   - Arena 1, Page One: Sensei (50), The Eraser (100). Built.
   - Arena 2, Grandma's House: Dust Bunny (50), La Chancla (100), plus Sophy. Built.
-  - Arena 3, The Long Hallway: Ink Blob (50), The Slow One (100). The darker arena.
-- The Long Hallway (arena 3), agreed plan:
+  - Arena 3, The Long Hallway: Ink Blob (50), The Slow One (100). The darker arena. Built.
+- The Long Hallway (arena 3), built:
   - Dim hotel hallway in ink: identical numbered doors, runner carpet, flickering
     fluorescent tubes with light cones, darker paper. Shelves: vending machine,
     luggage cart, radiators, overhead pipes.

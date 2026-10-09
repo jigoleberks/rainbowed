@@ -6,6 +6,10 @@ const RAINBOW_TIME = 4.5;
 // Registries. Each file in js/arenas/ adds one arena, each file in js/bosses/ one boss.
 const ARENAS = {}, BOSSES = {};
 let arena = null, PLATS = [];
+// Looping arenas (arena.wrap): the left and right edges join up.
+const wrapX = x => arena && arena.wrap ? ((x % W) + W) % W : x;
+const wrapDx = dx => arena && arena.wrap ? ((dx % W) + W * 1.5) % W - W / 2 : dx;
+
 function setArena(id) {
   arena = ARENAS[id];
   PLATS = arena.plats.map(p => ({...p, gone: 0}));

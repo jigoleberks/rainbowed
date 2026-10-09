@@ -18,7 +18,10 @@ function updatePlayer(dt) {
   } else {
     // weaker air control mid-backflip so the backward nudge carries
     const ctl = p.onGround ? 14 : (p.spinT > 0 ? 2 : 5);
-    p.vx += (dir * 270 - p.vx) * Math.min(1, dt * ctl);
+    // props can slow you down where you stand (ink puddles)
+    let spd = 1;
+    for (const pr of props) if (pr.slowAt) spd = Math.min(spd, pr.slowAt(p.x, p.y));
+    p.vx += (dir * 270 * spd - p.vx) * Math.min(1, dt * ctl);
   }
 
   if (jumpQ > 0 && p.kickT <= 0) {
@@ -37,10 +40,10 @@ function updatePlayer(dt) {
   if (keys.down) p.drop = 0.22;
   p.drop -= dt;
   physics(p, dt, p.drop > 0);
-  p.x = clamp(p.x, 12, W - 12);
+  p.x = arena.wrap ? wrapX(p.x) : clamp(p.x, 12, W - 12);
   if (p.onGround) { p.jumps = 2; p.airKick = true; }
   p.wallT -= dt;
-  if (!p.onGround && (p.x <= 18 || p.x >= W - 18)) { p.wallT = 0.12; p.wallSide = p.x < W / 2 ? -1 : 1; }
+  if (!arena.wrap && !p.onGround && (p.x <= 18 || p.x >= W - 18)) { p.wallT = 0.12; p.wallSide = p.x < W / 2 ? -1 : 1; }
   p.phase += dt * Math.abs(p.vx) * 0.045;
   if (p.spinT > 0) { p.spinT -= dt; p.spin = (1 - Math.max(0, p.spinT) / 0.42) * Math.PI * 2; } else p.spin = 0;
   p.recoil = Math.max(0, p.recoil - dt * 10);
@@ -100,7 +103,7 @@ function updatePlayer(dt) {
 function updateEnemies(dt) {
   for (const e of enemies) {
     e.drop -= dt; e.jumpCd -= dt;
-    const dx = player.x - e.x, dy = player.y - e.y;
+    const dx = wrapDx(player.x - e.x), dy = player.y - e.y;
     const chasing = state === 'play';
     if (e.launched) {
       e.spin += dt * 18; e.launchT -= dt;
@@ -114,7 +117,8 @@ function updateEnemies(dt) {
       if (lz) {
         hitBoss(b, e.x, e.y - 40, e.vx, 0, bossDamage(b, lz, 'launch')); e.launchT = 0;
       }
-      if (e.x < 8 || e.x > W - 8) e.launchT = 0;
+      if (arena.wrap) e.x = wrapX(e.x);
+      else if (e.x < 8 || e.x > W - 8) e.launchT = 0;
       if (e.launchT <= 0) {
         kill(e, e.vx, -300, false);
         if (e.chain >= 2) texts.push({x: e.x, y: e.y - 110, s: 'CHAIN x' + e.chain, life: 0.9, big:false});
@@ -135,6 +139,7 @@ function updateEnemies(dt) {
         else if (dy > 40 && e.y < G) { e.drop = 0.25; e.jumpCd = 0.6; }
       }
       physics(e, dt, e.drop > 0);
+      if (arena.wrap) e.x = wrapX(e.x);
       e.phase += dt * Math.abs(e.vx) * 0.05;
     }
     if (chasing && rainbowT > 0 && Math.abs(dx) < 24 && Math.abs(dy) < 50) { kill(e, -dx * 8 || 200, -300, false); continue; }
@@ -164,6 +169,7 @@ function updateBullets(dt) {
     b.life -= dt;
     for (let s = 0; s < 3 && b.life > 0; s++) {
       b.x += b.vx * dt / 3; b.y += b.vy * dt / 3;
+      if (arena.wrap) b.x = wrapX(b.x);
       for (const e of enemies) {
         if (!e.dead && b.x > e.x - 10 && b.x < e.x + 10 && b.y > e.y - 78 && b.y < e.y + 2) {
           kill(e, b.vx, b.vy, b.y < e.y - 58); shotsHit++;
@@ -175,8 +181,13 @@ function updateBullets(dt) {
         hitBoss(bs, b.x, b.y, b.vx, b.vy, bossDamage(bs, zone, 'bullet')); shotsHit++;
         b.life = 0;
       }
+      // props that can be shot (the Slow One)
+      if (b.life > 0) for (const pr of props) {
+        const z = pr.target ? pr.zone(b.x, b.y, 0) : 0;
+        if (z) { pr.hit(z, 'bullet', b.x, b.y, b.vx, b.vy); shotsHit++; b.life = 0; break; }
+      }
     }
-    if (b.y > G || b.x < -30 || b.x > W + 30 || b.y < -30) {
+    if (b.y > G || (!arena.wrap && (b.x < -30 || b.x > W + 30)) || b.y < -30) {
       if (b.y > G && b.life > 0) for (let i = 0; i < 3; i++) parts.push({x:b.x, y:G - 1, vx:rand(-60, 60), vy:rand(-120, -40), h:0, r:1.3, life:0.3, spark:true, ink:true});
       b.life = 0;
     }
@@ -185,6 +196,7 @@ function updateBullets(dt) {
 }
 
 function splat(x, y, h, r) {
+  if (arena && arena.onSplat) arena.onSplat(x, y, h, r);
   sctx.fillStyle = `hsl(${h} 85% 58% / 0.9)`;
   sctx.beginPath();
   sctx.ellipse(x, y - 0.5, r * rand(1.4, 2.4), r * 0.55, 0, 0, Math.PI * 2);

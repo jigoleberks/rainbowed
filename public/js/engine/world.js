@@ -155,12 +155,12 @@ function kickHit(p) {
       return;
     }
   }
+  const bounce = () => { p.kickT = 0; p.pose = null; p.tilt = 0; p.vx = -f * 320; p.vy = -380; p.airKick = true; shake = Math.max(shake, 8); };
   const b = boss, zone = bossZone(b, fx, fy, 10);
-  if (zone) {
-    hitBoss(b, fx, fy, f, 0, bossDamage(b, zone, 'kick'));
-    p.kickT = 0; p.pose = null; p.tilt = 0;
-    p.vx = -f * 320; p.vy = -380; p.airKick = true;
-    shake = Math.max(shake, 8);
+  if (zone) { hitBoss(b, fx, fy, f, 0, bossDamage(b, zone, 'kick')); bounce(); return; }
+  for (const pr of props) {
+    const z = pr.target ? pr.zone(fx, fy, 10) : 0;
+    if (z) { pr.hit(z, 'kick', fx, fy, f, 0); bounce(); return; }
   }
 }
 
@@ -176,8 +176,9 @@ function aimTarget() {
   let t = null, bd = Infinity;
   for (const e of enemies) {
     if (e.x < -5 || e.x > W + 5) continue;
-    const d = Math.hypot(e.x - player.x, (e.y - player.y) * 1.3);
-    if (d < bd) { bd = d; t = {x: e.x, y: e.y - 46}; }
+    const ex = player.x + wrapDx(e.x - player.x);
+    const d = Math.hypot(ex - player.x, (e.y - player.y) * 1.3);
+    if (d < bd) { bd = d; t = {x: ex, y: e.y - 46}; }
   }
   if (boss && BOSSES[boss.kind].aimPoint) {
     const a = BOSSES[boss.kind].aimPoint(boss);

@@ -16,7 +16,7 @@ function boot(hash = '') {
   const ctx2d = () => new Proxy({}, {
     get: (t, k) => {
       if (k === 'measureText') return s => ({width: String(s).length * 10});
-      if (k === 'createLinearGradient') return () => ({addColorStop() {}});
+      if (k === 'createLinearGradient' || k === 'createRadialGradient') return () => ({addColorStop() {}});
       if (k === 'fillText') return s => drawn.push(String(s));
       return k in t ? t[k] : () => {};
     },
@@ -327,6 +327,74 @@ test("Sophy: every kind of SOPHY TIME works, including the chandelier", () => {
   g.seconds(8, () => {});
   ok(g.saw(/^CHANDELIERED/), 'chandelier never fell');
   ok(g.get('kills') > k0, 'chandelier hit nobody');
+});
+
+/* ---------- The Long Hallway ---------- */
+
+test('Long Hallway: loads, loops at the edges, no wall flips, stickmen come out of doors', () => {
+  const g = boot(); g.run("pickArena('long-hallway')"); g.godMode();
+  ok(g.get('arena.wrap') === true && g.get("arena.bossLoop.join()") === 'giant,inkblob,giant,slowone', 'arena setup');
+  g.run('player.x = 790; player.vx = 300;'); g.step(5);
+  ok(g.get('player.x') < 100, 'walking off the right edge should come back on the left, x=' + g.get('player.x'));
+  g.run('player.x = 5; player.y = 300; player.vy = 0; player.onGround = false; player.wallT = 0;'); g.step(1);
+  ok(!(g.get('player.wallT') > 0), 'no wall flips in a looping arena');
+  let opened = false;
+  g.seconds(12, () => { if (g.get('arena.doors.some(d => d.open > 0)')) opened = true; });
+  ok(opened && g.get('enemies.length') > 0, 'no door opened');
+});
+
+test('Long Hallway: rainbow splats glow, and bullets loop around too', () => {
+  const g = boot(); g.run("pickArena('long-hallway')"); g.godMode();
+  g.run('spawn = function () {}; enemies = [];');
+  g.run('bullets.push({x: 795, y: 300, vx: 1150, vy: 0, life: 0.8})'); g.step(2);
+  ok(g.get('bullets.length') === 1 && g.get('bullets[0].x') < 100, 'bullet should wrap, not vanish');
+  let calls = 0; g.run('const _o = arena.onSplat; arena.onSplat = function (...a) { globalThis.__glow = (globalThis.__glow || 0) + 1; return _o.apply(this, a); }');
+  g.run("burst(400, 300, 0, -100, 40)"); g.seconds(2, () => {});
+  ok(g.get('globalThis.__glow') > 5, 'splats did not glow');
+});
+
+test('Ink Blob: swallows lights, leaves slowing puddles, splits nothing, and the lights come back on', () => {
+  const g = boot('#inkblob'); g.start(); g.godMode(); g.type('sophy');
+  ok(g.get('arena.id') === 'long-hallway', 'inkblob link should switch to the hallway');
+  g.run('kills = 50;');
+  let dark = 0, puddle = false;
+  g.seconds(14, () => {
+    dark = Math.max(dark, g.get('arena.lights.filter(l => l.dead).length'));
+    if (g.get('props.some(p => p.slowAt)')) puddle = true;
+  });
+  ok(g.get('boss && boss.kind') === 'inkblob', 'no ink blob');
+  ok(dark >= 1, 'never swallowed a light');
+  ok(puddle, 'no ink puddles');
+  g.run('{ const pd = props.find(p => p.slowAt); player.x = pd.x; player.y = pd.y; }');
+  ok(g.get('props.filter(p => p.slowAt).some(p => p.slowAt(player.x, player.y) < 1)'), 'puddle does not slow you');
+  g.key('KeyJ'); g.seconds(60, () => {});
+  ok(g.saw(/^LIGHTS BACK ON$/), 'never beat the blob');
+  ok(g.get('arena.lights.every(l => !l.dead)'), 'lights did not come back on');
+});
+
+test('The Slow One: steps out of a door, stays forever while the loop carries on, and touching him ends the run', () => {
+  const g = boot('#slowone'); g.start(); g.godMode(); g.run('slowOneTouch = function () {};'); g.type('sophy'); g.key('KeyJ');
+  g.run('kills = 100;');
+  g.seconds(8, () => {});
+  ok(g.get('props.filter(p => p.slowOne).length') === 1, 'he should be out and walking');
+  ok(g.get('boss') === null && g.get('nextBossAt') === 125, 'boss slot should free up, next boss at 125');
+  const h0 = g.get('props.find(p => p.slowOne).health');
+  g.seconds(5, () => {});
+  ok(g.get('props.find(p => p.slowOne).health') < h0, 'shooting him does nothing');
+  g.run('kills = 125;'); g.seconds(6, () => {});
+  ok(g.get('boss && boss.kind') === 'giant' && g.get('props.some(p => p.slowOne)'), 'the Giant should come while he is still here');
+  // touching him: no god mode for this part
+  const t = boot('#slowone'); t.start(); t.run('kills = 100; spawn = function () {}; enemies = [];');
+  t.seconds(5, () => {});
+  t.run('{ const s = props.find(p => p.slowOne); player.x = s.x; player.y = s.y; invuln = 0; }'); t.step(2);
+  ok(t.get('deathTitle') === 'He was always going to get you.', 'deathTitle ' + t.get('deathTitle'));
+});
+
+test('The Slow One: loaf costs 5 hearts instead of the run', () => {
+  const g = boot('#slowone'); g.start(); g.type('loaf'); g.run('kills = 100; spawn = function () {}; enemies = [];');
+  g.seconds(5, () => {});
+  g.run('{ const s = props.find(p => p.slowOne); player.x = s.x; player.y = s.y; invuln = 0; }'); g.step(2);
+  ok(g.get('state') === 'play' && g.get('hp') === 5, 'hp ' + g.get('hp') + ' state ' + g.get('state'));
 });
 
 let failed = 0;

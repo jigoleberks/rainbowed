@@ -361,8 +361,13 @@ function draw() {
     ctx.fillStyle = PAPER; ctx.beginPath(); ctx.arc(k.x, k.y, r - 3, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = INK; ctx.font = '14px "Permanent Marker", cursive'; ctx.textAlign = 'center'; ctx.fillText('\u2605', k.x, k.y + 5);
   }
-  for (const e of enemies) drawStick(e, 'enemy');
-  if (!player.dead && !(state === 'play' && invuln > 0 && !cine && Math.floor(clock * 18) % 2)) drawStick(player, 'player');
+  // in a looping arena, anyone at an edge also shows up at the other edge
+  const drawWrapped = (e, kind) => {
+    drawStick(e, kind);
+    if (arena.wrap && (e.x < 30 || e.x > W - 30)) { const x = e.x; e.x = x < 30 ? x + W : x - W; drawStick(e, kind); e.x = x; }
+  };
+  for (const e of enemies) drawWrapped(e, 'enemy');
+  if (!player.dead && !(state === 'play' && invuln > 0 && !cine && Math.floor(clock * 18) % 2)) drawWrapped(player, 'player');
   for (const pr of props) if (pr.front && pr.draw) pr.draw();
 
   ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
@@ -374,6 +379,10 @@ function draw() {
     ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
   }
   ctx.globalAlpha = 1;
+
+  // arenas can draw over the action (darkness and light); some bosses glint through it
+  if (arena.drawOver) arena.drawOver();
+  if (boss && BOSSES[boss.kind].drawLit) BOSSES[boss.kind].drawLit(boss);
 
   ctx.textAlign = 'center';
   for (const t of texts) {
