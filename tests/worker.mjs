@@ -42,7 +42,8 @@ await test('initials: three letters, lowercase is fixed, rude ones refused', asy
   ok((await run('xyz', 60000)).body.top[0].n === 'XYZ', 'uppercased');
   ok((await run('AB', 60000)).status === 400, 'two letters');
   ok((await run('A1C', 60000)).status === 400, 'digit');
-  ok((await run('ASS', 60000)).body.error === 'blocked', 'blocked');
+  ok((await run('KKK', 60000)).body.error === 'blocked', 'blocked');
+  ok((await run('ASS', 60000)).status === 200, 'ASS is allowed');
 });
 await test('made-up scores are refused', async () => {
   ok(!plausible({score: 999999, kills: 3, time: 20}), 'huge score, few kills');

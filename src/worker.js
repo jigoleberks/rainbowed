@@ -12,8 +12,8 @@
 const ARENAS = ['page-one', 'grandmas-house', 'long-hallway'];
 const SIZE = 10;
 // three-letter words that shouldn't go on the board
-const BLOCKED = new Set(('ASS FUK FUC FCK FUQ FKU CUM SEX TIT TTS DIK DIC DIX COK COC KOK CNT KNT JIZ JZZ ' +
-  'FAG FGT NIG NGR NGA KKK KYS SUK SUC PUS PIS POO WTF STD VAG HOE HOR XXX RAP RPE NAZ SHT').split(' '));
+const BLOCKED = new Set(('FUK FUC FCK FUQ FKU CUM SEX TIT TTS DIK DIC DIX COK COC KOK CNT KNT JIZ JZZ ' +
+  'FAG FGT NIG NGR NGA KKK KYS SUK SUC PUS PIS STD VAG HOE HOR XXX RAP RPE NAZ SHT').split(' '));
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), {
   status, headers: {'content-type': 'application/json', 'cache-control': 'no-store'},
