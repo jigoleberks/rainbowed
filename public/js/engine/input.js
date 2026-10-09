@@ -131,7 +131,7 @@ function showPicker() {
   ovArena.textContent = 'Pick an arena';
   if (PICK_TITLE !== undefined) ovTitle.innerHTML = PICK_TITLE;
   ovText.textContent = PICK_TEXT;
-  ovScore.hidden = true; ovActions.hidden = true; arenaList.hidden = false;
+  ovScore.hidden = true; ovStats.hidden = true; ovActions.hidden = true; arenaList.hidden = false;
   arenaList.textContent = '';
   const cards = Object.values(ARENAS).map(a => ({...a, ready: true})).concat(COMING_SOON)
     .sort((a, b) => a.number - b.number);
@@ -175,6 +175,12 @@ function start(skipTo) {
   codeForm.hidden = true;
   overlay.classList.remove('picking');
 }
+// time survived and accuracy, for the game-over screen
+function runStats() {
+  const t = Math.floor(runTime), time = Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0');
+  const acc = shotsFired ? Math.round(shotsHit / shotsFired * 100) + '%' : '\u2014';
+  return [['Survived', time], ['Accuracy', acc], ['Shots', shotsHit + '/' + shotsFired]];
+}
 function showOver() {
   state = 'over';
   if (!runCheated && score > best) { best = score; try { localStorage.setItem(bestKey(), String(best)); } catch (e) {} }
@@ -184,6 +190,13 @@ function showOver() {
   arenaList.hidden = true; ovActions.hidden = false;
   ovScore.hidden = false;
   ovScore.textContent = pad6(score);
+  ovStats.hidden = false;
+  ovStats.textContent = '';
+  for (const [label, value] of runStats()) {
+    const s = document.createElement('span'); s.textContent = label + ' ';
+    const v = document.createElement('b'); v.textContent = value; s.appendChild(v);
+    ovStats.appendChild(s);
+  }
   let msg = kills + (kills === 1 ? ' stickman' : ' stickmen') + ' turned into rainbows';
   if (bossesBeaten) msg += ', ' + bossesBeaten + (bossesBeaten === 1 ? ' boss' : ' bosses') + ' beaten';
   ovText.textContent = msg + '. Best run: ' + pad6(best) + '.' + (runCheated ? ' A cheat code was on, so this run is not saved.' : '');

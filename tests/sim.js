@@ -172,6 +172,18 @@ test('hidden code box: five taps reveal it; codes and boss names work; typing in
   ok(h.get('keys.down') !== true, 'typing in the code box moved the player');
 });
 
+test('game over shows time survived and accuracy', () => {
+  const g = boot(); g.start(); g.key('KeyJ');
+  g.seconds(20, () => {});
+  const fired = g.get('shotsFired'), hit = g.get('shotsHit');
+  ok(fired > 50 && hit > 0 && hit <= fired, 'fired ' + fired + ' hit ' + hit);
+  ok(Math.abs(g.get('runTime') - 20) < 0.5, 'runTime ' + g.get('runTime'));
+  const stats = g.get('runStats()');
+  ok(stats[0][1] === '0:20' && /^\d+%$/.test(stats[1][1]), JSON.stringify(stats));
+  g.run('showOver()');
+  ok(g.el('ov-stats').hidden === false && g.el('ov-stats').children.length === 3, 'stats not shown on game over');
+});
+
 test('sophy code: bottomless magazine and no saved score', () => {
   const g = boot(); g.start(); g.type('sophy'); g.key('KeyJ'); g.step(240);
   ok(g.get('ammo') === 12 && g.get('reloadT') === 0, 'ammo ' + g.get('ammo'));

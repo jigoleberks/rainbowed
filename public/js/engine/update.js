@@ -91,6 +91,7 @@ function updatePlayer(dt) {
     const off = p.side * 4;
     const sx = p.x + Math.cos(a) * 32 - Math.sin(a) * off, sy = p.y - 52 + Math.sin(a) * 32 + Math.cos(a) * off;
     bullets.push({x:sx, y:sy, vx:Math.cos(a) * 1150, vy:Math.sin(a) * 1150, life:0.8});
+    shotsFired++;
     flash = 0.05; p.recoil = 1;
     if (!reduceMotion) shake = Math.max(shake, 1.5);
   }
@@ -165,13 +166,13 @@ function updateBullets(dt) {
       b.x += b.vx * dt / 3; b.y += b.vy * dt / 3;
       for (const e of enemies) {
         if (!e.dead && b.x > e.x - 10 && b.x < e.x + 10 && b.y > e.y - 78 && b.y < e.y + 2) {
-          kill(e, b.vx, b.vy, b.y < e.y - 58);
+          kill(e, b.vx, b.vy, b.y < e.y - 58); shotsHit++;
           b.life = 0; break;
         }
       }
       const bs = boss, zone = b.life > 0 ? bossZone(bs, b.x, b.y, 0) : 0;
       if (zone) {
-        hitBoss(bs, b.x, b.y, b.vx, b.vy, bossDamage(bs, zone, 'bullet'));
+        hitBoss(bs, b.x, b.y, b.vx, b.vy, bossDamage(bs, zone, 'bullet')); shotsHit++;
         b.life = 0;
       }
     }
@@ -243,6 +244,7 @@ function updateFx(dt) {
 
 function update(rdt) {
   clock += rdt;
+  if (state === 'play') runTime += rdt;
   shake = reduceMotion ? 0 : Math.max(0, shake - rdt * 32);
   flash = Math.max(0, flash - rdt);
   if (banner) { banner.life -= rdt; if (banner.life <= 0) banner = null; }

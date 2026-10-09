@@ -28,6 +28,7 @@ const goBtn = document.getElementById('go');
 const arenaList = document.getElementById('arena-list');
 const ovActions = document.getElementById('ov-actions');
 const ovArena = document.getElementById('ov-arena');
+const ovStats = document.getElementById('ov-stats');
 const bestEl = document.getElementById('best');
 
 let best = 0;
@@ -61,6 +62,8 @@ const maxHp = () => cheatLoaf ? 10 : 5;
 let score, kills, combo, comboT, slow, shake, spawnT, hp, invuln, fireCd, flash, overT, clock = 0;
 let boss, bossWarn, nextBossAt, bossCount, bossesBeaten, cine, banner, geyser;
 let pickups = [], rainbowT = 0, deathTitle = null, props = [];
+// end-of-run stats
+let runTime = 0, shotsFired = 0, shotsHit = 0;
 const cam = {x: W / 2, y: H / 2, z: 1};
 
 function reset() {
@@ -71,6 +74,7 @@ function reset() {
   hp = maxHp(); invuln = 1; fireCd = 0; dual = false; ammo = MAG; reloadT = 0; runCheated = cheatSophy || cheatLoaf; flash = 0; overT = 0;
   boss = null; bossWarn = 0; nextBossAt = 25; bossCount = 0; bossesBeaten = 0; cine = null; banner = null; geyser = null;
   pickups = []; rainbowT = 0; deathTitle = null;
+  runTime = 0; shotsFired = 0; shotsHit = 0;
   // props: arena extras like Sophy and knockable objects, each {update(dt), draw(), front, done}
   props = [];
   if (arena && arena.setup) arena.setup();
