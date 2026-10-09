@@ -28,6 +28,18 @@ There is no winning. Every run ends with "You got rainbowed."
   - Arena 1, Page One: Sensei (50), The Eraser (100). Built.
   - Arena 2, Grandma's House: Dust Bunny (50), La Chancla (100), plus Sophy. Built.
   - Arena 3, The Long Hallway: Ink Blob (50), The Slow One (100). The darker arena.
+- The Long Hallway (arena 3), agreed plan:
+  - Dim hotel hallway in ink: identical numbered doors, runner carpet, flickering
+    fluorescent tubes with light cones, darker paper. Shelves: vending machine,
+    luggage cart, radiators, overhead pipes.
+  - The hallway loops: walk off one side and come back on the other. No walls, so no
+    wall flips here; the first arena that changes the rules, not just the scenery.
+  - Stickmen come out of the doors (any door can creak open).
+  - Rainbow splats glow faintly: the more mess you make, the more you can see.
+  - Ink Blob (50) swallows the lights one by one; the hallway goes dark.
+  - The Slow One (100) never leaves. No timer: he keeps strolling after you for the
+    rest of the run while the loop continues around him. 10,000 health, touch = death.
+    Death message idea: "He was always going to get you."
 - Dust Bunny: a huge dust ball rolls out from under the couch. Every hit splits it
   into smaller, faster dust bunnies until the floor is a fluffy swarm.
 - Ink Blob: spreads instead of splitting. Oozes along the floor leaving ink puddles
