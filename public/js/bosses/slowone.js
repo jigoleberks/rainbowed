@@ -20,6 +20,16 @@ function slowOneTouch(s) {
   limbs(player, 0, -200);
 }
 
+// his one bit of colour: a red bowler hat
+function drawSlowHat(x, y, f) {
+  const hx = x + f * 2, top = y - 76;
+  ctx.fillStyle = '#d63b3b'; ctx.strokeStyle = INK; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(hx, top, 15, 3.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(hx - 9, top); ctx.quadraticCurveTo(hx - 9, top - 15, hx, top - 15); ctx.quadraticCurveTo(hx + 9, top - 15, hx + 9, top);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#8f2424'; ctx.fillRect(hx - 9, top - 4, 18, 3);
+}
+
 // he lives as a prop, not in the boss slot, so the next bosses can still come
 function makeSlowOne(x, y) {
   const s = {x, y, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, scale: 1, health: SLOW_HP, maxHealth: SLOW_HP,
@@ -76,11 +86,12 @@ function makeSlowOne(x, y) {
     for (const x of [s.x, s.x - W, s.x + W]) {
       if (x < -30 || x > W + 30) continue;
       drawStick({...s, x}, 'enemy');
+      drawSlowHat(x, s.y, s.facing);
       // a small, calm smile, and his health, which barely ever moves
       ctx.strokeStyle = s.hitT > 0 ? ACCENT : INK; ctx.lineWidth = 1.6;
       ctx.beginPath(); ctx.arc(x + s.facing * 4, s.y - 66, 3.2, 0.25, Math.PI - 0.25); ctx.stroke();
       ctx.fillStyle = 'rgba(21,22,26,0.55)'; ctx.font = '600 9px "IBM Plex Mono", monospace'; ctx.textAlign = 'center';
-      ctx.fillText(Math.max(0, Math.ceil(s.health)).toLocaleString('en-US'), x, s.y - 86);
+      ctx.fillText(Math.max(0, Math.ceil(s.health)).toLocaleString('en-US'), x, s.y - 98);
     }
   };
   return s;
@@ -108,5 +119,6 @@ BOSSES.slowone = {
   },
   draw(b) {
     drawStick({...b, vx: b.t > 1.2 ? 0 : SLOW_SPEED, onGround: true}, 'enemy');
+    drawSlowHat(b.x, b.y, b.facing);
   },
 };
