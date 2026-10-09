@@ -36,13 +36,15 @@
   </div>
 
   <div class="pad" id="pad">
-    <div class="grp">
+    <div class="grp grp-move">
       <button data-k="left" type="button" aria-label="Move left">◀</button>
       <button data-k="right" type="button" aria-label="Move right">▶</button>
     </div>
-    <div class="grp">
-      <button data-k="jump" type="button">Jump</button>
+    <!-- 2x2: Fire sits in the bottom corner under the right thumb -->
+    <div class="grp grp-act">
+      <button data-k="reload" class="small" type="button">Reload</button>
       <button data-k="kick" type="button">Kick</button>
+      <button data-k="jump" type="button">Jump</button>
       <button data-k="fire" class="fire" type="button">Fire</button>
     </div>
   </div>

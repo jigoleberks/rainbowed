@@ -146,7 +146,7 @@ test('right click kicks, alone and while holding fire', () => {
 });
 
 test('wall flip pushes you away from the wall', () => {
-  const g = boot(); g.start();
+  const g = boot(); g.start(); g.godMode(); g.run('spawn = function () {}; enemies = [];');
   g.key('KeyA'); g.step(130); g.tap('KeyW'); g.step(10); g.tap('KeyW'); g.step(3); g.key('KeyA', false);
   ok(g.get('player.vx') > 250, 'vx ' + g.get('player.vx'));
 });
@@ -242,7 +242,8 @@ test("La Chancla: survive and her show comes on", () => {
 test("La Chancla: her slippers rainbow stickmen, and can chancla you", () => {
   const g = boot('#chancla'); g.start();
   g.seconds(3, () => {});
-  g.run('enemies = []; kills = 100; hp = 1; invuln = 0;');
+  // no furniture, so nothing can shelter the player from the slippers
+  g.run('enemies = []; kills = 100; hp = 1; invuln = 0; PLATS = [];');
   for (let i = 0; i < 40 * 60 && g.get('state') === 'play'; i++) { g.run('enemies = []'); g.step(1); }
   ok(g.get('deathTitle') === "You got chancla'd.", 'death title ' + g.get('deathTitle'));
   const h = boot('#chancla'); h.start(); h.godMode();

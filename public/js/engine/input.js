@@ -77,6 +77,7 @@ document.querySelectorAll('[data-k]').forEach(b => {
     try { b.setPointerCapture(e.pointerId); } catch (_) {}
     btn[k] = true; b.classList.add('on');
     if (k === 'jump') jumpQ = 0.12;
+    if (k === 'reload' && state === 'play') startReload();
     if (k === 'kick') kickQ = 0.12;
   });
   const up = () => { btn[k] = false; b.classList.remove('on'); };
