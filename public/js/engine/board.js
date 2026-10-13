@@ -18,6 +18,7 @@ const SCOLDS = [
 ];
 let ini = null;        // while entering initials: {letters, at, run, seq}
 let boardSeq = 0;      // bumps every run, so a slow reply from an old run is ignored
+let lastRank = 0;      // your place on the board this run, for the share text
 
 const online = () => typeof fetch === 'function' && typeof location !== 'undefined' && /^https?:$/.test(location.protocol);
 function api(path, opts) {
@@ -30,7 +31,7 @@ function savedInitials() {
 }
 
 function hideBoard() {
-  boardSeq++; ini = null;
+  boardSeq++; ini = null; lastRank = 0;
   iniBox.hidden = true; boardEl.hidden = true;
   overlay.classList.remove('ranked');
 }
@@ -127,6 +128,7 @@ function showBoard(top, myId) {
     }
     boardEl.appendChild(li);
   });
+  lastRank = myId ? top.findIndex(e => e.id === myId) + 1 : 0;
   ovText.hidden = true; boardEl.hidden = false; overlay.classList.add('ranked');
 }
 
@@ -151,3 +153,25 @@ function pickerTops() {
     }
   }).catch(() => {});
 }
+
+// ---------- sharing a run ----------
+// On a phone this opens the share sheet (Bluesky, Messages, Discord...); elsewhere it copies the text.
+const shareBtn = document.getElementById('share');
+function shareText() {
+  const pts = score.toLocaleString('en-US');
+  const where = (arena.id === 'page-one' ? 'on ' : arena.id === 'grandmas-house' ? 'at ' : 'in ') + arena.name;
+  let line;
+  if (deathTitle === "You got chancla'd.") line = `I got chancla'd ${where} with ${pts} points.`;
+  else if (deathTitle === 'You got erased.') line = `I got erased ${where} with ${pts} points.`;
+  else if (deathTitle === 'He was always going to get you.') line = `He was always going to get me. ${pts} points ${where}.`;
+  else line = `I got rainbowed ${where} with ${pts} points.`;
+  if (lastRank) line += ` That's #${lastRank} on the board.`;
+  return line + ' Your turn: https://rainbowed.ca';
+}
+shareBtn.addEventListener('click', async () => {
+  const text = shareText();
+  if (navigator.share) { try { await navigator.share({text}); } catch (e) {} return; }
+  try { await navigator.clipboard.writeText(text); shareBtn.textContent = 'Copied!'; }
+  catch (e) { window.open('https://bsky.app/intent/compose?text=' + encodeURIComponent(text), '_blank', 'noopener'); }
+  setTimeout(() => { shareBtn.textContent = 'Share'; }, 1800);
+});

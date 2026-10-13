@@ -30,6 +30,8 @@ tests/sim.js          headless gameplay tests
 tests/worker.mjs      leaderboard Worker tests
 tools/bundle.py       bundles everything into one HTML file (previews, offline play)
 IDEAS.md              what's next
+public/og.png         the link-preview image (Bluesky, Discord, iMessage...)
+public/robots.txt, sitemap.xml   for search engines
 ```
 
 ## Adding an arena

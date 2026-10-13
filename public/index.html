@@ -10,8 +10,26 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Rainbowed">
-<meta name="description" content="A Flash-era stickman shooter where every enemy bursts into rainbows.">
-<title>Rainbow Stick Brawl</title>
+<title>Rainbowed: Rainbow Stick Brawl, a free stickman shooter</title>
+<meta name="description" content="Rainbowed is a free stickman shooter in the spirit of the old Flash games: every stickman you hit bursts into rainbows. Play in your browser on a phone or computer, no download, no ads.">
+<link rel="canonical" href="https://rainbowed.ca/">
+<!-- link previews (Bluesky, Discord, iMessage, Facebook...) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Rainbowed">
+<meta property="og:title" content="Rainbowed: Rainbow Stick Brawl">
+<meta property="og:description" content="A free stickman shooter where every enemy bursts into rainbows. Play it in your browser, no download.">
+<meta property="og:url" content="https://rainbowed.ca/">
+<meta property="og:image" content="https://rainbowed.ca/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A stickman fires a rainbow grenade into a crowd while a supply crate parachutes in and RAINBOW TIME flashes across the screen.">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"Rainbowed","alternateName":"Rainbow Stick Brawl","url":"https://rainbowed.ca/","image":"https://rainbowed.ca/og.png",
+ "description":"A free stickman shooter in the spirit of the old Flash games. Every stickman you hit bursts into rainbows.",
+ "genre":["Action","Shooter"],"gamePlatform":"Web browser","applicationCategory":"Game","operatingSystem":"Any",
+ "offers":{"@type":"Offer","price":"0","priceCurrency":"CAD"}}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=IBM+Plex+Mono:wght@400;600&display=swap">
@@ -50,6 +68,7 @@
       <div class="actions" id="ov-actions" hidden>
         <button class="go" id="go" type="button">Again</button>
         <button class="go ghost" id="to-arenas" type="button">Arenas</button>
+        <button class="go ghost" id="share" type="button">Share</button>
       </div>
       <!-- hidden: tap the line above the title five times -->
       <form class="code" id="code-form" hidden>
@@ -78,6 +97,7 @@
 
   <p class="help help-desk"><b>A / D</b> move · <b>W</b> jump, press again mid-air to flip, or jump against a wall to flip off it · <b>S</b> drop through a ledge · <b>K</b> or <b>right click</b> kick, in the air for a flying kick · <b>R</b> reload · <b>Mouse</b> aims, hold click to fire · <b>J</b> fires at the nearest enemy</p>
   <p class="help help-touch"><b>Fire</b> auto-aims at the nearest stickman. You can also press and hold the arena to shoot where your finger is. The gun holds 12 shots and reloads on its own, so kick while it does. Tap <b>Jump</b> twice to backflip, or jump against a wall to flip off it. <b>Kick</b> launches stickmen into each other. Turn your phone sideways for a bigger arena.</p>
+  <p class="about"><b>Rainbowed</b> is a free stickman shooter in the spirit of the old Flash games. Every stickman you hit bursts into rainbows, the bosses are deeply unserious, and every run ends the same way: you get rainbowed. No ads, no accounts, no download.</p>
 </main>
 
 <!-- Engine first, then arenas and bosses register themselves, then main boots the game. -->

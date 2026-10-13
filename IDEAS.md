@@ -48,7 +48,7 @@ There is no winning. Every run ends with "You got rainbowed."
 - Code is split into a shared engine plus one file per arena and boss (see README).
 - Start screen with an arena picker and a best score per arena: built.
 
-## Share results button (zero maintenance)
+## Share results button (zero maintenance): built
 On the game-over screen, a Share button that copies text (or opens the phone's share
 sheet) like: "I got rainbowed by the Sensei at 154 kills on Page One. rainbowed.ca"
 No server needed, and every share is a link back to the game.
