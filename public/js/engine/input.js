@@ -132,6 +132,7 @@ function showPicker() {
   ovArena.textContent = 'Pick an arena';
   if (PICK_TITLE !== undefined) ovTitle.innerHTML = PICK_TITLE;
   ovText.textContent = PICK_TEXT; ovText.hidden = false;
+  wipe = null; overlay.classList.remove('wiped');
   hideBoard();
   ovScore.hidden = true; ovStats.hidden = true; ovActions.hidden = true; arenaList.hidden = false;
   arenaList.textContent = '';
@@ -210,6 +211,8 @@ function showOver() {
   if (bossesBeaten) msg += ', ' + bossesBeaten + (bossesBeaten === 1 ? ' boss' : ' bosses') + ' beaten';
   ovText.textContent = msg + '. Best run: ' + pad6(best) + '.' + (runCheated ? ' A cheat code was on, so this run is not saved.' : '');
   ovText.hidden = false;
+  // after the rainbow wipe the arena is blank paper, so the results sit straight on it
+  overlay.classList.toggle('wiped', !!wipe);
   overlay.hidden = false;
   boardAfterRun();
 }

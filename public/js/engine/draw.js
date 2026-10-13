@@ -424,5 +424,6 @@ function draw() {
     ctx.strokeRect(4, 4, W - 8, H - 8);
   }
   drawHUD();
+  drawWipe();
 }
 

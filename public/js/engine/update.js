@@ -267,6 +267,7 @@ function update(rdt) {
   shake = reduceMotion ? 0 : Math.max(0, shake - rdt * 32);
   flash = Math.max(0, flash - rdt);
   if (banner) { banner.life -= rdt; if (banner.life <= 0) banner = null; }
+  updateWipe(rdt);
   if (cine) { updateCine(rdt); updateFx(rdt * 0.25); updateCam(rdt); return; }
   slow = Math.max(0, slow - rdt);
   timeScale += ((slow > 0 ? 0.3 : 1) - timeScale) * Math.min(1, rdt * 7);

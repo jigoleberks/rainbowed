@@ -17,6 +17,7 @@ public/
     input.js          keyboard, mouse, touch, secret codes, start and game-over screens
     world.js          physics, spawning, effects, damage, kicks, aiming
     weapons.js        supply crates (every 15 kills) and the rainbow grenade launcher
+    wipe.js           the rainbow wipe when you die (fills the arena, shatters into confetti)
     bosses.js         boss loop, spawning, knockouts, cutscene camera
     update.js         the per-frame update
     draw.js           drawing and HUD

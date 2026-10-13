@@ -85,6 +85,7 @@ function reset() {
   boss = null; bossWarn = 0; nextBossAt = 25; bossCount = 0; bossesBeaten = 0; cine = null; banner = null; geyser = null;
   pickups = []; rainbowT = 0; deathTitle = null;
   grenades = 0; nades = []; nextCrateAt = CRATE_EVERY;
+  wipe = null;
   runTime = 0; shotsFired = 0; shotsHit = 0;
   // props: arena extras like Sophy and knockable objects, each {update(dt), draw(), front, done}
   props = [];

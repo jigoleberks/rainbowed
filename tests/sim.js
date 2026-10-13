@@ -27,7 +27,7 @@ function boot(hash = '') {
     id, hidden: false, textContent: '', dataset: {},
     addEventListener: (t, f) => (listeners[id + ':' + t] = listeners[id + ':' + t] || []).push(f),
     getContext: ctx2d, getBoundingClientRect: () => ({width: 800, height: 450, left: 0, top: 0}),
-    classList: {add() {}, remove() {}}, setPointerCapture() {},
+    classList: {add() {}, remove() {}, toggle() {}, contains() { return false; }}, setPointerCapture() {},
     children: [], appendChild(c) { this.children.push(c); return c; },
   });
   let raf = null, now = 0;
@@ -459,6 +459,20 @@ test('Dust Bunny: stomping squishes, and the tiny ones only stun', () => {
   g.run('{ const bun = boss.bunnies[0]; bun.x = player.x; bun.vx = 0; bun.y = G; bun.onGround = true; player.y = G - bun.r * 2 - 2; player.vy = 300; }');
   g.step(1);
   ok(g.get('boss.bunnies.length') === 0 || g.get('boss.dead'), 'tiny bunny should be squished');
+});
+
+test('dying sets off the rainbow wipe: it fills the arena, then shatters into confetti that falls away', () => {
+  const g = boot(); g.start(); g.run('spawn = function () {}; enemies = []; dropCrate = function () {};');
+  g.run('hp = 1; invuln = 0; hurt({x: player.x + 10});');
+  ok(g.get('state') === 'dying', 'should be dying');
+  g.step(2);
+  ok(g.get('wipe && wipe.t < 0'), 'wipe should wait a beat first');
+  g.seconds(1.2, () => {});
+  ok(g.get('wipe.confetti && wipe.confetti.length > 800'), 'should shatter into confetti: ' + g.get('wipe.confetti && wipe.confetti.length'));
+  g.seconds(5, () => {});
+  ok(g.get('state') === 'over' && g.get('wipe.confetti.length') === 0, 'confetti should have fallen away');
+  g.start();
+  ok(g.get('wipe') === null, 'a new run clears it');
 });
 
 let failed = 0;
