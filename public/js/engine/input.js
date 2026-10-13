@@ -144,9 +144,15 @@ function showPicker() {
     part('num', 'Arena ' + a.number);
     part('name', a.name);
     part('best', a.ready ? 'Best ' + pad6(readBest(a.id)) : 'Coming soon');
-    if (a.ready) card.addEventListener('click', () => pickArena(a.id));
+    if (a.ready) {
+      // the arena's top three from the leaderboard, filled in by board.js when it's online
+      const top = document.createElement('ol'); top.className = 'top3'; top.dataset.arena = a.id; top.hidden = true;
+      card.appendChild(top);
+      card.addEventListener('click', () => pickArena(a.id));
+    }
     arenaList.appendChild(card);
   }
+  pickerTops();
 }
 function pickArena(id) {
   setArena(id); loadBest();

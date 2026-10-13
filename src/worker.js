@@ -2,6 +2,7 @@
    an arcade-style top 10 per arena with three-letter initials, kept in one KV key per arena.
 
    GET  /api/scores?arena=page-one   -> {top: [{n, s, k, t, id}, ...]}
+   GET  /api/scores?arena=all        -> {tops: {'page-one': [top three], ...}}  (the arena picker)
    POST /api/scores  {arena, initials, score, kills, time}   -> {top, id}
 
    No accounts and no personal data: just initials, score, kills and seconds survived.
@@ -34,6 +35,12 @@ export default {
 
     if (req.method === 'GET') {
       const arena = url.searchParams.get('arena');
+      // the arena picker: the top three of every arena in one request
+      if (arena === 'all') {
+        const tops = {};
+        await Promise.all(ARENAS.map(async a => { tops[a] = ((await env.SCORES.get('top:' + a, 'json')) || []).slice(0, 3); }));
+        return json({tops});
+      }
       if (!ARENAS.includes(arena)) return json({error: 'arena'}, 400);
       return json({top: (await env.SCORES.get('top:' + arena, 'json')) || []});
     }

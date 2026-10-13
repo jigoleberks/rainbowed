@@ -54,5 +54,11 @@ await test('made-up scores are refused', async () => {
   ok((await run('BAD', 999999, {kills: 2, time: 10})).status === 400, 'endpoint refuses it');
 });
 
+await test('the arena picker gets the top three of every arena', async () => {
+  const r = await call('/api/scores?arena=all');
+  ok(r.status === 200 && r.body.tops['page-one'].length === 3 && r.body.tops['long-hallway'].length === 0, JSON.stringify(r.body));
+  ok(r.body.tops['page-one'][0].s >= r.body.tops['page-one'][2].s, 'sorted');
+});
+
 console.log(`\n${total - failed}/${total} passed`);
 process.exit(failed ? 1 : 0);

@@ -129,3 +129,25 @@ function showBoard(top, myId) {
   });
   ovText.hidden = true; boardEl.hidden = false; overlay.classList.add('ranked');
 }
+
+// ---------- the arena picker: each arena's top three ----------
+function pickerTops() {
+  api('/api/scores?arena=all').then(({ok, b}) => {
+    if (!ok || state !== 'title' || !b.tops) return;
+    for (const ol of arenaList.querySelectorAll('ol.top3')) {
+      const top = b.tops[ol.dataset.arena] || [];
+      ol.textContent = '';
+      if (!top.length) {
+        const li = document.createElement('li'); li.className = 'empty'; li.textContent = 'No scores yet'; ol.appendChild(li);
+      }
+      top.forEach((e, i) => {
+        const li = document.createElement('li');
+        for (const [cls, text] of [['r', i + 1], ['n', e.n], ['s', pad6(e.s)]]) {
+          const sp = document.createElement('span'); sp.className = cls; sp.textContent = text; li.appendChild(sp);
+        }
+        ol.appendChild(li);
+      });
+      ol.hidden = false;
+    }
+  }).catch(() => {});
+}
