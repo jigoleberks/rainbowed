@@ -363,6 +363,7 @@
 
   ARENAS['grandmas-house'] = {
     id: 'grandmas-house', number: 2, name: "Grandma's House",
+    desc: "La Chancla and the Dust Bunny. Sophy naps on the couch.",
     plats: [
       {x: 95, y: 348, w: 175},   // couch
       {x: 300, y: 212, w: 95},   // bookshelf

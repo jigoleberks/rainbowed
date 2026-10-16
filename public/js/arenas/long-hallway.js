@@ -132,6 +132,7 @@
 
   ARENAS['long-hallway'] = {
     id: 'long-hallway', number: 3, name: 'The Long Hallway',
+    desc: "Dark, looping, no walls to flip off. The Ink Blob and the Slow One.",
     wrap: true,
     plats: [
       {x: 30, y: 352, w: 70},    // radiator

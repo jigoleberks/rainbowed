@@ -144,6 +144,8 @@ function showPicker() {
     const part = (cls, text) => { const s = document.createElement('span'); s.className = cls; s.textContent = text; card.appendChild(s); };
     part('num', 'Arena ' + a.number);
     part('name', a.name);
+    if (a.recommended) { const r = document.createElement('span'); r.className = 'rec'; r.textContent = '\u2605 Start here'; card.appendChild(r); }
+    if (a.desc) { const d = document.createElement('span'); d.className = 'desc'; d.textContent = a.desc; card.appendChild(d); }
     part('best', a.ready ? 'Best ' + pad6(readBest(a.id)) : 'Coming soon');
     if (a.ready) {
       // the arena's top three from the leaderboard, filled in by board.js when it's online
