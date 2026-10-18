@@ -402,6 +402,7 @@ test('a supply crate parachutes in every 15 kills and can hold two guns', () => 
   g.step(2);
   ok(g.get("pickups.some(k => k.kind === 'crate' && k.chute)"), 'no crate falling');
   ok(g.get('nextCrateAt') === 30, 'nextCrateAt ' + g.get('nextCrateAt'));
+  g.run("player.x = pickups.find(k => k.kind === 'crate').x < W / 2 ? W - 30 : 30;");   // don't catch it on the way down
   g.seconds(7, () => {});
   ok(g.get("pickups.some(k => k.kind === 'crate' && !k.chute && k.y === G - 10)"), 'crate should land on the floor');
   g.run("{ const k = pickups.find(k => k.kind === 'crate'); k.what = 'gun'; player.x = k.x; player.y = G; }"); g.step(2);
@@ -473,6 +474,64 @@ test('dying sets off the rainbow wipe: it fills the arena, then shatters into co
   ok(g.get('state') === 'over' && g.get('wipe.confetti.length') === 0, 'confetti should have fallen away');
   g.start();
   ok(g.get('wipe') === null, 'a new run clears it');
+});
+
+test('Bear Cave: the belly bounces you, snores are ledges, and noise brings down stalactites', () => {
+  const g = boot(); g.run("pickArena('bear-cave')"); g.godMode(); g.run('spawn = function () {}; enemies = []; dropCrate = function () {};');
+  ok(g.get('arena.id') === 'bear-cave' && g.get("arena.bossLoop.join()") === 'giant,cub,giant,clowncar', 'arena setup');
+  // drop onto the bear's back from high up
+  g.run('player.x = 390; player.y = 150; player.vy = 0; player.onGround = false;');
+  let bounced = false; g.seconds(1, () => { if (g.get('player.vy') < -500) bounced = true; });
+  ok(bounced, 'landing on the belly should bounce you');
+  // snoring: Z ledges appear and drift upward
+  g.seconds(3, () => {});
+  ok(g.get('PLATS.some(p => p.z)'), 'no snore ledges');
+  const y0 = g.get('PLATS.find(p => p.z).y'); g.step(30);
+  ok(g.get('PLATS.find(p => p.z) && PLATS.find(p => p.z).y') < y0, 'snores should rise');
+  // lots of shooting: it grumbles and stalactites fall, rainbowing a stickman underneath
+  g.run(`player.x = 283; player.y = G; enemies = [];
+    for (const x of [283, 511]) enemies.push({x, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 0, drop: 0, jumpCd: 9});`);
+  const k0 = g.get('kills');
+  g.run('shotsFired += 20;'); g.step(2);
+  ok(g.saw(/GRRMPH/), 'the bear should grumble');
+  g.seconds(2.5, () => {});
+  ok(g.get('kills') > k0, 'falling stalactites should rainbow stickmen');
+});
+
+test('The Cub bursts out of the bear, and goes back to bed when beaten', () => {
+  const g = boot('#cub'); g.start(); g.godMode(); g.type('sophy'); g.key('KeyJ');
+  ok(g.get('arena.id') === 'bear-cave' && g.get('kills') === 49, 'cub link');
+  g.run('spawn = function () {}; dropCrate = function () {}; kills = 50; enemies = [];');
+  let burst = false;
+  g.seconds(60, () => { if (g.get("boss && boss.kind === 'cub' && boss.st !== 'bulge'")) burst = true; });
+  ok(burst, 'the cub never came out');
+  ok(g.saw(/BACK TO BED/), 'the cub was never beaten');
+  ok(g.get("!boss || boss.kind !== 'cub'"), 'the cub fight should be over');
+});
+
+test('The Clown Car: bears pour out, then everyone goes back in and you learn how many', () => {
+  const g = boot('#clowncar'); g.start(); g.godMode(); g.run('dropCrate = function () {};');
+  ok(g.get('arena.id') === 'bear-cave', 'clowncar link');
+  g.run('spawn = function () {}; kills = 100; enemies = [];');
+  let most = 0, eye = false, flipped = false;
+  g.seconds(60, () => {
+    if (g.get('arena.bear.eye') > 0.9) eye = true;
+    if (g.get('arena.bear.flipped')) flipped = true;
+    most = Math.max(most, g.get("boss && boss.kind === 'clowncar' ? boss.bears.length : 0"));
+  });
+  ok(eye, 'the bear should open one eye'); ok(flipped, 'the bear should roll over');
+  ok(most >= 3, 'not enough bears came out: ' + most);
+  ok(g.saw(/^THERE WERE \d+ BEARS IN THERE$/), 'no bear count at the end');
+  ok(g.get("!boss || boss.kind !== 'clowncar'"), 'the clown car should be over');
+  ok(g.get('arena.bear.eye') < 0.1, 'and he is still asleep');
+});
+
+test('The Clown Car: a bear can end your run with its own message', () => {
+  const g = boot('#clowncar'); g.start(); g.run('spawn = function () {}; dropCrate = function () {}; kills = 100; enemies = [];');
+  g.seconds(8, () => {});
+  ok(g.get("boss && boss.kind === 'clowncar' && boss.bears.length > 0"), 'no bears out yet');
+  g.run('hp = 1; invuln = 0; { const k = boss.bears[0]; player.x = k.x; player.y = k.y; player.vy = 0; player.kickT = 0; }'); g.step(2);
+  ok(g.get('deathTitle') === 'You got bear-piled.', 'deathTitle ' + g.get('deathTitle'));
 });
 
 let failed = 0;

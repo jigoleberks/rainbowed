@@ -28,6 +28,9 @@ There is no winning. Every run ends with "You got rainbowed."
   - Arena 1, Page One: Sensei (50), The Eraser (100). Built.
   - Arena 2, Grandma's House: Dust Bunny (50), La Chancla (100), plus Sophy. Built.
   - Arena 3, The Long Hallway: Ink Blob (50), The Slow One (100). The darker arena. Built.
+  - Arena 4, The Bear Cave: a huge bear sleeps in the middle the whole time (bouncy belly,
+    snore Zs you can stand on, gunfire makes it grumble and drop stalactites). The Cub (50)
+    bursts out of it; the Clown Car (100) is every bear that was in there. It never wakes. Built.
 - The Long Hallway (arena 3), built:
   - Dim hotel hallway in ink: identical numbered doors, runner carpet, flickering
     fluorescent tubes with light cones, darker paper. Shelves: vending machine,
