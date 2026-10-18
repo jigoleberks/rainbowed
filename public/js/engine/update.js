@@ -203,7 +203,8 @@ function updateBullets(dt) {
 }
 
 function splat(x, y, h, r) {
-  if (arena && arena.onSplat) arena.onSplat(x, y, h, r);
+  // arenas can react to a splat, or return false to stop it sticking (moving ledges)
+  if (arena && arena.onSplat && arena.onSplat(x, y, h, r) === false) return;
   sctx.fillStyle = `hsl(${h} 85% 58% / 0.9)`;
   sctx.beginPath();
   sctx.ellipse(x, y - 0.5, r * rand(1.4, 2.4), r * 0.55, 0, 0, Math.PI * 2);

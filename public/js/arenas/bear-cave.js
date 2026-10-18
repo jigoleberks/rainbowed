@@ -260,6 +260,8 @@
       return Math.random() < 0.5 ? {x: -15, y: G, air: false} : {x: W + 15, y: G, air: false};
     },
     drawStage: drawCave,
+    // paint doesn't stick to the snores: they drift away and would leave streaks in mid-air
+    onSplat(x, y) { return !PLATS.some(p => p.z && x > p.x && x < p.x + p.w && Math.abs(y - p.y) < 1); },
     setup() {
       Object.assign(bear, {breath: 0, squash: 0, stir: 0, bulge: 0, eye: 0, flipped: false, roll: 0, snoring: true});
       noise = 0; lastShots = shotsFired; snoreT = 1.5; prevVy = 0; prevGround = true;
