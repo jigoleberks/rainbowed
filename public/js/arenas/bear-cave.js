@@ -15,7 +15,8 @@
   const NOISE_MAX = 14;                   // shots (minus quiet time) before it grumbles
 
   // the bear's state, shared with the Cub and the Clown Car
-  const bear = {breath: 0, squash: 0, stir: 0, bulge: 0, eye: 0, flipped: false, roll: 0, snoring: true};
+  const bear = {breath: 0, squash: 0, stir: 0, bulge: 0, eye: 0, flipped: false, roll: 0, snoring: true, paint: []};
+  const PAINT_MAX = 180;
   let noise = 0, lastShots = 0, snoreT = 2, stals = [], prevVy = 0, prevGround = true;
 
   const box = (x, y, w, h, fill, lw = 3) => {
@@ -50,6 +51,16 @@
     ctx.strokeStyle = '#6e4a30'; ctx.lineWidth = 2;
     for (const [fx, fy] of [[-110, -72], [-80, -96], [-40, -106], [0, -110], [40, -106], [80, -96], [-120, -45], [110, -60]])
       { line(fx, fy, fx + 8, fy - 6); line(fx + 10, fy + 2, fx + 18, fy - 4); }
+    // rainbow paint that landed on its back, stuck in the fur (kept inside the body's outline)
+    if (bear.paint.length) {
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(0, -58, 148, 60, 0, 0, Math.PI * 2); ctx.clip();
+      for (const d of bear.paint) {
+        ctx.fillStyle = `hsl(${d.h} 85% 60% / 0.9)`;
+        ctx.beginPath(); ctx.ellipse(d.x, d.y, d.r * 1.5, d.r, d.a, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
     // the belly patch, and the bulge when something wants out
     ctx.fillStyle = '#c99c74'; ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
     const wob = bear.bulge * Math.sin(clock * 22) * 5;
@@ -261,9 +272,21 @@
     },
     drawStage: drawCave,
     // paint doesn't stick to the snores: they drift away and would leave streaks in mid-air
-    onSplat(x, y) { return !PLATS.some(p => p.z && x > p.x && x < p.x + p.w && Math.abs(y - p.y) < 1); },
+    onSplat(x, y, h, r) {
+      if (PLATS.some(p => p.z && x > p.x && x < p.x + p.w && Math.abs(y - p.y) < 1)) return false;
+      // paint on the bear's back goes into its fur as a blotch (it moves with the bear), not a flat line
+      if (Math.abs(y - BACK.y) < 1 && x > BACK.x && x < BACK.x + BACK.w) {
+        // about a third of the drops leave a blotch, scattered down the fur (mostly near the top)
+        if (Math.random() < 0.65) return false;
+        const lx = (x - BX) * (bear.flipped ? -1 : 1) + rand(-8, 8);
+        const top = -58 - 62 * Math.sqrt(Math.max(0, 1 - (lx / 150) ** 2));
+        bear.paint.push({x: lx, y: top + 4 + Math.pow(Math.random(), 1.8) * 48, r: r * rand(1.2, 2.1), h, a: rand(-0.5, 0.5)});
+        if (bear.paint.length > PAINT_MAX) bear.paint.splice(0, bear.paint.length - PAINT_MAX);
+        return false;
+      }
+    },
     setup() {
-      Object.assign(bear, {breath: 0, squash: 0, stir: 0, bulge: 0, eye: 0, flipped: false, roll: 0, snoring: true});
+      Object.assign(bear, {breath: 0, squash: 0, stir: 0, bulge: 0, eye: 0, flipped: false, roll: 0, snoring: true, paint: []});
       noise = 0; lastShots = shotsFired; snoreT = 1.5; prevVy = 0; prevGround = true;
       stals = STALS.map(x => ({x, st: 'hang', t: 0, y: 0, vy: 0, grow: 1}));
       PLATS = PLATS.filter(p => !p.z);
