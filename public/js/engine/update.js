@@ -89,6 +89,8 @@ function updatePlayer(dt) {
 
   fireCd -= dt;
   if (stunned) {}
+  // arenas can take over a shot (Grandpa's Farm: throwing Buster's frisbee)
+  else if ((pointer.down || auto) && fireCd <= 0 && rainbowT <= 0 && arena.fireHook && arena.fireHook(ang)) fireCd = 0.35;
   else if ((pointer.down || auto) && fireCd <= 0 && rainbowT <= 0 && grenades > 0) fireGrenade(ang, aimD);
   else if ((pointer.down || auto) && fireCd <= 0 && reloadT <= 0 && ammo > 0 && rainbowT <= 0) {
     fireCd = dual ? 0.065 : 0.13;

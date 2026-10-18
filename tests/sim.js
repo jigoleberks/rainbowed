@@ -534,6 +534,69 @@ test('The Clown Car: a bear can end your run with its own message', () => {
   ok(g.get('deathTitle') === 'You got bear-piled.', 'deathTitle ' + g.get('deathTitle'));
 });
 
+test("Grandpa's Farm: Buster's zoomies bowl stickmen over, and he herds them together", () => {
+  const g = boot(); g.run("pickArena('grandpas-farm')"); g.godMode(); g.run('spawn = function () {}; dropCrate = function () {}; enemies = [];');
+  ok(g.get('arena.id') === 'grandpas-farm' && g.get("arena.bossLoop.join()") === 'giant,rooster,giant,grandpa', 'arena setup');
+  ok(g.get("arena.grandpa.st") === 'chair', 'Grandpa should be asleep on the porch');
+  g.seconds(1, () => {});
+  g.run(`for (const x of [150, 300, 450, 600]) enemies.push({x, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 0, drop: 0, jumpCd: 9});
+    player.x = 400; player.y = 200; arena.busterTime('zoomies');`);
+  const k0 = g.get('kills');
+  g.seconds(4, () => {});
+  ok(g.saw(/^BOWLED!$/) && g.get('kills') > k0, 'zoomies should bowl stickmen over');
+  g.run(`banner = null; enemies = []; for (const x of [120, 400, 680]) enemies.push({x, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 0, drop: 0, jumpCd: 9});
+    arena.busterTime('herd');`);
+  g.seconds(3.6, () => {});
+  const xs = g.get('enemies.map(e => e.x)');
+  ok(Math.max(...xs) - Math.min(...xs) < 120, 'herding should bunch them up: ' + xs.map(Math.round));
+});
+
+test("Grandpa's Farm: Buster brings his frisbee, your next shot throws it, he fetches it back", () => {
+  const g = boot(); g.run("pickArena('grandpas-farm')"); g.godMode(); g.run('spawn = function () {}; dropCrate = function () {}; enemies = [];');
+  g.seconds(1, () => {});
+  g.run("player.x = 300; player.y = G; arena.busterTime('fetch');");
+  g.seconds(3, () => {});
+  ok(g.get("arena.frisbee && arena.frisbee.st === 'ready'"), 'Buster should drop the frisbee at your feet');
+  const shots = g.get('shotsFired');
+  g.run('player.facing = 1;'); g.key('KeyJ'); g.step(2); g.key('KeyJ', false);
+  ok(g.get("arena.frisbee && arena.frisbee.st === 'fly'") && g.get('shotsFired') === shots, 'the shot should throw the frisbee instead');
+  let caught = false; g.seconds(6, () => { if (g.saw(/^CAUGHT IT!$/)) caught = true; });
+  ok(caught, 'Buster should catch it');
+  ok(g.get("arena.frisbee && arena.frisbee.st === 'ready'"), 'and bring it back for another throw');
+});
+
+test('The Rooster crows shockwaves, and storms back to the coop when beaten', () => {
+  const g = boot('#rooster'); g.start(); g.godMode(); g.type('sophy'); g.key('KeyJ');
+  ok(g.get('arena.id') === 'grandpas-farm' && g.get('kills') === 49, 'rooster link');
+  g.run('spawn = function () {}; dropCrate = function () {}; kills = 50; enemies = []; arena.busterTime = function () {};');
+  let waves = false;
+  g.seconds(60, () => { if (g.get('waves.length') > 0) waves = true; });
+  ok(waves || g.saw(/COCK-A-DOODLE-DOO!/), 'he never crowed');
+  ok(g.saw(/COCK-A-DOODLE-DONE/), 'the rooster was never beaten');
+});
+
+test("Grandpa mows the lawn until supper, and it's his line if he gets you", () => {
+  const g = boot('#grandpa'); g.start(); g.godMode(); g.run('dropCrate = function () {};');
+  ok(g.get('arena.id') === 'grandpas-farm', 'grandpa link');
+  g.run('spawn = function () {}; kills = 100; enemies = [];');
+  let mowing = false, mowed = false;
+  g.seconds(14, i => {
+    if (g.get('arena.mower && arena.mower.on')) mowing = true;
+    if (i % 60 === 0) g.run('enemies.push({x: arena.mower ? arena.mower.x + arena.mower.dir * 60 : 400, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 0, drop: 0, jumpCd: 9});');
+    if (g.saw(/^MOWED$/)) mowed = true;
+  });
+  ok(mowing && g.get("arena.grandpa.st") === 'away', 'Grandpa should be out mowing');
+  ok(mowed, 'the mower should mow stickmen');
+  g.seconds(50, () => {});
+  ok(g.saw(/^SUPPER'S ON$/), 'Grandma never rang the bell');
+  ok(g.get("!boss") && g.get("arena.grandpa.st") === 'chair', 'Grandpa should be back in his chair');
+  // and getting mowed
+  const t = boot('#grandpa'); t.start(); t.run('dropCrate = function () {}; spawn = function () {}; kills = 100; enemies = [];');
+  t.seconds(6, () => {});
+  t.run('hp = 1; invuln = 0; player.x = arena.mower.x; player.y = G; player.vy = 0; player.kickT = 0;'); t.step(2);
+  ok(t.get('deathTitle') === 'Get off my lawn.', 'deathTitle ' + t.get('deathTitle'));
+});
+
 let failed = 0;
 for (const [pass, name] of results) { console.log((pass ? 'PASS  ' : 'FAIL  ') + name); if (!pass) failed++; }
 console.log(`\n${results.length - failed}/${results.length} passed`);

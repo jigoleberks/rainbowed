@@ -31,6 +31,10 @@ There is no winning. Every run ends with "You got rainbowed."
   - Arena 4, The Bear Cave: a huge bear sleeps in the middle the whole time (bouncy belly,
     snore Zs you can stand on, gunfire makes it grumble and drop stalactites). The Cub (50)
     bursts out of it; the Clown Car (100) is every bear that was in there. It never wakes. Built.
+  - Arena 5, Grandpa's Farm: barn, hay, tractor, coop, cornfield, Grandpa asleep on the porch,
+    and Buster (Grandpa's real border collie): frisbee, zoomies, herding, naps. The Rooster (50)
+    crows shockwaves; Grandpa (100) mows the lawn until Grandma rings the dinner bell.
+    "Get off my lawn." Built.
 - The Long Hallway (arena 3), built:
   - Dim hotel hallway in ink: identical numbered doors, runner carpet, flickering
     fluorescent tubes with light cones, darker paper. Shelves: vending machine,

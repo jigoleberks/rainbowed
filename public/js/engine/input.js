@@ -138,6 +138,12 @@ function showPicker() {
   arenaList.textContent = '';
   const cards = Object.values(ARENAS).map(a => ({...a, ready: true})).concat(COMING_SOON)
     .sort((a, b) => a.number - b.number);
+  // the card grid: 2 or 3 columns, all in one row on a sideways phone (see style.css)
+  if (arenaList.style && arenaList.style.setProperty) {
+    arenaList.style.setProperty('--n', cards.length);
+    arenaList.style.setProperty('--cols', cards.length <= 4 ? 2 : 3);
+    arenaList.style.setProperty('--pcols', cards.length <= 4 ? 2 : 3);
+  }
   for (const a of cards) {
     const card = document.createElement('button');
     card.type = 'button'; card.className = 'arena-card'; card.disabled = !a.ready;
