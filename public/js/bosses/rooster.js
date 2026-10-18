@@ -85,9 +85,12 @@ function updateRooster(b, dt, fighting) {
       b.vx = Math.abs(dx) > 30 ? b.facing * (110 + b.level * 20) : 0;
       b.cd -= dt;
       // you're up on a ledge: he flaps up and dive-pecks
-      if (b.onGround && dy < -60 && b.cd <= 0.6 && Math.random() < dt * 1.5) {
+      b.diveCd -= dt;
+      // you're up on a ledge, or he's just in the mood: he flaps up and dive-pecks
+      if (b.onGround && ((dy < -60 && b.cd <= 0.6 && Math.random() < dt * 1.5) || (b.diveCd <= 0 && Math.abs(dx) < 320))) {
+        b.diveCd = rand(3.5, 5.5) - b.level * 0.5;
         b.st = 'flap'; b.t = 0.7; b.vy = -760; b.vx = clamp(dx * 1.2, -260, 260); b.onGround = false;
-      } else if (b.cd <= 0) { b.st = 'puff'; b.t = 0.75; b.vx = 0; }
+      } else if (b.cd <= 0) { b.st = 'puff'; b.t = 0.55; b.vx = 0; }
       break;
     }
     case 'puff':
@@ -96,7 +99,11 @@ function updateRooster(b, dt, fighting) {
       break;
     case 'crow':
       b.t -= dt;
-      if (b.t <= 0) { b.st = 'strut'; b.cd = rand(2.4, 3.4) - b.level * 0.3; }
+      if (b.t <= 0) {
+        // sometimes he goes again right away, to catch you on the landing
+        if (!b.again && Math.random() < 0.35) { b.again = true; b.st = 'puff'; b.t = 0.4; }
+        else { b.again = false; b.st = 'strut'; b.cd = rand(1.6, 2.4) - b.level * 0.3; }
+      }
       break;
     case 'flap':
       b.t -= dt; b.vy += -GRAV * 0.55 * dt;   // flapping holds him up
@@ -142,12 +149,12 @@ BOSSES.rooster = {
   spawn(level) {
     const homeX = arena.COOP_X || W - 100;
     return {x: homeX, y: G, vx: 0, vy: 0, onGround: true, facing: -1, phase: 0, scale: 1, hp: 34 + level * 10,
-      st: 'enter', t: 0, cd: 1, hitT: 0, homeX, name: 'THE ROOSTER'};
+      st: 'enter', t: 0, cd: 1, diveCd: 2.5, again: false, hitT: 0, homeX, name: 'THE ROOSTER'};
   },
   update(b, dt, fighting) { updateRooster(b, dt, fighting); },
   draw(b) {
     if (b.exploded) return;
-    const puff = b.st === 'puff' ? Math.min(1, (0.75 - b.t) / 0.5) : b.st === 'crow' ? 1 : 0;
+    const puff = b.st === 'puff' ? Math.min(1, (0.55 - b.t) / 0.35) : b.st === 'crow' ? 1 : 0;
     drawRoosterBird(b.x, b.y, b.facing, {phase: b.phase, s: 1.25, puff, crow: b.st === 'crow', fly: b.st === 'flap' || b.st === 'dive', angry: b.st !== 'strut', hit: b.hitT > 0});
     if (b.st === 'puff') { ctx.font = '24px "Permanent Marker", cursive'; ctx.textAlign = 'center'; ctx.fillStyle = ACCENT; ctx.fillText('!', b.x, b.y - 92); }
   },

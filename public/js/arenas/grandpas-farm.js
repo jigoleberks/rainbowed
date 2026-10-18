@@ -222,7 +222,7 @@
     };
 
     function nap() { announce(pick(['He went to lie down by Grandpa.', 'Good boy. Very tired good boy.', 'He has earned a nap.'])); b.mode = 'run'; b.dest = PORCH.chairX - 52; b.then = 'nap'; }
-    function zoomies() { announce(pick(['ZOOMIES.', 'He has too much energy.', 'Nobody knows why. He just has to.'])); b.mode = 'zoom'; b.laps = 4; b.f = b.x < W / 2 ? 1 : -1; }
+    function zoomies() { announce(pick(['ZOOMIES.', 'He has too much energy.', 'Nobody knows why. He just has to.'])); b.mode = 'zoom'; b.laps = 3; b.f = b.x < W / 2 ? 1 : -1; }
     function herd() {
       if (enemies.filter(e => !e.dead).length < 3) return zoomies();
       announce(pick(["Herding. It's what he does.", 'He is rounding them up.', 'Everyone get in a nice tidy group.']));
@@ -290,7 +290,7 @@
       } else if (b.mode === 'return') {
         if (runTo(clamp(player.x - player.facing * 30, 20, W - 20), 460, dt) || Math.abs(player.x - b.x) < 40) {
           b.hasDisc = false; b.throws++;
-          if (b.throws >= 3) { texts.push({x: b.x, y: b.y - 50, s: 'pant pant', life: 1, big: false}); b.mode = 'run'; b.dest = PORCH.chairX - 52; b.then = 'nap'; }
+          if (b.throws >= 2) { texts.push({x: b.x, y: b.y - 50, s: 'pant pant', life: 1, big: false}); b.mode = 'run'; b.dest = PORCH.chairX - 52; b.then = 'nap'; }
           else { frisbee = {st: 'ready', t: 9}; b.mode = 'stare'; }
         }
       }
@@ -305,7 +305,7 @@
       if (b.mode !== 'nap' && b.mode !== 'sit') return;
       b.timer -= dt;
       if (b.timer > 0) return;
-      b.timer = rand(18, 28);
+      b.timer = rand(24, 34);
       const r = Math.random();
       if (r < 0.35) nap(); else if (r < 0.6) zoomies(); else if (r < 0.8) herd(); else fetch();
     };
