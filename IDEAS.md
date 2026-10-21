@@ -147,7 +147,7 @@ A prehistoric valley: ferns, a smoking volcano in the background, a river and ta
 - Shelves: a fallen log, rocky ledges, a giant fern, and the back of a sleeping Brontosaurus
   that sometimes stands up and wanders a few steps (the shelf moves).
 - Stickmen are cavemen with clubs, coming out of the cave and down the ledges.
-- Chaos agent, the baby T. rex (from the Lego T. rex family on Aron's desk): tiny, furious and
+- Chaos agent, the baby T. rex (inspired by the Lego T. rex family on the desk): tiny, furious and
   very brave. It charges whatever's nearest, stickman or you, and flails its little arms at
   it. Now and then it steals an egg from a nest and runs off with it, starting a stampede of
   whoever wanted the egg.
