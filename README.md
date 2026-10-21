@@ -4,6 +4,8 @@ A Flash-era stickman shooter where every enemy bursts into rainbows. Play it at 
 
 Plain static files, no build step. Cloudflare serves the `public/` folder (see `wrangler.jsonc`), and every push to `main` redeploys it.
 
+It plays offline: `public/sw.js` (a service worker, registered only on rainbowed.ca and localhost) keeps a copy of every file index.html loads, plus the fonts. Online it always fetches fresh files first, so updates still show up right away; with no signal, or a signal too weak to answer within a few seconds, it uses the copy. Scores set offline are kept on the device and sent to the leaderboard when there's signal again.
+
 The one bit of server code is `src/worker.js`: the arcade-style leaderboard (top 10 per arena, three initials) at `/api/scores`, stored in a Workers KV namespace that Wrangler creates on the first deploy. To remove a bad entry, open the SCORES namespace in the Cloudflare dashboard (Storage & Databases > KV) and edit the `top:<arena>` key. Opened as a file or from the offline bundle, the game just skips the leaderboard.
 
 ## Layout

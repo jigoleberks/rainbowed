@@ -17,3 +17,8 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+
+// offline play: keep a copy of the game on the device (see sw.js). Only on the real site.
+if (typeof navigator !== 'undefined' && navigator.serviceWorker && /(^|\.)rainbowed\.ca$|^localhost$/.test(location.hostname)) {
+  addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}

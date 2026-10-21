@@ -46,7 +46,12 @@ function boardAfterRun() {
     const top = b.top || [];
     const makesIt = !runCheated && score > 0 && (top.length < BOARD_SIZE || score > top[top.length - 1].s);
     if (makesIt) startInitials(run, seq); else showBoard(top, null);
-  }).catch(() => {});
+  }).catch(() => {
+    // no signal (and no saved board): ask anyway, and the server decides later if it made it
+    if (seq !== boardSeq || state !== 'over' || runCheated || score <= 0 || !online()) return;
+    startInitials(run, seq);
+    iniMsg.textContent = 'No signal. Enter your initials and it goes up later if it makes the board.';
+  });
 }
 
 // ---------- entering initials ----------
@@ -94,8 +99,38 @@ function submitInitials() {
       try { localStorage.setItem('rsb-initials', n); } catch (e) {}
       showBoard(b.top || [], b.id);
     })
-    .catch(() => { if (seq === boardSeq) { iniOk.disabled = false; iniMsg.textContent = 'No connection. Tap OK to try again.'; } });
+    .catch(() => {
+      // no signal: keep it, and send it the next time there's a connection
+      if (seq !== boardSeq) return;
+      queueScore({...run, initials: n});
+      try { localStorage.setItem('rsb-initials', n); } catch (e) {}
+      ini = null; iniBox.hidden = true; overlay.classList.remove('ranked');
+      ovText.textContent = "No signal, so your score is saved on this phone. It'll go up on the board next time you're online.";
+      ovText.hidden = false;
+    });
 }
+
+// ---------- scores set offline ----------
+const PENDING_KEY = 'rsb-pending';
+function pending() { try { return JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'); } catch (e) { return []; } }
+function savePending(list) { try { localStorage.setItem(PENDING_KEY, JSON.stringify(list.slice(-20))); } catch (e) {} }
+function queueScore(entry) { savePending(pending().concat([entry])); }
+let flushing = false;
+async function flushPending() {
+  if (flushing || !online()) return;
+  flushing = true;
+  try {
+    let list = pending();
+    while (list.length) {
+      let r;
+      try { r = await api('/api/scores', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(list[0])}); }
+      catch (e) { break; }                       // still no signal: try again later
+      list = pending().slice(1); savePending(list); // sent (or refused): either way it's done
+    }
+  } finally { flushing = false; }
+}
+if (typeof addEventListener === 'function') addEventListener('online', () => flushPending());
+if (typeof setTimeout === 'function') setTimeout(() => flushPending(), 3000);
 iniOk.addEventListener('click', submitInitials);
 
 // keyboard: type the letters, arrows to adjust, Enter to save. Runs before the game's own keys.
