@@ -101,6 +101,13 @@ function drawStick(e, kind) {
     line(0, shY, hx, hy);
     ctx.lineWidth = 5.5;
     line(hx - ca * 2, hy - sa * 2, hx + ca * 13, hy + sa * 13);
+    if (shotgun()) {
+      // a long barrel, a wooden pump and stock
+      ctx.save(); ctx.lineWidth = 4; line(hx, hy, hx + ca * 30, hy + sa * 30);
+      ctx.strokeStyle = '#8a5a34'; ctx.lineWidth = 7; line(hx + ca * 14, hy + sa * 14, hx + ca * 21, hy + sa * 21);
+      ctx.lineWidth = 6; line(hx - ca * 2, hy - sa * 2, hx - ca * 11 + sa * 3, hy - sa * 11 - ca * 3);
+      ctx.restore();
+    }
     if (grenades > 0) {
       // the launcher: a fat tube with a rainbow band at the muzzle
       ctx.save(); ctx.lineWidth = 9; line(hx - ca * 5, hy - sa * 5, hx + ca * 19, hy + sa * 19);
@@ -219,11 +226,13 @@ function drawHUD() {
       ctx.font = '600 11px "IBM Plex Mono", monospace';
       ctx.fillText('\u221E SOPHY MODE', 20, 76);
     } else {
-      const n = magSize(), step = dual ? 5 : 7;
+      const sg = shotgun(), n = magSize(), step = sg ? (dual ? 8 : 11) : dual ? 5 : 7;
       for (let i = 0; i < n; i++) {
-        const on = reloadT > 0 ? i < Math.floor((1 - reloadT / RELOAD_TIME) * n) : i < ammo;
-        ctx.fillStyle = on ? INK : '#c9ccd4';
-        ctx.fillRect(20 + i * step, 66, dual ? 3 : 4, 11);
+        const on = reloadT > 0 && !sg ? i < Math.floor((1 - reloadT / RELOAD_TIME) * n) : i < ammo;
+        ctx.fillStyle = on ? (sg ? '#d9574a' : INK) : '#c9ccd4';
+        // shotgun shells are fatter, with a brass end
+        if (sg) { ctx.fillRect(20 + i * step, 66, dual ? 6 : 8, 11); ctx.fillStyle = on ? '#e0c46a' : '#dfe1e6'; ctx.fillRect(20 + i * step, 74, dual ? 6 : 8, 3); }
+        else ctx.fillRect(20 + i * step, 66, dual ? 3 : 4, 11);
       }
       ctx.font = '600 11px "IBM Plex Mono", monospace';
       if (reloadT > 0) { ctx.fillStyle = ACCENT; ctx.fillText('RELOADING', 20 + n * step + 6, 76); }

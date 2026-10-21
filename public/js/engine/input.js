@@ -140,7 +140,10 @@ function showPicker() {
     .sort((a, b) => a.number - b.number);
   // the card grid: 2 or 3 columns, all in one row on a sideways phone (see style.css)
   if (arenaList.style && arenaList.style.setProperty) {
-    arenaList.style.setProperty('--n', cards.length);
+    // six or more on a sideways phone: two rows, and each card shows just its #1
+    const rows = cards.length > 5 ? 2 : 1;
+    arenaList.style.setProperty('--n', Math.ceil(cards.length / rows));
+    arenaList.classList.toggle('two-rows', rows > 1);
     arenaList.style.setProperty('--cols', cards.length <= 4 ? 2 : 3);
     arenaList.style.setProperty('--pcols', cards.length <= 4 ? 2 : 3);
   }

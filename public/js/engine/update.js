@@ -84,7 +84,12 @@ function updatePlayer(dt) {
   if (reloadT > 0) {
     reloadT -= dt;
     p.aim = p.facing > 0 ? 1.1 : Math.PI - 1.1;
-    if (reloadT <= 0) { reloadT = 0; ammo = magSize(); for (let i = 0; i < 4; i++) parts.push({x: p.x + p.facing * 12, y: p.y - 48, vx: rand(-60, 60), vy: rand(-80, -20), h: 0, r: 1.2, life: 0.25, spark: true, ink: true}); }
+    if (reloadT <= 0 && shotgun()) {
+      // one shell in; keep going until it's full
+      ammo = Math.min(magSize(), ammo + 1); reloadT = ammo < magSize() ? SHELL_TIME : 0;
+      parts.push({x: p.x + p.facing * 12, y: p.y - 48, vx: rand(-40, 40), vy: -rand(40, 90), h: 0, r: 1.4, life: 0.25, spark: true, ink: true, col: '#d9574a'});
+    }
+    else if (reloadT <= 0) { reloadT = 0; ammo = magSize(); for (let i = 0; i < 4; i++) parts.push({x: p.x + p.facing * 12, y: p.y - 48, vx: rand(-60, 60), vy: rand(-80, -20), h: 0, r: 1.2, life: 0.25, spark: true, ink: true}); }
   }
 
   fireCd -= dt;
@@ -92,6 +97,24 @@ function updatePlayer(dt) {
   // arenas can take over a shot (Grandpa's Farm: throwing Buster's frisbee)
   else if ((pointer.down || auto) && fireCd <= 0 && rainbowT <= 0 && arena.fireHook && arena.fireHook(ang)) fireCd = 0.35;
   else if ((pointer.down || auto) && fireCd <= 0 && rainbowT <= 0 && grenades > 0) fireGrenade(ang, aimD);
+  else if ((pointer.down || auto) && fireCd <= 0 && ammo > 0 && rainbowT <= 0 && shotgun()) {
+    // the shotgun: a spread of short-range pellets; firing interrupts a reload
+    reloadT = 0;
+    fireCd = dual ? 0.3 : 0.55;
+    if (!cheatSophy) ammo--;
+    p.side = dual ? -(p.side || 1) : 0;
+    parts.push({x: p.x + Math.cos(ang) * 10, y: p.y - 54, vx: -p.facing * rand(60, 130), vy: -rand(140, 220), h: 0, r: 2.2, life: 0.6, spark: true, ink: true, col: '#d9574a'});
+    if (ammo === 0) startReload();
+    const group = {hit: false}, off = p.side * 4;
+    for (let k = 0; k < 6; k++) {
+      const a = ang + (k - 2.5) * 0.06 + rand(-0.03, 0.03), sp = rand(950, 1150);
+      bullets.push({x: p.x + Math.cos(a) * 34 - Math.sin(a) * off, y: p.y - 52 + Math.sin(a) * 34 + Math.cos(a) * off, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0.3, group});
+    }
+    shotsFired++;
+    flash = 0.08; p.recoil = 2.2; p.vx -= Math.cos(ang) * 90;
+    if (!reduceMotion) shake = Math.max(shake, 4);
+    if (typeof sfx !== 'undefined') sfx.shotgun();
+  }
   else if ((pointer.down || auto) && fireCd <= 0 && reloadT <= 0 && ammo > 0 && rainbowT <= 0) {
     fireCd = dual ? 0.065 : 0.13;
     if (!cheatSophy) ammo--;
@@ -173,6 +196,9 @@ function updateHazards(dt) {
   eproj = eproj.filter(p => p.life > 0);
 }
 
+// a hit for the accuracy stat: a shotgun blast counts once, however many pellets land
+function countHit(b) { if (b.group) { if (b.group.hit) return; b.group.hit = true; } shotsHit++; }
+
 function updateBullets(dt) {
   for (const b of bullets) {
     b.life -= dt;
@@ -181,19 +207,19 @@ function updateBullets(dt) {
       if (arena.wrap) b.x = wrapX(b.x);
       for (const e of enemies) {
         if (!e.dead && b.x > e.x - 10 && b.x < e.x + 10 && b.y > e.y - 78 && b.y < e.y + 2) {
-          kill(e, b.vx, b.vy, b.y < e.y - 58); shotsHit++;
+          kill(e, b.vx, b.vy, b.y < e.y - 58); countHit(b);
           b.life = 0; break;
         }
       }
       const bs = boss, zone = b.life > 0 ? bossZone(bs, b.x, b.y, 0) : 0;
       if (zone) {
-        hitBoss(bs, b.x, b.y, b.vx, b.vy, bossDamage(bs, zone, 'bullet')); shotsHit++;
+        hitBoss(bs, b.x, b.y, b.vx, b.vy, bossDamage(bs, zone, 'bullet')); countHit(b);
         b.life = 0;
       }
       // props that can be shot (the Slow One)
       if (b.life > 0) for (const pr of props) {
         const z = pr.target ? pr.zone(b.x, b.y, 0) : 0;
-        if (z) { pr.hit(z, 'bullet', b.x, b.y, b.vx, b.vy); shotsHit++; b.life = 0; break; }
+        if (z) { pr.hit(z, 'bullet', b.x, b.y, b.vx, b.vy); countHit(b); b.life = 0; break; }
       }
     }
     if (b.y > G || (!arena.wrap && (b.x < -30 || b.x > W + 30)) || b.y < -30) {

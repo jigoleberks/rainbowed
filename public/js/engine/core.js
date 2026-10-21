@@ -63,7 +63,11 @@ let state = 'title';
 let player, enemies, bullets, parts, debris, rings, texts, eproj, waves;
 let ammo = MAG, reloadT = 0, dual = false;
 // two guns: double fire rate and two magazines, kept until you get hit
-const magSize = () => dual ? MAG * 2 : MAG;
+// the cabin hands you a shotgun instead: 6 shells, loaded one at a time
+const SHELLS = 6, SHELL_TIME = 0.32;
+const shotgun = () => !!(arena && arena.shotgun);
+const magBase = () => shotgun() ? SHELLS : MAG;
+const magSize = () => dual ? magBase() * 2 : magBase();
 let cheatSophy = false, cheatLoaf = false, runCheated = false, typed = '';
 const maxHp = () => cheatLoaf ? 10 : 5;
 let timeScale = 1;   // eases in and out of slow motion
@@ -81,7 +85,7 @@ function reset() {
     kickT:0, kickCd:0, airKick:true, kickDir:1, pose:null, tilt:0, flipSign:-1, wallT:0, wallSide:0, stunT:0, stunImm:0};
   enemies = []; bullets = []; parts = []; debris = []; rings = []; texts = []; eproj = []; waves = [];
   score = 0; kills = 0; combo = 0; comboT = 0; slow = 0; timeScale = 1; shake = 0; spawnT = 0.8;
-  hp = maxHp(); invuln = 1; fireCd = 0; dual = false; ammo = MAG; reloadT = 0; runCheated = cheatSophy || cheatLoaf; flash = 0; overT = 0;
+  hp = maxHp(); invuln = 1; fireCd = 0; dual = false; ammo = magBase(); reloadT = 0; runCheated = cheatSophy || cheatLoaf; flash = 0; overT = 0;
   boss = null; bossWarn = 0; nextBossAt = 25; bossCount = 0; bossesBeaten = 0; cine = null; banner = null; geyser = null;
   pickups = []; rainbowT = 0; deathTitle = null;
   grenades = 0; nades = []; nextCrateAt = CRATE_EVERY;

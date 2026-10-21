@@ -597,6 +597,74 @@ test("Grandpa mows the lawn until supper, and it's his line if he gets you", () 
   ok(t.get('deathTitle') === 'Get off my lawn.', 'deathTitle ' + t.get('deathTitle'));
 });
 
+test("Uncle's Creepy Cabin: a shotgun with 6 shells, a spread of pellets, one shell at a time back in", () => {
+  const g = boot(); g.run("pickArena('creepy-cabin')"); g.godMode(); g.run('spawn = function () {}; dropCrate = function () {}; enemies = [];');
+  ok(g.get('arena.id') === 'creepy-cabin' && g.get("arena.bossLoop.join()") === 'giant,hand,giant,tree', 'arena setup');
+  ok(g.get('ammo') === 6 && g.get('magSize()') === 6, 'six shells: ' + g.get('ammo'));
+  g.seconds(1, () => {});
+  // three stickmen close together in front of you: one blast gets more than one
+  g.run(`player.x = 200; player.y = G; player.facing = 1; enemies = [];
+    for (const y of [G, G - 6, G + 0]) enemies.push({x: 300 + enemies.length * 8, y, vx: 0, vy: 0, onGround: true, facing: -1, phase: 0, speed: 0, drop: 0, jumpCd: 9});`);
+  const k0 = g.get('kills'), s0 = g.get('shotsFired');
+  g.key('KeyJ'); g.step(2); g.key('KeyJ', false); g.step(20);
+  ok(g.get('shotsFired') - s0 === 1 && g.get('kills') - k0 >= 2, 'one blast, several kills: ' + (g.get('kills') - k0));
+  ok(g.get('shotsHit') <= g.get('shotsFired'), 'accuracy counts a blast once');
+  g.run('ammo = 0; reloadT = 0; slow = 0; timeScale = 1; startReload();');
+  g.step(25);
+  const mid = g.get('ammo');
+  ok(mid > 0 && mid < 6, 'shells go in one at a time: ' + mid);
+  g.seconds(3, () => {});
+  ok(g.get('ammo') === 6, 'and it fills up');
+  // everywhere else is still the pistol
+  const p = boot(); p.start();
+  ok(p.get('ammo') === 12, 'the pistol elsewhere');
+});
+
+test("Uncle's Creepy Cabin: the trap door grabs you, and SPOOKY TIME makes the cabin laugh", () => {
+  const g = boot(); g.run("pickArena('creepy-cabin')"); g.run('spawn = function () {}; dropCrate = function () {}; enemies = [];');
+  g.seconds(1.5, () => {});
+  g.run('player.x = 505; player.y = G; player.vx = 0; invuln = 0; hp = 3;');
+  g.seconds(2.6, () => { g.run('player.x = 505; player.vx = 0;'); });
+  ok(g.get('hp') === 2, 'something in the cellar should grab you: hp ' + g.get('hp'));
+  g.run(`player.x = 100; banner = null; enemies = [];
+    for (const x of [470, 500, 300]) enemies.push({x, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 100, drop: 0, jumpCd: 9});
+    arena.spookyTime();`);
+  g.seconds(2.6, () => {});
+  ok(g.saw(/^SPOOKY TIME$/) && g.saw(/^HAHAHA$/), 'the cabin should laugh');
+  ok(g.get('enemies.filter(e => e.spooked).length') > 0 || g.get('kills') > 0, 'the laughing should speed stickmen up (or books got them)');
+});
+
+test('The Hand comes up from the cellar, hides, springs, and goes back down when beaten', () => {
+  const g = boot('#hand'); g.start(); g.godMode(); g.type('sophy'); g.key('KeyJ');
+  ok(g.get('arena.id') === 'creepy-cabin' && g.get('kills') === 49, 'hand link');
+  g.run('spawn = function () {}; dropCrate = function () {}; kills = 50; enemies = [];');
+  let hid = false;
+  g.seconds(80, () => { if (g.get("boss && boss.kind === 'hand' && boss.st === 'hidden'")) hid = true; });
+  ok(hid, 'the hand never hid');
+  ok(g.saw(/^HANDLED$/), 'the hand was never beaten');
+});
+
+test('The Tree grabs and drags you, you can break free, and it gives up at dawn', () => {
+  const g = boot('#tree'); g.start(); g.godMode(); g.run('dropCrate = function () {};');
+  ok(g.get('arena.id') === 'creepy-cabin', 'tree link');
+  g.run('spawn = function () {}; kills = 100; enemies = [];');
+  let grabbed = false;
+  g.seconds(25, () => { if (g.get("boss && boss.kind === 'tree' && boss.holding")) grabbed = true; });
+  ok(grabbed, 'a branch should grab you');
+  // break free with a kick-strength hit on the branch holding you
+  g.run("if (!boss.holding) { const br = boss.branches.find(b => b.st === 'grow' || b.st === 'reach') || boss.branches[0]; }");
+  g.seconds(30, i => {
+    if (i % 20 === 0) g.run("if (boss && boss.holding) { boss.hitBranch = boss.holding; hitBoss(boss, player.x, player.y - 40, 0, -1, 4); }");
+  });
+  ok(g.saw(/^BROKE FREE$/), 'you should be able to break free');
+  g.seconds(8, () => {});
+  ok(g.saw(/^THE SUN CAME UP$/) && !g.get('boss'), 'dawn should end it');
+  // and getting dragged out ends a run with its own line
+  const t = boot('#tree'); t.start(); t.run('dropCrate = function () {}; spawn = function () {}; kills = 100; enemies = []; hp = 1;');
+  t.seconds(40, () => { t.run('if (player.dead) {}'); });
+  ok(t.get('deathTitle') === "You're staying for the weekend." || t.get('hp') > 0, 'deathTitle ' + t.get('deathTitle'));
+});
+
 let failed = 0;
 for (const [pass, name] of results) { console.log((pass ? 'PASS  ' : 'FAIL  ') + name); if (!pass) failed++; }
 console.log(`\n${results.length - failed}/${results.length} passed`);

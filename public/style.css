@@ -41,6 +41,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
   #overlay.picking .arena-card .top3 li{gap:4px}
   #overlay.picking .arena-card .top3 .r{display:none}   /* the order shows the ranking; saves room */
   #overlay.picking .arena-card .top3 .n{letter-spacing:.02em}
+  #overlay.picking .arenas.two-rows .top3 li:nth-child(n+2),#overlay.picking .arenas.two-rows .num{display:none}
 }
 .arena-card{display:grid;align-content:start;gap:2px;text-align:left;min-width:150px;padding:8px 14px 9px;border:3px solid var(--ink);border-radius:6px;background:var(--paper);color:var(--ink);box-shadow:3px 3px 0 var(--ink);cursor:pointer;font:inherit}
 .arena-card .num{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}

@@ -35,6 +35,9 @@ There is no winning. Every run ends with "You got rainbowed."
     and Buster (Grandpa's real border collie): frisbee, zoomies, herding, naps. The Rooster (50)
     crows shockwaves; Grandpa (100) mows the lawn until Grandma rings the dinner bell.
     "Get off my lawn." Built.
+  - Arena 6, Uncle's Creepy Cabin (Casey's idea): dark cabin, lightning, glowing-eyed
+    stickmen, a shotgun instead of the pistol, the trap door, and SPOOKY TIME (the lamp, the
+    deer head and the whole cabin laugh, with real sound). The Hand (50) and the Tree (100). Built.
 - The Long Hallway (arena 3), built:
   - Dim hotel hallway in ink: identical numbered doors, runner carpet, flickering
     fluorescent tubes with light cones, darker paper. Shelves: vending machine,
