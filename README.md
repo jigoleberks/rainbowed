@@ -49,7 +49,7 @@ ARENAS['grandmas-house'] = {
 };
 ```
 
-and add a `<script>` tag for it in `index.html`, after the engine core.
+and add a `<script>` tag for it in `index.html`, after the engine core. The start screen shows every arena in one swipeable row (arrows and arrow keys too), opening on the one you played last, so there's no limit on how many there are. Add the arena's id to `ARENAS` in `src/worker.js` to give it a leaderboard.
 
 ## Adding a boss
 

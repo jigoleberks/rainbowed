@@ -138,19 +138,10 @@ function showPicker() {
   arenaList.textContent = '';
   const cards = Object.values(ARENAS).map(a => ({...a, ready: true})).concat(COMING_SOON)
     .sort((a, b) => a.number - b.number);
-  // the card grid: 2 or 3 columns, all in one row on a sideways phone (see style.css)
-  if (arenaList.style && arenaList.style.setProperty) {
-    // six or more on a sideways phone: two rows, and each card shows just its #1
-    const rows = cards.length > 5 ? 2 : 1;
-    arenaList.style.setProperty('--n', Math.ceil(cards.length / rows));
-    arenaList.classList.toggle('two-rows', rows > 1);
-    arenaList.style.setProperty('--cols', cards.length <= 4 ? 2 : cards.length <= 6 ? 3 : 4);
-    arenaList.style.setProperty('--pcols', cards.length <= 4 ? 2 : cards.length <= 6 ? 3 : 4);
-    arenaList.classList.toggle('many', cards.length > 6);
-  }
   for (const a of cards) {
     const card = document.createElement('button');
     card.type = 'button'; card.className = 'arena-card'; card.disabled = !a.ready;
+    card.dataset.arena = a.id;
     const part = (cls, text) => { const s = document.createElement('span'); s.className = cls; s.textContent = text; card.appendChild(s); };
     part('num', 'Arena ' + a.number);
     part('name', a.name);
@@ -164,8 +155,54 @@ function showPicker() {
     arenaList.appendChild(card);
   }
   pickerTops();
+  // open the row on the arena you played last
+  let last = null; try { last = localStorage.getItem('rsb-last-arena'); } catch (e) {}
+  rowTo(last || arena.id, false);
 }
+
+// ---------- the arena row: swipe, arrows, keys ----------
+const arenaPrev = document.getElementById('arena-prev'), arenaNext = document.getElementById('arena-next');
+const rowCards = () => [...(arenaList.children || [])].filter(c => c.dataset && c.dataset.arena && !c.disabled);
+// the card nearest the middle of the row
+function rowFocus() {
+  const cards = rowCards();
+  if (!cards.length || !arenaList.getBoundingClientRect) return cards[0] || null;
+  const r = arenaList.getBoundingClientRect(), mid = r.left + r.width / 2;
+  let best = cards[0], bd = Infinity;
+  for (const c of cards) { const b = c.getBoundingClientRect(), d = Math.abs(b.left + b.width / 2 - mid); if (d < bd) { bd = d; best = c; } }
+  return best;
+}
+function rowUpdate() {
+  const f = rowFocus();
+  for (const c of rowCards()) c.classList.toggle('focus', c === f);
+  const cards = rowCards();
+  arenaPrev.disabled = !f || f === cards[0];
+  arenaNext.disabled = !f || f === cards[cards.length - 1];
+}
+function rowTo(id, smooth = true) {
+  const c = rowCards().find(c => c.dataset.arena === id);
+  if (!c || typeof arenaList.scrollTo !== 'function') return;
+  const go = () => { arenaList.scrollTo({left: c.offsetLeft - (arenaList.clientWidth - c.offsetWidth) / 2 - arenaList.offsetLeft * 0, behavior: smooth ? 'smooth' : 'auto'}); rowUpdate(); };
+  if (smooth) go(); else requestAnimationFrame(() => { go(); requestAnimationFrame(rowUpdate); });
+}
+function rowStep(dir) {
+  const cards = rowCards(), f = rowFocus(), i = Math.max(0, cards.indexOf(f));
+  const next = cards[clamp(i + dir, 0, cards.length - 1)];
+  if (next) rowTo(next.dataset.arena);
+}
+arenaPrev.addEventListener('click', () => rowStep(-1));
+arenaNext.addEventListener('click', () => rowStep(1));
+let rowRaf = 0;
+arenaList.addEventListener('scroll', () => { if (!rowRaf) rowRaf = requestAnimationFrame(() => { rowRaf = 0; rowUpdate(); }); }, {passive: true});
+// on the start screen: arrow keys move along the row, Enter or Space plays the one in the middle
+addEventListener('keydown', e => {
+  if (state !== 'title' || overlay.hidden || isTyping(e) || !overlay.classList.contains('picking')) return;
+  if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); rowStep(-1); }
+  else if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); rowStep(1); }
+  else if (e.code === 'Enter' || e.code === 'Space') { const f = rowFocus(); if (f) { e.preventDefault(); e.stopImmediatePropagation(); pickArena(f.dataset.arena); } }
+}, true);
 function pickArena(id) {
+  try { localStorage.setItem('rsb-last-arena', id); } catch (e) {}
   setArena(id); loadBest();
   bestEl.textContent = 'Best ' + pad6(best);
   start();

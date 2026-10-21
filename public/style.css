@@ -23,33 +23,28 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
 #overlay h2{font-family:var(--display);font-weight:400;font-size:clamp(1.3rem,5vw,2.5rem);line-height:1.05;margin:0;text-wrap:balance}
 #overlay .arena{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 #overlay p{margin:0;max-width:38ch;color:var(--muted);font-size:.82rem;line-height:1.5}
-#overlay .arenas{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
-/* the start screen: arenas in a 2x2 grid, and the intro line goes (it's in the about text) */
-#overlay.picking .arenas{display:flex;flex-wrap:wrap;justify-content:center;max-width:calc(var(--cols,2) * 200px + 20px)}
+/* the start screen: every arena in one row you swipe through (or use the arrows), so there's
+   always room for one more. The intro line goes here (it's in the about text). */
+#overlay .arena-row{display:none}
+#overlay.picking .arena-row{display:flex;align-items:center;gap:6px;width:100%;max-width:100%;--cw:176px}
+#overlay .arenas{display:flex;flex-wrap:nowrap;gap:12px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;padding:4px calc(50% - var(--cw) / 2) 10px;flex:1;min-width:0}
+#overlay .arenas::-webkit-scrollbar{display:none}
+#overlay .arenas .arena-card{flex:0 0 var(--cw);min-width:0;scroll-snap-align:center}
+#overlay .arenas .arena-card.focus{border-color:var(--accent);box-shadow:3px 3px 0 var(--accent)}
+.row-arrow{flex:0 0 auto;width:34px;height:34px;padding:0;border-radius:50%;border:2.5px solid var(--ink);background:var(--paper);box-shadow:2px 2px 0 var(--ink);font:inherit;font-size:.8rem;line-height:1;cursor:pointer;color:var(--ink);touch-action:manipulation}
+.row-arrow:disabled{opacity:.2;cursor:default}
 #overlay.picking #ov-text{display:none}
-/* lots of arenas: smaller cards so four fit across */
-#overlay.picking .arenas.many{max-width:calc(4 * 172px)}
-#overlay.picking .arenas.many .arena-card{min-width:0;max-width:166px;padding:6px 10px 7px}
-#overlay.picking .arenas.many .arena-card .name{font-size:1rem}
-#overlay.picking:has(.arenas.many) h2{font-size:clamp(1.1rem,3.6vw,1.9rem)}
 @media (max-height:520px){
   #overlay.picking h2{display:none}
   #overlay.picking{gap:6px;padding-inline:8px}
-  /* a phone on its side: all four arenas in one row */
-  #overlay.picking .arenas{display:grid;max-width:none;grid-template-columns:repeat(var(--n,4),minmax(0,1fr));gap:6px;width:100%}
-  #overlay.picking .arena-card{padding:5px 5px 6px;box-shadow:2px 2px 0 var(--ink);border-width:2.5px}
-  #overlay.picking .arena-card{container-type:inline-size}
-  #overlay.picking .arena-card .name{font-size:min(.8rem, 17cqw);line-height:1.05}
+  #overlay.picking .arena-row{--cw:150px}
+  #overlay.picking .arena-card{padding:5px 8px 6px;box-shadow:2px 2px 0 var(--ink);border-width:2.5px}
+  #overlay.picking .arena-card .name{font-size:.92rem;line-height:1.05}
   #overlay.picking .arena-card .num{font-size:.5rem}
-  #overlay.picking .arena-card .best{font-size:min(.52rem, 11cqw);white-space:nowrap}
-  #overlay.picking .arena-card .top3{font-size:.52rem;gap:0}
+  #overlay.picking .arena-card .best{font-size:.56rem}
+  #overlay.picking .arena-card .top3{font-size:.56rem;gap:0}
   #overlay.picking .arena-card .top3 li{gap:4px}
-  #overlay.picking .arena-card .top3 .r{display:none}   /* the order shows the ranking; saves room */
-  #overlay.picking .arena-card .top3 .n{letter-spacing:.02em}
-  #overlay.picking .arenas.two-rows .top3 li:nth-child(n+2),#overlay.picking .arenas.two-rows .num{display:none}
-  #overlay.picking .arenas.two-rows .arena-card{padding:3px 5px 4px;max-width:none}
-  #overlay.picking .arenas.two-rows .arena-card .name{font-size:min(.8rem, 13cqw)}
-  #overlay.picking .arenas.two-rows .top3{margin-top:2px;padding-top:2px}
+  #overlay.picking .row-arrow{width:28px;height:28px;font-size:.7rem}
 }
 .arena-card{display:grid;align-content:start;gap:2px;text-align:left;min-width:150px;padding:8px 14px 9px;border:3px solid var(--ink);border-radius:6px;background:var(--paper);color:var(--ink);box-shadow:3px 3px 0 var(--ink);cursor:pointer;font:inherit}
 .arena-card .num{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
@@ -62,7 +57,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
 .arena-card .top3 .s{margin-left:auto}
 .arena-card .top3 li:first-child{color:var(--accent)}
 .arena-card .top3 li.empty{color:var(--muted);font-style:italic}
-@media (max-width:560px){.arena-card .top3{display:none}#overlay.picking .arenas{display:grid;max-width:none;width:100%;grid-template-columns:repeat(var(--pcols,2),minmax(0,1fr));gap:6px}#overlay.picking .arena-card{padding:4px 8px 5px;container-type:inline-size}#overlay.picking .arena-card .name{font-size:min(.82rem, 11.5cqw)}#overlay.picking .arenas.many .num{display:none}#overlay.picking .arenas.many .arena-card .name{font-size:min(.82rem, 14.5cqw)}#overlay.picking .arenas.many .arena-card{padding:4px 5px 5px;max-width:none}#overlay.picking .arena-card .best{font-size:min(.55rem, 11cqw);white-space:nowrap}}
+@media (max-width:560px){.arena-card .top3{display:none}#overlay.picking .arena-row{--cw:118px}#overlay.picking .arenas{gap:8px}#overlay.picking .arena-card{padding:4px 8px 5px}#overlay.picking .arena-card .name{font-size:.82rem}#overlay.picking .arena-card .best{font-size:.55rem;white-space:nowrap}#overlay.picking .row-arrow{width:26px;height:26px;font-size:.65rem}}
 .arena-card:hover{border-color:var(--accent);box-shadow:3px 3px 0 var(--accent)}
 .arena-card:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .arena-card:disabled{border-style:dashed;box-shadow:none;background:transparent;color:var(--muted);cursor:default}
