@@ -82,6 +82,7 @@ function kill(e, dvx, dvy, head) {
     texts.push({x: e.x, y: e.y - 110, s: 'GRAB IT!', life: 1, big:false});
   }
   kills++; combo++; comboT = 1.7;
+  if (arena && arena.onKill) arena.onKill(e);
   const mult = Math.min(5, combo);
   const pts = (head ? 150 : 100) * mult;
   score += pts;

@@ -78,8 +78,60 @@ const sfx = (() => {
     try { fn(); return await ac.startRendering(); } finally { [ac, out, echo, noiseBuf] = saved; }
   }
 
+  // a plain little tone, for chimes and hold music
+  function tone(t, freq, dur, vol, wave = 'triangle', dest = out) {
+    const o = ac.createOscillator(); o.type = wave; o.frequency.value = freq;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + dur + 0.05);
+  }
+
+  // hold music: a cheerful four-chord loop, played down a phone line (tinny on purpose)
+  const HOLD = (() => {
+    const n = m => 440 * Math.pow(2, (m - 69) / 12);
+    // Cmaj7, Am7, Dm7, G7: bass note + arpeggio, then a little tune on top
+    const chords = [[48, 64, 67, 71, 72], [45, 64, 67, 69, 72], [50, 65, 69, 72, 74], [43, 65, 67, 71, 74]];
+    const tune = [76, 74, 72, 74, 76, 76, 76, null, 74, 74, 74, null, 76, 79, 79, null];
+    return {n, chords, tune, beat: 60 / 104 / 2};
+  })();
+  let holdNext = 0, holdStep = 0, holdLine = null, holdWanted = 0;
+  function holdMusic() {
+    if (!ready() || typeof ac.startRendering === 'function') return;
+    holdWanted = ac.currentTime;
+    if (!holdLine) {
+      holdLine = ac.createBiquadFilter(); holdLine.type = 'bandpass'; holdLine.frequency.value = 1200; holdLine.Q.value = 0.7;
+      const g = ac.createGain(); g.gain.value = 0.55; holdLine.connect(g); g.connect(out);
+    }
+    if (holdNext < ac.currentTime) holdNext = ac.currentTime + 0.05;
+    // schedule a little ahead
+    while (holdNext < ac.currentTime + 0.4) {
+      const b = HOLD.beat, step = holdStep % 64, chord = HOLD.chords[Math.floor(step / 16)], i = step % 16;
+      if (i % 8 === 0) tone(holdNext, HOLD.n(chord[0]), b * 3.5, 0.09, 'sine', holdLine);
+      tone(holdNext, HOLD.n(chord[1 + (i % 4)]), b * 0.9, 0.035, 'triangle', holdLine);
+      const m = HOLD.tune[i];
+      if (m && i % 2 === 0) tone(holdNext, HOLD.n(m), b * 1.8, 0.05, 'square', holdLine);
+      holdNext += b; holdStep++;
+    }
+  }
+
   return {
-    wake, record,
+    wake, record, holdMusic,
+    // "now serving": ding-dong
+    ding() {
+      if (!ready()) return;
+      const t = ac.currentTime + 0.01;
+      tone(t, 1318.5, 0.9, 0.12, 'sine'); tone(t, 2637, 0.4, 0.03, 'sine');
+      tone(t + 0.28, 1046.5, 1.1, 0.12, 'sine'); tone(t + 0.28, 2093, 0.5, 0.03, 'sine');
+    },
+    // a big rubber stamp
+    stamp() {
+      if (!ready()) return;
+      const t = ac.currentTime;
+      noise(t, 0.25, 'lowpass', 500, 0.8);
+      const o = ac.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.2);
+      const g = ac.createGain(); g.gain.setValueAtTime(0.6, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+      o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.3);
+    },
     get on() { return ready(); },
     // the cabin's laughing fit: the lamp, then the deer head, then everything
     laugh(who) {

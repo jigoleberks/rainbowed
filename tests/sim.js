@@ -665,6 +665,77 @@ test('The Tree grabs and drags you, you can break free, and it gives up at dawn'
   ok(t.get('deathTitle') === "You're staying for the weekend." || t.get('hp') > 0, 'deathTitle ' + t.get('deathTitle'));
 });
 
+test('The Waiting Room: stickmen take a number, sit down, and only come when called', () => {
+  const g = boot(); g.run("pickArena('waiting-room')"); g.godMode(); g.run('dropCrate = function () {};');
+  ok(g.get('arena.id') === 'waiting-room' && g.get("arena.bossLoop.join()") === 'giant,printer,giant,clerk', 'arena setup');
+  g.run('player.x = 700; player.y = 320;');   // up on the counter, out of the way
+  g.run("arena.wr.callT = 999;");              // nobody gets called for now
+  g.seconds(8, () => { g.run('player.x = 700; player.y = 320; arena.wr.callT = 999;'); });
+  const seated = g.get("enemies.filter(e => e.wr === 'seated').length");
+  ok(seated >= 2, 'they should be sitting with tickets: ' + seated);
+  ok(g.get("enemies.filter(e => e.wr === 'seated').every(e => e.ticket > 0 && e.pose === 'sit')"), 'tickets and sitting');
+  // call one: the lowest number gets up and comes for you
+  const low = g.get("Math.min(...enemies.filter(e => e.ticket).map(e => e.ticket))");
+  g.run('arena.callNext();'); g.step(1);
+  ok(g.get('arena.wr.nowServing') === low, 'now serving ' + g.get('arena.wr.nowServing') + ' not ' + low);
+  ok(g.get("enemies.some(e => e.ticket === " + low + " && e.wr === 'called')"), 'number ' + low + ' should be called');
+  ok(g.saw(new RegExp('^NUMBER ' + low + '!$')), 'it should say so');
+  // a kill calls the next number right away
+  const before = g.get('arena.wr.nowServing');
+  g.run("{ const e = enemies.find(e => e.wr === 'called'); kill(e, 1, 0, false); arena.wr.callT = Math.min(arena.wr.callT, 0.3); }");
+  g.seconds(0.6, () => {});
+  ok(g.get('arena.wr.nowServing') > before, 'a kill should call the next number');
+});
+
+test('The Waiting Room: Doug puts a stickman on hold', () => {
+  const g = boot(); g.run("pickArena('waiting-room')"); g.godMode(); g.run('dropCrate = function () {}; spawn = function () {};');
+  g.seconds(1, () => {});
+  g.run(`enemies = [{x: 300, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 120, drop: 0, jumpCd: 9, wr: 'called'}];
+    player.x = 600; arena.wr.doug.holdT = 0.01;`);
+  g.step(3);
+  ok(g.get('enemies[0].held > 0'), 'the stickman should be on hold');
+  const x0 = g.get('enemies[0].x'); g.seconds(1, () => {});
+  ok(Math.abs(g.get('enemies[0].x') - x0) < 2, 'and stay put while on hold');
+});
+
+test('The Printer jams, takes double damage jammed, and runs out of toner', () => {
+  const g = boot('#printer'); g.start(); g.godMode();
+  ok(g.get('arena.id') === 'waiting-room' && g.get('kills') === 49, 'printer link');
+  g.run('spawn = function () {}; dropCrate = function () {}; kills = 50; enemies = [];');
+  let jammed = false;
+  g.seconds(20, () => { if (g.get("boss && boss.kind === 'printer' && boss.st === 'jam'")) jammed = true; });
+  ok(jammed, 'the printer never jammed');
+  // jammed, a hit counts double
+  g.run("boss.st = 'jam'; boss.t = 2;"); const hp0 = g.get('boss.hp');
+  g.run('hitBoss(boss, boss.x, boss.y - 30, 1, 0, 3);');
+  ok(hp0 - g.get('boss.hp') === 6, 'jammed hits should count double: ' + (hp0 - g.get('boss.hp')));
+  g.type('sophy'); g.key('KeyJ');
+  g.seconds(60, () => {});
+  ok(g.saw(/^OUT OF TONER$/), 'the printer was never beaten');
+});
+
+test('The Clerk stamps DENIED, APPROVED heals, and she closes at 5:00', () => {
+  const g = boot('#clerk'); g.start(); g.godMode(); g.run('dropCrate = function () {};');
+  ok(g.get('arena.id') === 'waiting-room', 'clerk link');
+  g.run('spawn = function () {}; kills = 100; enemies = [];');
+  let stamped = false;
+  g.seconds(10, () => { if (g.get("boss && boss.kind === 'clerk' && boss.stamps.some(s => s.st === 'down')")) stamped = true; });
+  ok(stamped, 'no stamp came down');
+  // an APPROVED stamp right on top of you gives a heart back
+  g.run("hp = 3; boss.stamps.push({x: player.x, y: stampSurface(player.x), st: 'aim', t: 0.05, approved: true}); boss.cd = 99;");
+  g.step(20);
+  ok(g.get('hp') === 4, 'approved should heal: hp ' + g.get('hp'));
+  g.run('boss.cd = 0;');
+  g.seconds(45, () => {});
+  ok(g.saw(/^CLOSED$/) && !g.get('boss') && g.get("arena.wr.clerk.st") === 'away', 'she should close up at 5:00');
+  // and a DENIED stamp can end your run
+  const t = boot('#clerk'); t.start(); t.run('dropCrate = function () {}; spawn = function () {}; kills = 100; enemies = [];');
+  t.seconds(4, () => {});
+  t.run("hp = 1; invuln = 0; boss.stamps.push({x: player.x, y: stampSurface(player.x), st: 'aim', t: 0.05, approved: false}); boss.cd = 99;");
+  t.step(20);
+  ok(t.get('deathTitle') === 'Please take a number.', 'deathTitle ' + t.get('deathTitle'));
+});
+
 let failed = 0;
 for (const [pass, name] of results) { console.log((pass ? 'PASS  ' : 'FAIL  ') + name); if (!pass) failed++; }
 console.log(`\n${results.length - failed}/${results.length} passed`);

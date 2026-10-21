@@ -35,8 +35,9 @@ function drawStick(e, kind) {
   if ((kind === 'player' && rainbowT > 0 && !(rainbowT < 1 && Math.floor(clock * 14) % 2)) || e.glow) col = `hsl(${(clock * 600 + (e.glow ? 180 : 0)) % 360} 85% 50%)`;
   ctx.strokeStyle = col; ctx.lineWidth = 3.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   const pose = e.pose;
-  const crouch = pose === 'crouch';
-  const hipY = crouch ? -23 : -30, shY = crouch ? -46 : -52;
+  const crouch = pose === 'crouch', sit = pose === 'sit';
+  // sitting (the Waiting Room): hips on the seat at e.y, feet down on the floor 26px below
+  const hipY = sit ? -2 : crouch ? -23 : -30, shY = sit ? -24 : crouch ? -46 : -52;
   const lean = crouch ? 6 * f : (pose === 'dash' ? 8 * f : (pose === 'tired' ? 4 * f : 0));
   const neckX = 2 * f + lean, neckY = shY - 5, headX = neckX, headY = neckY - 10;
   const mv = Math.min(1, Math.abs(e.vx) / 120);
@@ -45,6 +46,7 @@ function drawStick(e, kind) {
   if (pose === 'stompWind') { poly([0, hipY, f * 12, -44, f * 17, -30]); poly([0, hipY, -f * 2, -15, 0, 0]); }
   else if (pose === 'kick') { poly([0, hipY, f * 14, -36, f * 31, -40]); poly([0, hipY, -f * 4, -15, -f * 7, 0]); }
   else if (crouch) { poly([0, hipY, f * 12, -13, f * 11, 0]); poly([0, hipY, -f * 6, -11, -f * 13, 0]); }
+  else if (sit) { poly([0, hipY, f * 14, hipY, f * 13, 24]); poly([0, hipY, f * 10, hipY + 1, f * 8, 24]); }
   else {
     for (let i = 0; i < 2; i++) {
       let fx, fy, kx, ky;
@@ -142,6 +144,7 @@ function drawStick(e, kind) {
       case 'dash': A(f * 12, shY, f * 25, shY - 1); A(-f * 9, shY + 6, -f * 15, shY + 12); break;
       case 'kick': A(-f * 10, shY + 4, -f * 18, shY - 2); A(f * 8, shY - 6, f * 4, shY - 14); break;
       case 'crouch': A(f * 9, shY + 6, f * 15, shY - 2); A(f * 3, shY + 9, f * 10, shY + 4); break;
+      case 'sit': A(f * 7, shY + 11, f * 13, shY + 17); A(f * 3, shY + 12, f * 10, shY + 18); break;
       case 'tired': A(f * 5, shY + 12, f * 6, hipY + 6); A(-f * 3, shY + 12, -f * 2, hipY + 6); break;
       case 'stompWind': A(-f * 12, shY + 2, -f * 18, shY - 8); A(f * 12, shY + 2, f * 18, shY - 8); break;
       default:

@@ -38,6 +38,10 @@ There is no winning. Every run ends with "You got rainbowed."
   - Arena 6, Uncle's Creepy Cabin (Casey's idea): dark cabin, lightning, glowing-eyed
     stickmen, a shotgun instead of the pistol, the trap door, and SPOOKY TIME (the lamp, the
     deer head and the whole cabin laugh, with real sound). The Hand (50) and the Tree (100). Built.
+    Casey's recordings of the laughs are coming to replace the synthesized ones.
+  - Arena 7, The Waiting Room (Claude's pick): stickmen take a number and only come when called,
+    every kill calls the next; hold music; Doug on the phone puts stickmen on hold. The Printer
+    (50, PAPER JAM) and the Clerk (100, DENIED stamps, closes at 5:00). Built.
 - The Long Hallway (arena 3), built:
   - Dim hotel hallway in ink: identical numbered doors, runner carpet, flickering
     fluorescent tubes with light cones, darker paper. Shelves: vending machine,

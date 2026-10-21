@@ -162,6 +162,11 @@ function updateEnemies(dt) {
       physics(e, dt, false);
       e.x = clamp(e.x, 10, W - 10);
       if (e.onGround) { e.thrown = false; e.spin = 0; dust(e.x, e.y); }
+    } else if (arena.holdEnemy && arena.holdEnemy(e, dt)) {
+      // the arena has this one busy (the Waiting Room: sitting with a ticket, or on hold)
+      physics(e, dt, e.drop > 0);
+      e.phase += dt * Math.abs(e.vx) * 0.05;
+      continue;
     } else {
       e.facing = dx >= 0 ? 1 : -1;
       const tv = !chasing || Math.abs(dx) < 6 ? 0 : e.speed * e.facing;

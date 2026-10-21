@@ -144,8 +144,9 @@ function showPicker() {
     const rows = cards.length > 5 ? 2 : 1;
     arenaList.style.setProperty('--n', Math.ceil(cards.length / rows));
     arenaList.classList.toggle('two-rows', rows > 1);
-    arenaList.style.setProperty('--cols', cards.length <= 4 ? 2 : 3);
-    arenaList.style.setProperty('--pcols', cards.length <= 4 ? 2 : 3);
+    arenaList.style.setProperty('--cols', cards.length <= 4 ? 2 : cards.length <= 6 ? 3 : 4);
+    arenaList.style.setProperty('--pcols', cards.length <= 4 ? 2 : cards.length <= 6 ? 3 : 4);
+    arenaList.classList.toggle('many', cards.length > 6);
   }
   for (const a of cards) {
     const card = document.createElement('button');

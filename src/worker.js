@@ -10,7 +10,7 @@
    cheater could still get through, and a bad entry can be removed in the Cloudflare
    dashboard (Storage & Databases > KV > the SCORES namespace > edit the top:<arena> key). */
 
-const ARENAS = ['page-one', 'grandmas-house', 'long-hallway', 'bear-cave', 'grandpas-farm', 'creepy-cabin'];
+const ARENAS = ['page-one', 'grandmas-house', 'long-hallway', 'bear-cave', 'grandpas-farm', 'creepy-cabin', 'waiting-room'];
 const SIZE = 10;
 // three-letter words that shouldn't go on the board
 const BLOCKED = new Set(('FUK FUC FCK FUQ FKU CUM SEX TIT TTS DIK DIC DIX COK COC KOK CNT KNT JIZ JZZ ' +
