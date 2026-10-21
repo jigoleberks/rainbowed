@@ -118,7 +118,7 @@ site. Rename Sophy for the public build.
 
 ## Next arenas (fleshed out, not built yet)
 
-### The Bluenose (Arenas idea from Aron)
+### The Bluenose
 On the deck of the Bluenose, the Nova Scotia racing schooner (the one on the dime), out at sea.
 - The arena rocks: the deck slowly tilts with the swell, so you slide a little downhill and
   stickmen do too. Now and then a big wave crashes over the rail, shoves everyone across the
