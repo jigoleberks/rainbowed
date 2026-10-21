@@ -147,17 +147,21 @@ A prehistoric valley: ferns, a smoking volcano in the background, a river and ta
 - Shelves: a fallen log, rocky ledges, a giant fern, and the back of a sleeping Brontosaurus
   that sometimes stands up and wanders a few steps (the shelf moves).
 - Stickmen are cavemen with clubs, coming out of the cave and down the ledges.
-- Chaos agent, a little dinosaur (tiny, fast, very brave) that charges whatever's nearest,
-  stickman or you, and occasionally steals an egg from a nest and runs off with it, starting
-  a stampede of whoever wanted the egg.
+- Chaos agent, the baby T. rex (from the Lego T. rex family on Aron's desk): tiny, furious and
+  very brave. It charges whatever's nearest, stickman or you, and flails its little arms at
+  it. Now and then it steals an egg from a nest and runs off with it, starting a stampede of
+  whoever wanted the egg.
 - A pterodactyl now and then swoops down and carries a stickman off (or you, briefly, then
   drops you somewhere unhelpful).
 - Sub-boss (50), the Triceratops: charges across the valley like a bull with a "!" first. Jump
   it or get launched; it hits the far wall and staggers, and that's your window.
-- Finale (100), the T. rex: unkillable, enormous, stomping shockwaves, and a roar that knocks
-  you back. The joke: its arms are too short. Get right underneath it and it can't reach you;
-  it just flails its little arms. Survive until the meteor arrives: a giant rainbow meteor
-  streaks in and wipes the whole valley in a rainbow ("EXTINCT"), and the run carries on.
+- Finale (100), the T. rex family: the baby's parents (a big one and a medium one) stomp in
+  together with the baby running between their feet. Unkillable, stomping shockwaves, roars
+  that knock you back. The joke: every one of them has arms that are too short. Get right
+  underneath one and it can't reach you, it just flails its little arms (and the family
+  sometimes tries to high-five each other and can't). Survive until the meteor arrives: a
+  giant rainbow meteor streaks in and wipes the whole valley in a rainbow ("EXTINCT"), and
+  the run carries on.
 - Death lines: "You got fossilized." (the T. rex), "Trampled." (Triceratops).
 
 ### Leonardo's Workshop (Casey's idea)
