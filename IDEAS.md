@@ -115,3 +115,66 @@ barely needs to reload at all. That gives players a reason to go climb for them.
 Wrap the web app as a Trusted Web Activity (PWABuilder or Bubblewrap). Needs a $25
 developer account, 12 testers for 14 days, a privacy page and an assetlinks.json on the
 site. Rename Sophy for the public build.
+
+## Next arenas (fleshed out, not built yet)
+
+### The Bluenose (Arenas idea from Aron)
+On the deck of the Bluenose, the Nova Scotia racing schooner (the one on the dime), out at sea.
+- The arena rocks: the deck slowly tilts with the swell, so you slide a little downhill and
+  stickmen do too. Now and then a big wave crashes over the rail, shoves everyone across the
+  deck and washes some of the rainbow paint off.
+- Shelves: the cargo hatch, stacked lobster traps, the boom, the rigging, and the crow's nest
+  way up top. The boom swings across the deck every so often: duck or get swept off your feet.
+- Stickmen climb over the rails dripping wet, or swing in on ropes from the rigging.
+- Sharks leap clean over the ship now and then, in an arc, and snap up anything in the air:
+  stickmen, you, a grenade. A fin circling alongside warns you which side.
+- Chaos agent, a seagull: steals things (your second gun, a crate) and flies off with them,
+  or drops something on a stickman's head. "MINE." Gulls only take, never give... usually.
+- The supply crate is a lobster trap on a rope.
+- Sub-boss (50), the Lobster: a huge lobster hauls itself up over the rail. Hard shell from
+  the front (bullets ping off), soft from behind, so you have to get round it. Scuttles
+  sideways, snaps with both claws, and grabs you if you get close. KO: "BUTTERED".
+- Finale (100), the Shark: a shark the size of the ship. Unkillable. It circles, then leaps
+  across the deck jaws first; sometimes it rams the hull and the whole ship lurches. Survive
+  until the lighthouse at Peggy's Cove comes into view: "LAND HO!"
+- Death lines: "Man overboard." (the Shark), "You got chummed." (sharks), "Snip snip." (the
+  Lobster).
+
+### The Valley (dinosaurs)
+A prehistoric valley: ferns, a smoking volcano in the background, a river and tar pits.
+- Tar pits slow you down like the hallway's ink, and the volcano spits glowing rocks that
+  land as hazards (and burst into rainbows when they hit stickmen).
+- Shelves: a fallen log, rocky ledges, a giant fern, and the back of a sleeping Brontosaurus
+  that sometimes stands up and wanders a few steps (the shelf moves).
+- Stickmen are cavemen with clubs, coming out of the cave and down the ledges.
+- Chaos agent, a little dinosaur (tiny, fast, very brave) that charges whatever's nearest,
+  stickman or you, and occasionally steals an egg from a nest and runs off with it, starting
+  a stampede of whoever wanted the egg.
+- A pterodactyl now and then swoops down and carries a stickman off (or you, briefly, then
+  drops you somewhere unhelpful).
+- Sub-boss (50), the Triceratops: charges across the valley like a bull with a "!" first. Jump
+  it or get launched; it hits the far wall and staggers, and that's your window.
+- Finale (100), the T. rex: unkillable, enormous, stomping shockwaves, and a roar that knocks
+  you back. The joke: its arms are too short. Get right underneath it and it can't reach you;
+  it just flails its little arms. Survive until the meteor arrives: a giant rainbow meteor
+  streaks in and wipes the whole valley in a rainbow ("EXTINCT"), and the run carries on.
+- Death lines: "You got fossilized." (the T. rex), "Trampled." (Triceratops).
+
+### Leonardo's Workshop (Casey's idea)
+A Renaissance artist's workshop: parchment walls covered in sepia sketches, easels, a
+half-finished painting, a hanging flying machine, notebooks of mirror writing.
+- The stickmen are sepia sketches that step off the parchment, and they leave a blank spot
+  on the wall where they were drawn. In this arena the rainbows are the only real colour.
+- Shelves: the workbench, the easels, a scaffold, and the flying machine hanging from the
+  ceiling (it swings when you land on it).
+- Running gag, the portrait on the easel: her eyes follow you around the room, and her smile
+  changes depending on how you're doing. Now and then she does something (a wink turns a
+  stickman back into a sketch and it falls apart).
+- Sub-boss (50), the Flying Machine: the hanging ornithopter breaks loose and flaps around the
+  workshop, dropping paint pots and swooping at you. KO: "GROUNDED".
+- Finale (100), the Vitruvian Man, who (in Casey's words) is trying to kick your ass. He
+  steps out of his circle-and-square drawing with four arms and four legs. In his square
+  stance he does a four-legged kick flurry; in his circle he cartwheels across the workshop
+  like a wheel. Unkillable. Survive until the drawing is finished and he's pulled back onto
+  the page: "BACK TO THE DRAWING BOARD."
+- Death lines: "Perfectly proportioned." (the Vitruvian Man), "Grounded." (the Flying Machine).
