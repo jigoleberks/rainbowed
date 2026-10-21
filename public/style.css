@@ -144,20 +144,26 @@ body.editing .rack{outline:3px dashed var(--accent);outline-offset:6px;border-ra
 .help b{color:var(--ink);font-weight:600}
 @media (pointer:coarse){.pad{display:flex}.help-desk{display:none}}
 @media (pointer:fine){.help-touch{display:none}}
-/* Phone sideways: controls on the sides, vertically centred where thumbs rest; the arena gets the full height */
+/* Phone sideways: the arena gets the whole screen and the buttons float over its edges.
+   There's a real margin to the screen edge so a thumb doesn't slide off Fire. */
 @media (pointer:coarse) and (orientation:landscape){
-  /* the side columns are never narrower than the buttons (plus room for their shadows), and
-     there's a real margin to the screen edge, so a thumb doesn't slide off Fire; the arena
-     gives up the space instead */
-  .wrap{max-width:none;min-height:100dvh;display:grid;grid-template-columns:minmax(calc(var(--bs) * 2.44 + 14px),1fr) auto minmax(calc(var(--bs) * 2.44 + 14px),1fr);grid-template-areas:"move stage act";align-items:center;gap:12px;padding-block:6px;padding-left:max(30px,calc(env(safe-area-inset-left,0px) + 18px));padding-right:max(30px,calc(env(safe-area-inset-right,0px) + 18px));box-sizing:border-box}
+  /* the arena takes the whole screen and the buttons float over its edges, see-through */
+  .wrap{max-width:none;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:6px 0;box-sizing:border-box}
   .bar,.help,.about{display:none}
-  .stage{grid-area:stage;max-width:none;margin:0}
+  .stage{max-width:none;margin:0;width:min(calc(100vw - 2 * max(8px, env(safe-area-inset-left,0px), env(safe-area-inset-right,0px))),calc((100dvh - 12px) * 16 / 9))}
   .pad{display:contents}
   .wrap,.pad{--bs:calc(52px * var(--pad-scale, 1))}
-  .stage{width:min(calc(100vw - var(--bs) * 4.88 - 28px - 24px - 60px - 2 * max(0px, env(safe-area-inset-left,0px) - 12px)),calc((100dvh - 16px) * 16 / 9))}
-  /* each side's height is set by the Move buttons editor (--pad-left / --pad-right, in % of screen height) */
-  .rack-l{grid-area:move;align-self:start;justify-self:center;margin-top:calc(var(--pad-left, 18) * 1dvh)}
-  .rack-r{grid-area:act;align-self:start;justify-self:center;margin-top:calc(var(--pad-right, 14) * 1dvh)}
+  .rack{position:fixed;z-index:5;pointer-events:none;transition:opacity .2s}
+  .rack button{pointer-events:auto;opacity:.5;background:color-mix(in srgb,var(--paper) 70%,transparent);box-shadow:2px 2px 0 color-mix(in srgb,var(--ink) 50%,transparent)}
+  .rack .fire{background:color-mix(in srgb,var(--accent) 80%,transparent)}
+  .rack button.on{opacity:1}
+  .rack-l{left:max(30px,calc(env(safe-area-inset-left,0px) + 18px));top:calc(var(--pad-left, 18) * 1dvh)}
+  .rack-r{right:max(30px,calc(env(safe-area-inset-right,0px) + 18px));top:calc(var(--pad-right, 14) * 1dvh)}
+  /* menus up: the buttons get out of the way of the arena arrows and the initials */
+  body:has(#overlay:not([hidden])) .rack{opacity:0}
+  body:has(#overlay:not([hidden])) .rack button{pointer-events:none}
+  body.editing .rack{pointer-events:auto}
+  body.editing .rack button{opacity:.85}
   #overlay.picking #edit-pad{display:inline-block;font-size:.8rem;padding:4px 14px}
 }
 
