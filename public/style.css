@@ -146,12 +146,15 @@ body.editing .rack{outline:3px dashed var(--accent);outline-offset:6px;border-ra
 @media (pointer:fine){.help-touch{display:none}}
 /* Phone sideways: controls on the sides, vertically centred where thumbs rest; the arena gets the full height */
 @media (pointer:coarse) and (orientation:landscape){
-  .wrap{max-width:none;min-height:100dvh;display:grid;grid-template-columns:1fr auto 1fr;grid-template-areas:"move stage act";align-items:center;gap:10px;padding-block:6px;padding-left:max(24px,calc(env(safe-area-inset-left,0px) + 12px));padding-right:max(24px,calc(env(safe-area-inset-right,0px) + 12px))}
+  /* the side columns are never narrower than the buttons (plus room for their shadows), and
+     there's a real margin to the screen edge, so a thumb doesn't slide off Fire; the arena
+     gives up the space instead */
+  .wrap{max-width:none;min-height:100dvh;display:grid;grid-template-columns:minmax(calc(var(--bs) * 2.44 + 14px),1fr) auto minmax(calc(var(--bs) * 2.44 + 14px),1fr);grid-template-areas:"move stage act";align-items:center;gap:12px;padding-block:6px;padding-left:max(30px,calc(env(safe-area-inset-left,0px) + 18px));padding-right:max(30px,calc(env(safe-area-inset-right,0px) + 18px));box-sizing:border-box}
   .bar,.help,.about{display:none}
   .stage{grid-area:stage;max-width:none;margin:0}
   .pad{display:contents}
   .wrap,.pad{--bs:calc(52px * var(--pad-scale, 1))}
-  .stage{width:min(calc(100vw - var(--bs) * 4.88 - 84px),calc((100dvh - 16px) * 16 / 9))}
+  .stage{width:min(calc(100vw - var(--bs) * 4.88 - 28px - 24px - 60px - 2 * max(0px, env(safe-area-inset-left,0px) - 12px)),calc((100dvh - 16px) * 16 / 9))}
   /* each side's height is set by the Move buttons editor (--pad-left / --pad-right, in % of screen height) */
   .rack-l{grid-area:move;align-self:start;justify-self:center;margin-top:calc(var(--pad-left, 18) * 1dvh)}
   .rack-r{grid-area:act;align-self:start;justify-self:center;margin-top:calc(var(--pad-right, 14) * 1dvh)}
