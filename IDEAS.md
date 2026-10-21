@@ -182,3 +182,28 @@ half-finished painting, a hanging flying machine, notebooks of mirror writing.
   like a wheel. Unkillable. Survive until the drawing is finished and he's pulled back onto
   the page: "BACK TO THE DRAWING BOARD."
 - Death lines: "Perfectly proportioned." (the Vitruvian Man), "Grounded." (the Flying Machine).
+
+### The Library
+A quiet public library: tall bookshelves, reading tables with green lamps, a card catalogue,
+a QUIET PLEASE sign, and the Librarian at the front desk, glaring over her glasses.
+- The arena's rule is silence. Every gunshot fills the QUIET PLEASE sign (it lights up as it
+  fills). When it's full the Librarian stands up and goes "SHHHHH!": a shush wave rolls across
+  the room (a real, synthesized shush with the sound on) that knocks everyone back and puts
+  your gun on silent for a few seconds (you can't shoot, only kick). Kicks, stomps and
+  rainbows are quiet. So the library rewards kicking more than anywhere else.
+- Shelves: the bookcases (with a rolling ladder that slides along them when you land on it),
+  the reading tables, the card catalogue, the returns cart.
+- Stickmen are patrons coming in the doors and climbing out from between the stacks. Some are
+  reading and won't come for you until you make noise near them.
+- Chaos agent, the returns cart: it rolls across the floor now and then, slowly picking up
+  speed, bowling over stickmen (and you), and books fly off it.
+- Sub-boss (50), the Encyclopedia Set: twenty-six volumes, A to Z, that march across the
+  shelves in a line like a centipede. Shoot or kick them off one volume at a time; the head
+  (volume A) is the only one that bites. KO: "COMPLETE SET".
+- Finale (100), the Librarian: she's had enough. Unkillable. She patrols the aisles, shushes
+  constantly (every shush silences your gun), throws heavy hardcovers in arcs, and fines you:
+  getting hit takes a heart and a LATE FEE off your score. The only way through is quietly:
+  kicks and dodging. Survive until closing time and she flicks the lights off and on:
+  "THE LIBRARY IS NOW CLOSED."
+- Death lines: "Your library card has been revoked." (the Librarian), "Volume Z got you."
+  (the Encyclopedia Set).
