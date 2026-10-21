@@ -192,9 +192,11 @@
   }
 
   // ---------- Doug, on the phone ----------
+  const DOUG_BLUE = '#3f6db0';
+  const DOUG_SHOT = ["I'm on a call.", 'Do you mind?', 'HR is going to hear about this.', 'Not now.', 'Can you not?', "I'm literally on the phone."];
   const DOUG_LINES = ['Yep.', 'Mm-hm.', "No, it's chaos here.", 'Uh huh.', 'Can you hold?', 'Totally.', 'Is it Friday yet?', "I'll have to call you back. No I won't.", 'They took a number, Linda.'];
   function makeDoug() {
-    const d = {x: 640, y: G, vx: 0, vy: 0, facing: -1, phase: 0, onGround: true, scale: 1, t: 0, sayT: 2, say: null, holdT: rand(14, 20), dest: 300, front: true};
+    const d = {x: 640, y: G, vx: 0, vy: 0, facing: -1, phase: 0, onGround: true, scale: 1, t: 0, sayT: 2, say: null, holdT: rand(14, 20), dest: 300, front: true, col: DOUG_BLUE, shotT: 0};
     d.update = dt => {
       // stroll somewhere, stop, chat, repeat
       const dd = d.dest - d.x;
@@ -203,6 +205,11 @@
       d.sayT -= dt;
       if (d.sayT <= 0) { d.say = DOUG_LINES[Math.floor(Math.random() * DOUG_LINES.length)]; d.sayT = rand(3.5, 6); d.sayLife = 2.2; }
       d.sayLife -= dt; if (d.sayLife <= 0) d.say = null;
+      // shooting him does nothing (the bullets go through), except annoy him
+      d.shotT = Math.max(0, d.shotT - dt);
+      if (d.shotT <= 0 && bullets.some(b => Math.abs(b.x - d.x) < 12 && b.y > d.y - 78 && b.y < d.y)) {
+        d.say = DOUG_SHOT[Math.floor(Math.random() * DOUG_SHOT.length)]; d.sayLife = 2; d.sayT = 4; d.shotT = 3;
+      }
       // "Can you hold?": the nearest one coming at you is put on hold
       if (state === 'play' && !boss) {
         d.holdT -= dt;
@@ -218,13 +225,25 @@
       }
     };
     d.draw = () => {
+      // office blue: the only blue stick figure in the game, so you know he's not one of them
       drawStick(d, 'enemy');
-      const f = d.facing, hx = d.x + 2 * f, hy = d.y - 67;
-      // a tie, and the phone at his ear
-      ctx.fillStyle = '#2b4a6b'; ctx.beginPath(); ctx.moveTo(d.x + f * 2, d.y - 52); ctx.lineTo(d.x + f * 4, d.y - 40); ctx.lineTo(d.x, d.y - 40); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = INK; ctx.lineWidth = 3; line(d.x, d.y - 50, hx - f * 7, hy + 4);
+      const f = d.facing, hx = d.x + 2 * f, hy = d.y - 67, blue = DOUG_BLUE;
+      // a big red tie
+      ctx.fillStyle = '#d63b3b'; ctx.strokeStyle = INK; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(d.x + f * 1, d.y - 55); ctx.lineTo(d.x + f * 6, d.y - 50); ctx.lineTo(d.x + f * 5, d.y - 34); ctx.lineTo(d.x + f * 1, d.y - 30); ctx.lineTo(d.x - f * 1, d.y - 34); ctx.lineTo(d.x - f * 3, d.y - 50); ctx.closePath(); ctx.fill(); ctx.stroke();
+      // lanyard and ID badge
+      ctx.strokeStyle = '#2fb866'; ctx.lineWidth = 1.5; line(d.x - f * 3, d.y - 54, d.x - f * 6, d.y - 42); line(d.x + f * 5, d.y - 54, d.x - f * 6, d.y - 42);
+      ctx.fillStyle = PAPER; ctx.fillRect(d.x - f * 6 - 4, d.y - 42, 8, 10); ctx.strokeStyle = INK; ctx.lineWidth = 1; ctx.strokeRect(d.x - f * 6 - 4, d.y - 42, 8, 10);
+      // glasses
+      ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(hx + f * 3, hy - 1, 2.6, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.arc(hx + f * 8, hy - 1, 2.6, 0, Math.PI * 2); ctx.stroke();
+      // the phone at his ear
+      ctx.strokeStyle = blue; ctx.lineWidth = 3.5; line(d.x, d.y - 50, hx - f * 7, hy + 4);
       ctx.fillStyle = '#1d1b22'; ctx.fillRect(hx - f * 9 - 2, hy - 6, 4, 13);
-      ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(hx + f * 4, hy - 2, 1.4, 0, Math.PI * 2); ctx.fill();
+      // and a coffee mug in the other hand
+      const mx = d.x + f * 15, my = d.y - 40;
+      ctx.fillStyle = '#f4f1ea'; ctx.fillRect(mx - 4, my - 7, 8, 9); ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.strokeRect(mx - 4, my - 7, 8, 9);
+      ctx.beginPath(); ctx.arc(mx + f * 5, my - 3, 2.5, -1.4, 1.4); ctx.stroke();
+      ctx.strokeStyle = MUTED; ctx.lineWidth = 1; line(mx - 1, my - 10 - Math.sin(clock * 4) * 2, mx + 1, my - 15);
       if (d.say) { ctx.fillStyle = INK; ctx.font = '13px "Permanent Marker", cursive'; ctx.textAlign = 'center'; ctx.fillText(d.say, clamp(d.x, 90, W - 90), d.y - 92); }
     };
     return d;

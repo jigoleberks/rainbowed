@@ -31,7 +31,7 @@ function drawStick(e, kind) {
   if (s !== 1) ctx.scale(s, s);
   if (e.spin) { ctx.translate(0, -34); ctx.rotate(e.spin * (e.flipSign !== undefined ? e.flipSign : f)); ctx.translate(0, 34); }
   if (e.tilt) { ctx.translate(0, -30); ctx.rotate(e.tilt * f); ctx.translate(0, 30); }
-  let col = e.ghost ? MUTED : (e.hitT > 0 ? ACCENT : INK);
+  let col = e.ghost ? MUTED : (e.hitT > 0 ? ACCENT : e.col || INK);
   if ((kind === 'player' && rainbowT > 0 && !(rainbowT < 1 && Math.floor(clock * 14) % 2)) || e.glow) col = `hsl(${(clock * 600 + (e.glow ? 180 : 0)) % 360} 85% 50%)`;
   ctx.strokeStyle = col; ctx.lineWidth = 3.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   const pose = e.pose;

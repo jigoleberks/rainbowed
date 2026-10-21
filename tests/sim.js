@@ -722,7 +722,7 @@ test('The Clerk stamps DENIED, APPROVED heals, and she closes at 5:00', () => {
   g.seconds(10, () => { if (g.get("boss && boss.kind === 'clerk' && boss.stamps.some(s => s.st === 'down')")) stamped = true; });
   ok(stamped, 'no stamp came down');
   // an APPROVED stamp right on top of you gives a heart back
-  g.run("hp = 3; boss.stamps.push({x: player.x, y: stampSurface(player.x), st: 'aim', t: 0.05, approved: true}); boss.cd = 99;");
+  g.run("hp = 3; boss.stamps = []; boss.cd = 99; boss.stamps.push({x: player.x, y: stampSurface(player.x), st: 'aim', t: 0.05, approved: true});");
   g.step(20);
   ok(g.get('hp') === 4, 'approved should heal: hp ' + g.get('hp'));
   g.run('boss.cd = 0;');
@@ -734,6 +734,16 @@ test('The Clerk stamps DENIED, APPROVED heals, and she closes at 5:00', () => {
   t.run("hp = 1; invuln = 0; boss.stamps.push({x: player.x, y: stampSurface(player.x), st: 'aim', t: 0.05, approved: false}); boss.cd = 99;");
   t.step(20);
   ok(t.get('deathTitle') === 'Please take a number.', 'deathTitle ' + t.get('deathTitle'));
+});
+
+test("The Waiting Room: shooting Doug does nothing but annoy him", () => {
+  const g = boot(); g.run("pickArena('waiting-room')"); g.godMode(); g.run('dropCrate = function () {}; spawn = function () {}; enemies = [];');
+  g.seconds(1, () => {});
+  g.run('arena.wr.doug.x = 400; arena.wr.doug.dest = 400; arena.wr.doug.say = null; arena.wr.doug.sayT = 99; player.x = 250; player.y = G; player.facing = 1;');
+  const k0 = g.get('kills');
+  g.run('bullets.push({x: 390, y: G - 40, vx: 1150, vy: 0, life: 0.8});'); g.step(2);
+  ok(g.get('arena.wr.doug.say') !== null, 'Doug should complain');
+  ok(g.get('kills') === k0, 'and not get hurt');
 });
 
 let failed = 0;
