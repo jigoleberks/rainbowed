@@ -207,3 +207,19 @@ a QUIET PLEASE sign, and the Librarian at the front desk, glaring over her glass
   "THE LIBRARY IS NOW CLOSED."
 - Death lines: "Your library card has been revoked." (the Librarian), "Volume Z got you."
   (the Encyclopedia Set).
+
+## Bosses without an arena yet
+
+### The Wolf in a Backpack
+A big wolf wearing a hiking backpack. Kill him and the backpack unzips and another wolf climbs
+out, a size smaller and wearing a smaller backpack. Kill that one and another climbs out, like
+nesting dolls.
+- Each wolf is smaller, faster and jumpier than the last. The big one is slow and takes a lot
+  of hits; the little ones are quick, hard to hit and nip at your ankles.
+- Each one drops its empty backpack where it died, so the floor slowly fills with little
+  backpacks.
+- The last one is a tiny wolf with a tiny backpack. Kill it and the backpack unzips and has
+  nothing in it but a sandwich. Eat it (walk over it) for a heart back. KO: "UNPACKED".
+- Fits a forest or camping arena (a campsite at night, with tents and a campfire), or the
+  Valley or Bear Cave as a sub-boss.
+- Death line: "You got wolfed. Several times."
