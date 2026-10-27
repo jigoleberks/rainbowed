@@ -230,7 +230,7 @@ WILL BE TRAPPED. The woods are full of booby traps, and the stickmen keep walkin
 - Who set the traps? The finale explains it.
 - Finale (100), the Wolf in a Backpack (below): he's been living out here and the traps are
   his. He fights with them: he lures you over a pit and cuts the rope on a log.
-- Death lines: "The woods got you." (a trap), "You walked into that one." (your own trap).
+- Death lines: "The woods got you." (a trap), "You walked into that one." (a trap you shot off yourself).
 
 #### The Wolf in a Backpack (the Woods finale)
 A big wolf wearing a hiking backpack. Kill him and the backpack unzips and another wolf climbs
