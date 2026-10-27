@@ -212,7 +212,7 @@ a QUIET PLEASE sign, and the Librarian at the front desk, glaring over her glass
 A clearing in the woods at night: a big bonfire in the middle throwing flickering light, dark
 trees behind it, a tent, a log pile, and a hand-painted sign nailed to a tree: TRESPASSERS
 WILL BE TRAPPED. The woods are full of booby traps, and the stickmen keep walking into them.
-- The joke: the traps are killing the stickmen faster than you are. A trap kill doesn't count
+- The joke: the traps (the Trapper's, see below) are killing the stickmen faster than you are. A trap kill doesn't count
   for you ("THE WOODS GOT ONE"), so you're racing the traps for your own score. Shoot them
   before the woods do.
 - The traps (they get you too, so watch where you step):
@@ -227,10 +227,19 @@ WILL BE TRAPPED. The woods are full of booby traps, and the stickmen keep walkin
 - The bonfire: stickmen who wander into it run around on fire and light the others up.
   Kicking one into the fire counts as yours.
 - Shelves: the log pile, the tent roof (bouncy), and low tree branches.
-- Who set the traps? The finale explains it.
-- Finale (100), the Wolf in a Backpack (below): he's been living out here and the traps are
-  his. He fights with them: he lures you over a pit and cuts the rope on a log.
-- Death lines: "The woods got you." (a trap), "You walked into that one." (a trap you shot off yourself).
+- Sub-boss (50), the Trapper: the guy who set every trap out here, and he's furious at you
+  for wasting them. A big grizzled hunter in a plaid jacket, a fur hat and a beard you could
+  lose a squirrel in. He stomps out of the trees complaining every time a trap goes off
+  ("That was a GOOD snare!", "Do you know how long that pit took?!", "Those nets aren't
+  free!"). He fights by setting new traps right in front of you, throws bear traps that snap
+  shut where they land, and swings a big net. He walks right through his own traps because
+  he knows where they all are. KO: he backs into his own snare and gets yanked up into a tree
+  by the ankle, hanging upside down and still complaining. "CAUGHT".
+- Finale (100), the Wolf in a Backpack (below): the one the Trapper was trying to catch all
+  along. None of the traps work on him: he steps around the pits, chews through the nets and
+  sniffs out the tripwires. Kill him and a smaller wolf climbs out of his backpack, and so on.
+- Death lines: "The woods got you." (a trap), "You walked into that one." (a trap you shot off
+  yourself), "Trapped." (the Trapper).
 
 #### The Wolf in a Backpack (the Woods finale)
 A big wolf wearing a hiking backpack. Kill him and the backpack unzips and another wolf climbs
