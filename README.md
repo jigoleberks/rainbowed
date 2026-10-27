@@ -20,7 +20,7 @@ public/
     world.js          physics, spawning, effects, damage, kicks, aiming
     weapons.js        supply crates (every 15 kills) and the rainbow grenade launcher
     wipe.js           the rainbow wipe when you die (fills the arena, shatters into confetti)
-    sound.js          the few sounds (the cabin's laugh, thunder, the shotgun, hold music, the ding, the stamp), synthesized with Web Audio
+    sound.js          the few sounds (the cabin's laugh, thunder, the shotgun, hold music, the ding, the stamp, a trap snapping, a howl), synthesized with Web Audio
     bosses.js         boss loop, spawning, knockouts, cutscene camera
     update.js         the per-frame update
     draw.js           drawing and HUD
@@ -71,7 +71,7 @@ A boss with a `timer` field gets a "SURVIVE 0:45" countdown under its health bar
 
 ## Arena hooks
 
-Besides `drawStage`, `drawOver`, `spawnPoint` and `setup`, an arena can define `holdEnemy(e, dt)` (return true to keep a stickman busy instead of chasing: the Waiting Room's seated ticket-holders), `onKill(e)`, `onSplat(x, y, h, r)` (return false to stop a splat sticking), and `fireHook(angle)` (take over a shot: Buster's frisbee).
+Besides `drawStage`, `drawOver`, `spawnPoint` and `setup`, an arena can define `holdEnemy(e, dt)` (return true to keep a stickman busy instead of chasing: the Waiting Room's seated ticket-holders; the Woods' snared, netted and burning stickmen), `onKill(e)`, `onSplat(x, y, h, r)` (return false to stop a splat sticking), and `fireHook(angle)` (take over a shot: Buster's frisbee).
 
 ## Weapons per arena
 
@@ -86,4 +86,4 @@ node tests/worker.mjs
 
 Runs scripted games against the real files and checks the boss loop, Rainbow Mode, kicks, right-click, wall flips, reloading, the secret codes and the Eraser. Run it before pushing.
 
-For playtesting, add a boss name to the address to start one kill before it: `#giant`, `#sensei`, `#giant2`, `#eraser` on Page One, `#dustbunny`, `#chancla` for Grandma's House, `#inkblob`, `#slowone` for The Long Hallway, `#cub`, `#clowncar` for The Bear Cave, `#rooster`, `#grandpa` for Grandpa's Farm, `#hand`, `#tree` for Uncle's Creepy Cabin, or `#printer`, `#clerk` for The Waiting Room (the link switches arenas). On the farm, `arena.busterTime('fetch')` (or `zoomies`, `herd`, `nap`) in the console sets Buster off. In Grandma's House, `arena.sophyTime('light')` in the browser console makes Sophy go for the ceiling light. Secret codes: `sophy` (no reloading), `loaf` (10 hearts). Type them anywhere on a keyboard, or on a phone tap the small line above the title five times to open a code box, which also takes a boss name (`chancla`, `eraser`, `giant2`...) to jump to that boss. Runs with a code on don't save a best score.
+For playtesting, add a boss name to the address to start one kill before it: `#giant`, `#sensei`, `#giant2`, `#eraser` on Page One, `#dustbunny`, `#chancla` for Grandma's House, `#inkblob`, `#slowone` for The Long Hallway, `#cub`, `#clowncar` for The Bear Cave, `#rooster`, `#grandpa` for Grandpa's Farm, `#hand`, `#tree` for Uncle's Creepy Cabin, `#printer`, `#clerk` for The Waiting Room, or `#trapper`, `#wolf` for The Woods (the link switches arenas). On the farm, `arena.busterTime('fetch')` (or `zoomies`, `herd`, `nap`) in the console sets Buster off. In Grandma's House, `arena.sophyTime('light')` in the browser console makes Sophy go for the ceiling light. Secret codes: `sophy` (no reloading), `loaf` (10 hearts). Type them anywhere on a keyboard, or on a phone tap the small line above the title five times to open a code box, which also takes a boss name (`chancla`, `eraser`, `giant2`...) to jump to that boss. Runs with a code on don't save a best score.

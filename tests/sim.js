@@ -746,6 +746,91 @@ test("The Waiting Room: shooting Doug does nothing but annoy him", () => {
   ok(g.get('kills') === k0, 'and not get hurt');
 });
 
+test('The Woods: a trap kill counts for the woods, not for you', () => {
+  const g = boot(); g.run("pickArena('the-woods')"); g.godMode(); g.run('dropCrate = function () {}; spawn = function () {}; enemies = [];');
+  ok(g.get('arena.id') === 'the-woods' && g.get("arena.bossLoop.join()") === 'giant,trapper,giant,wolf', 'arena setup');
+  g.run('player.x = 700; player.y = G;');
+  // a stickman walks onto the leaves over the pit
+  g.run('enemies.push({x: arena.PIT.x0 - 30, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 120, drop: 0, jumpCd: 9});');
+  g.seconds(1, () => {});
+  ok(g.get('arena.st.woods') === 1 && g.get('kills') === 0 && g.get('score') === 0, 'woods ' + g.get('arena.st.woods') + ' kills ' + g.get('kills'));
+  ok(g.get("arena.st.pit.st") === 'open' && g.saw(/THE WOODS GOT ONE|AAAA/), 'the pit should open');
+});
+
+test('The Woods: the snare hangs a stickman upside down; shoot him first or the woods get him', () => {
+  const g = boot(); g.run("pickArena('the-woods')"); g.godMode(); g.run('dropCrate = function () {}; spawn = function () {}; enemies = [];');
+  g.run('player.x = 700; player.y = G;');
+  g.run('enemies.push({x: arena.SNARE.x - 30, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 120, drop: 0, jumpCd: 9});');
+  g.seconds(0.8, () => {});
+  ok(g.get('enemies.length === 1 && enemies[0].snared'), 'he should be in the snare');
+  const y = g.get('enemies[0].y'); g.seconds(1, () => {});
+  ok(Math.abs(g.get('enemies[0].y') - y) < 1 && y < 350, 'and hang there: y ' + y);
+  g.run('kill(enemies[0], 1, 0, false);'); g.step(1);
+  ok(g.get('kills') === 1 && g.get('arena.st.woods') === 0, 'shooting him counts for you');
+  // the next one hangs there too long
+  g.seconds(7, () => {});
+  g.run('enemies.push({x: arena.SNARE.x - 30, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 120, drop: 0, jumpCd: 9});');
+  g.seconds(6, () => {});
+  ok(g.get('arena.st.woods') === 1 && g.saw(/^THE ROPE SNAPPED$/), 'the rope should snap: woods ' + g.get('arena.st.woods'));
+});
+
+test('The Woods: shoot the log loose and what it hits is yours; the bonfire sets them alight', () => {
+  const g = boot(); g.run("pickArena('the-woods')"); g.godMode(); g.run('dropCrate = function () {}; spawn = function () {}; enemies = [];');
+  g.run('player.x = 760; player.y = 166; arena.st.wire.st = "reset"; arena.st.wire.t = 999;');
+  for (const x of [250, 330, 380]) g.run(`enemies.push({x: ${x}, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 0, drop: 0, jumpCd: 9});`);
+  g.run('{ const p = arena.logPos(); bullets.push({x: p.x - 30, y: p.y, vx: -1150, vy: 0, life: 0.8}); }');
+  g.step(2);
+  ok(g.get("arena.st.log.st") === 'swing' && g.get('arena.st.log.mine'), 'the log should be swinging, and yours');
+  g.seconds(2, () => { g.run('player.x = 760; player.y = 166;'); });
+  ok(g.get('kills') >= 2 && g.saw(/^LOGGED$/), 'the log should have got them for you: kills ' + g.get('kills'));
+  // walking into the fire (with the log out of the way)
+  g.run('arena.st.log.st = "tied"; arena.st.log.a = arena.LOG.rest;');
+  g.run('enemies = [{x: arena.FIRE.x - 5, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 0, drop: 0, jumpCd: 9, fireLook: true}];');
+  g.step(2);
+  ok(g.get('enemies[0].burn > 0'), 'he should be on fire');
+  const w = g.get('arena.st.woods'); g.seconds(3, () => {});
+  ok(g.get('arena.st.woods') === w + 1 && g.saw(/^TOASTED$/), 'and the woods get him');
+});
+
+test('The Trapper complains about his traps, throws bear traps, and ends up in his own snare', () => {
+  const g = boot('#trapper'); g.start(); g.godMode(); g.run('dropCrate = function () {};');
+  ok(g.get('arena.id') === 'the-woods' && g.get('kills') === 49, 'trapper link');
+  g.run('spawn = function () {}; kills = 50; enemies = [];');
+  let thrown = false;
+  g.seconds(12, () => { if (g.get("props.some(p => p.st === 'fly' || (p.st === 'set' && p.t !== undefined && p.vx !== undefined))")) thrown = true; });
+  ok(g.get("boss && boss.kind === 'trapper'") && thrown, 'he should be out and throwing traps');
+  g.run("arena.sprung('pit', 200);");
+  ok(g.get('boss.say') && /pit|SPOON|DAYS/i.test(g.get('boss.say')), 'he should complain about his pit: ' + g.get('boss.say'));
+  g.type('sophy'); g.key('KeyJ');
+  let hanging = false;
+  g.seconds(40, () => { if (g.get("props.some(p => p.target && p.say !== undefined && p.life !== undefined)")) hanging = true; });
+  ok(g.saw(/^CAUGHT$/), 'the Trapper was never beaten');
+  ok(hanging, 'he should be hanging from his snare');
+});
+
+test('The Wolf: five wolves, each out of the last one\'s backpack, and a sandwich', () => {
+  const g = boot('#wolf'); g.start(); g.godMode(); g.run('dropCrate = function () {};');
+  ok(g.get('arena.id') === 'the-woods', 'wolf link');
+  g.run('spawn = function () {}; kills = 100; enemies = [];');
+  g.seconds(7, () => {});
+  ok(g.get("boss && boss.kind === 'wolf' && boss.st !== 'enter'"), 'the wolf should be in');
+  const sizes = new Set();
+  for (let i = 0; i < 600 && g.get('boss && !boss.dead'); i++) {
+    g.run("if (boss && !boss.dead && boss.st !== 'unzip' && boss.st !== 'enter') hitBoss(boss, boss.x, boss.y - 20, 1, 0, 2);");
+    if (g.get('boss')) sizes.add(g.get('boss.s'));
+    g.step(3);
+  }
+  ok(sizes.size === 5, 'there should be five wolves: ' + [...sizes].join(','));
+  g.seconds(4, () => {});
+  ok(g.saw(/^UNPACKED$/), 'the wolf was never beaten');
+  ok(g.get("props.filter(p => p.s !== undefined && p.st === 'empty').length") === 5, 'five empty backpacks');
+  ok(g.saw(/^a sandwich\?$/), 'there should be a sandwich');
+  // eat it (if you haven't already walked over it)
+  g.run("{ const w = props.find(p => p.vy !== undefined && p.life !== undefined && p.s === undefined && !p.target); if (w) { hp = 2; player.x = w.x; player.y = w.y + 6; } }");
+  g.step(2);
+  ok(g.saw(/^SANDWICH$/), 'the sandwich should give a heart back');
+});
+
 let failed = 0;
 for (const [pass, name] of results) { console.log((pass ? 'PASS  ' : 'FAIL  ') + name); if (!pass) failed++; }
 console.log(`\n${results.length - failed}/${results.length} passed`);

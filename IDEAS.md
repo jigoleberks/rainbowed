@@ -208,7 +208,7 @@ a QUIET PLEASE sign, and the Librarian at the front desk, glaring over her glass
 - Death lines: "Your library card has been revoked." (the Librarian), "Volume Z got you."
   (the Encyclopedia Set).
 
-### The Woods
+### The Woods: built (arena 8)
 A clearing in the woods at night: a big bonfire in the middle throwing flickering light, dark
 trees behind it, a tent, a log pile, and a hand-painted sign nailed to a tree: TRESPASSERS
 WILL BE TRAPPED. The woods are full of booby traps, and the stickmen keep walking into them.

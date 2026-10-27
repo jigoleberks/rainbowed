@@ -151,6 +151,27 @@ const sfx = (() => {
       noise(t, 2.6, 'lowpass', 180, 0.7);
       noise(t + 0.15, 1.6, 'lowpass', 420, 0.25);
     },
+    // a trap going off: a whoosh and a thwack
+    snap() {
+      if (!ready()) return;
+      const t = ac.currentTime;
+      noise(t, 0.12, 'highpass', 2400, 0.25);
+      noise(t + 0.08, 0.18, 'lowpass', 600, 0.5);
+      tone(t + 0.08, 90, 0.15, 0.3, 'sine');
+    },
+    // a wolf, off in the trees
+    howl() {
+      if (!ready()) return;
+      const t = ac.currentTime + 0.05;
+      const o = ac.createOscillator(); o.type = 'sawtooth';
+      o.frequency.setValueAtTime(260, t); o.frequency.exponentialRampToValueAtTime(560, t + 0.5);
+      o.frequency.setValueAtTime(560, t + 1.3); o.frequency.exponentialRampToValueAtTime(380, t + 2.1);
+      const vib = ac.createOscillator(); vib.frequency.value = 5.5; const vg = ac.createGain(); vg.gain.value = 9; vib.connect(vg); vg.connect(o.frequency);
+      const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 900; f.Q.value = 2;
+      const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.3); g.gain.setValueAtTime(0.35, t + 1.5); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.2);
+      o.connect(f); f.connect(g); g.connect(out); g.connect(echo);
+      o.start(t); vib.start(t); o.stop(t + 2.3); vib.stop(t + 2.3);
+    },
     shotgun() {
       if (!ready()) return;
       const t = ac.currentTime;

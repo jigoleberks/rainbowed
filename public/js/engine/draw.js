@@ -209,20 +209,22 @@ function rainbowText(str, x, y, size) {
 }
 
 function drawHUD() {
+  // night arenas (arena.night) get the HUD in light ink so it reads against the dark
+  const HI = arena && arena.night ? PAPER : INK;
   if (state === 'play' || state === 'dying') {
     ctx.textAlign = 'left';
     ctx.font = '28px "Permanent Marker", cursive';
-    ctx.fillStyle = INK;
+    ctx.fillStyle = HI;
     ctx.fillText(pad6(score), 18, 40);
     ctx.font = '600 12px "IBM Plex Mono", monospace';
-    ctx.fillStyle = '#5f6370';
+    ctx.fillStyle = HI === INK ? '#5f6370' : '#c9ccd4';
     ctx.fillText(kills + ' RAINBOWED', 20, 58);
     if (rainbowT > 0) {
       const g = ctx.createLinearGradient(20, 0, 20 + MAG * 7, 0);
       for (let k = 0; k <= 6; k++) g.addColorStop(k / 6, `hsl(${(k * 60 + clock * 300) % 360} 88% 55%)`);
       ctx.fillStyle = g; ctx.fillRect(20, 66, (MAG * 7 - 3) * (rainbowT / RAINBOW_TIME), 11);
-      ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.strokeRect(20, 66, MAG * 7 - 3, 11);
-      ctx.fillStyle = INK; ctx.font = '600 11px "IBM Plex Mono", monospace';
+      ctx.strokeStyle = HI; ctx.lineWidth = 1.5; ctx.strokeRect(20, 66, MAG * 7 - 3, 11);
+      ctx.fillStyle = HI; ctx.font = '600 11px "IBM Plex Mono", monospace';
       ctx.fillText('RAINBOW MODE', 20 + MAG * 7 + 6, 76);
     } else if (cheatSophy) {
       ctx.fillStyle = ACCENT;
@@ -232,14 +234,14 @@ function drawHUD() {
       const sg = shotgun(), n = magSize(), step = sg ? (dual ? 8 : 11) : dual ? 5 : 7;
       for (let i = 0; i < n; i++) {
         const on = reloadT > 0 && !sg ? i < Math.floor((1 - reloadT / RELOAD_TIME) * n) : i < ammo;
-        ctx.fillStyle = on ? (sg ? '#d9574a' : INK) : '#c9ccd4';
+        ctx.fillStyle = on ? (sg ? '#d9574a' : HI) : (HI === INK ? '#c9ccd4' : '#4a5068');
         // shotgun shells are fatter, with a brass end
         if (sg) { ctx.fillRect(20 + i * step, 66, dual ? 6 : 8, 11); ctx.fillStyle = on ? '#e0c46a' : '#dfe1e6'; ctx.fillRect(20 + i * step, 74, dual ? 6 : 8, 3); }
         else ctx.fillRect(20 + i * step, 66, dual ? 3 : 4, 11);
       }
       ctx.font = '600 11px "IBM Plex Mono", monospace';
       if (reloadT > 0) { ctx.fillStyle = ACCENT; ctx.fillText('RELOADING', 20 + n * step + 6, 76); }
-      else if (dual) { ctx.fillStyle = INK; ctx.fillText('x2', 20 + n * step + 6, 76); }
+      else if (dual) { ctx.fillStyle = HI; ctx.fillText('x2', 20 + n * step + 6, 76); }
     }
     if (grenades > 0) {
       for (let i = 0; i < GRENADES; i++) {
@@ -247,13 +249,13 @@ function drawHUD() {
         ctx.fillStyle = i < grenades ? `hsl(${i * 60} 85% 56%)` : '#c9ccd4'; ctx.fill();
         ctx.lineWidth = 1.5; ctx.strokeStyle = INK; ctx.stroke();
       }
-      ctx.fillStyle = INK; ctx.font = '600 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'left';
+      ctx.fillStyle = HI; ctx.font = '600 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'left';
       ctx.fillText('LAUNCHER', 20 + GRENADES * 12 + 6, 94);
     }
     for (let i = 0; i < maxHp(); i++) {
       ctx.beginPath(); ctx.arc(W - 24 - i * 22, 30, 7, 0, Math.PI * 2);
-      ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
-      if (i < hp) { ctx.fillStyle = INK; ctx.fill(); }
+      ctx.lineWidth = 3; ctx.strokeStyle = HI; ctx.stroke();
+      if (i < hp) { ctx.fillStyle = HI; ctx.fill(); }
     }
     if (combo >= 2) {
       ctx.textAlign = 'center';
@@ -265,13 +267,13 @@ function drawHUD() {
       const bw = 300, bx = W / 2 - bw / 2, by = 68;
       ctx.textAlign = 'center';
       ctx.font = '15px "Permanent Marker", cursive';
-      ctx.fillStyle = INK;
+      ctx.fillStyle = HI;
       ctx.fillText(boss.name, W / 2, by - 6);
       const r = clamp(boss.hp / boss.maxHp, 0, 1);
       const g = ctx.createLinearGradient(bx, 0, bx + bw, 0);
       for (let k = 0; k <= 6; k++) g.addColorStop(k / 6, `hsl(${k * 55} 85% 56%)`);
       ctx.fillStyle = g; ctx.fillRect(bx, by, bw * r, 10);
-      ctx.lineWidth = 2.5; ctx.strokeStyle = INK; ctx.strokeRect(bx, by, bw, 10);
+      ctx.lineWidth = 2.5; ctx.strokeStyle = HI; ctx.strokeRect(bx, by, bw, 10);
       if (boss.timer !== undefined && boss.st !== 'leave') {
         const sec = Math.ceil(boss.timer);
         ctx.font = '600 12px "IBM Plex Mono", monospace';
@@ -292,7 +294,7 @@ function drawHUD() {
       ctx.fillStyle = ACCENT; ctx.fillText('WARNING', W / 2, 210);
       ctx.globalAlpha = 1;
       ctx.font = '600 13px "IBM Plex Mono", monospace';
-      ctx.fillStyle = INK;
+      ctx.fillStyle = HI;
       ctx.fillText(BOSSES[nextBossKind()].warning, W / 2, 232);
     }
   }
@@ -301,7 +303,7 @@ function drawHUD() {
     ctx.textAlign = 'center';
     rainbowText(banner.title, W / 2, 150, 46);
     ctx.font = '600 13px "IBM Plex Mono", monospace';
-    ctx.fillStyle = INK;
+    ctx.fillStyle = arena && arena.night ? PAPER : INK;
     ctx.fillText(banner.sub, W / 2, 176);
     ctx.globalAlpha = 1;
   }
@@ -425,7 +427,7 @@ function draw() {
   for (const t of texts) {
     ctx.globalAlpha = Math.min(1, t.life * 3);
     if (t.big) rainbowText(t.s, t.x, t.y, 44);
-    else { ctx.font = '16px "Permanent Marker", cursive'; ctx.fillStyle = INK; ctx.fillText(t.s, t.x, t.y); }
+    else { ctx.font = '16px "Permanent Marker", cursive'; ctx.fillStyle = arena && arena.night ? PAPER : INK; ctx.fillText(t.s, t.x, t.y); }
   }
   ctx.globalAlpha = 1;
   ctx.restore();
