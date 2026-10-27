@@ -208,9 +208,31 @@ a QUIET PLEASE sign, and the Librarian at the front desk, glaring over her glass
 - Death lines: "Your library card has been revoked." (the Librarian), "Volume Z got you."
   (the Encyclopedia Set).
 
-## Bosses without an arena yet
+### The Woods
+A clearing in the woods at night: a big bonfire in the middle throwing flickering light, dark
+trees behind it, a tent, a log pile, and a hand-painted sign nailed to a tree: TRESPASSERS
+WILL BE TRAPPED. The woods are full of booby traps, and the stickmen keep walking into them.
+- The joke: the traps are killing the stickmen faster than you are. A trap kill doesn't count
+  for you ("THE WOODS GOT ONE"), so you're racing the traps for your own score. Shoot them
+  before the woods do.
+- The traps (they get you too, so watch where you step):
+  - Rope snare: yanks a stickman up into a tree by the ankle, where he hangs upside down
+    swinging. Hanging ones are easy points if you get to them before the rope snaps.
+  - Swinging log on a rope: knocks a whole line of stickmen over like bowling pins. Shoot
+    the rope at the right moment to aim it.
+  - Leaf-covered pit: a patch of leaves that looks like the floor.
+  - Falling net: drops from a tree and bundles up whoever's under it.
+  - Tripwire: sets off something different each time (a falling log, a bucket of pinecones,
+    a tin-can alarm that brings more stickmen running).
+- The bonfire: stickmen who wander into it run around on fire and light the others up.
+  Kicking one into the fire counts as yours.
+- Shelves: the log pile, the tent roof (bouncy), and low tree branches.
+- Who set the traps? The finale explains it.
+- Finale (100), the Wolf in a Backpack (below): he's been living out here and the traps are
+  his. He fights with them: he lures you over a pit and cuts the rope on a log.
+- Death lines: "The woods got you." (a trap), "You walked into that one." (your own trap).
 
-### The Wolf in a Backpack
+#### The Wolf in a Backpack (the Woods finale)
 A big wolf wearing a hiking backpack. Kill him and the backpack unzips and another wolf climbs
 out, a size smaller and wearing a smaller backpack. Kill that one and another climbs out, like
 nesting dolls.
@@ -220,6 +242,4 @@ nesting dolls.
   backpacks.
 - The last one is a tiny wolf with a tiny backpack. Kill it and the backpack unzips and has
   nothing in it but a sandwich. Eat it (walk over it) for a heart back. KO: "UNPACKED".
-- Fits a forest or camping arena (a campsite at night, with tents and a campfire), or the
-  Valley or Bear Cave as a sub-boss.
 - Death line: "You got wolfed. Several times."
