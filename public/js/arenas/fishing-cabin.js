@@ -109,15 +109,9 @@
   function fireRifle(ang) {
     if (!(st.rifle > 0)) return false;
     st.rifle--;
-    const p = player, a = ang + rand(-0.01, 0.01);
-    bullets.push({x: p.x + Math.cos(a) * 44, y: p.y - 52 + Math.sin(a) * 44, vx: Math.cos(a) * 1900, vy: Math.sin(a) * 1900, life: 0.6, pierce: 4, dmg: 3, rifle: true});
-    shotsFired++;
-    flash = 0.09; p.recoil = 3; p.vx -= Math.cos(a) * 160;
-    if (!reduceMotion) shake = Math.max(shake, 6);
-    parts.push({x: p.x + Math.cos(a) * 10, y: p.y - 54, vx: -p.facing * rand(60, 130), vy: -rand(140, 220), h: 0, r: 2, life: 0.6, spark: true, ink: true, col: '#e0c46a'});
-    if (typeof sfx !== 'undefined' && sfx.rifle) sfx.rifle();
-    if (st.rifle <= 0) { st.rifleBack = RIFLE.back; texts.push({x: p.x, y: p.y - 110, s: 'OUT', life: 0.8, big: false}); }
-    return 0.6;   // a slow bolt action
+    fireRifleShot(ang);
+    if (st.rifle <= 0) { st.rifleBack = RIFLE.back; texts.push({x: player.x, y: player.y - 110, s: 'OUT', life: 0.8, big: false}); }
+    return RIFLE_CD;   // a slow bolt action
   }
   function updateRifle(dt) {
     if (st.rifleBack > 0) { st.rifleBack -= dt; if (st.rifleBack <= 0) { st.rifleOnWall = true; texts.push({x: RIFLE.x, y: RIFLE.y - 30, s: 'the rifle is back', life: 1.2, big: false}); } }
@@ -126,17 +120,6 @@
       banner = {title: 'THE HUNTING RIFLE', sub: RIFLE.shots + ' shots. Goes through every stickman in a line.', life: 2.6};
     }
   }
-  function drawRifle(x, y, ang, s = 1) {
-    ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s, s);
-    ctx.lineCap = 'round'; ctx.strokeStyle = INK;
-    ctx.lineWidth = 3.5; line(6, 0, 46, 0);                                // barrel
-    ctx.strokeStyle = '#8a5a34'; ctx.lineWidth = 7; line(-4, 1, 24, 1);      // wooden fore-end
-    ctx.lineWidth = 8; line(-6, 2, -22, 7);                                 // stock
-    ctx.strokeStyle = INK; ctx.lineWidth = 4; line(4, -6, 22, -6);           // scope
-    ctx.lineWidth = 2; line(8, -4, 8, -1); line(18, -4, 18, -1);
-    ctx.restore();
-  }
-
   function update(dt) {
     updateRifle(dt);
     const S = st.snorer;

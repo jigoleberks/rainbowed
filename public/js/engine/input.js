@@ -155,10 +155,34 @@ function showPicker() {
     arenaList.appendChild(card);
   }
   pickerTops();
+  gunLabel();
   // open the row on the arena you played last
   let last = null; try { last = localStorage.getItem('rsb-last-arena'); } catch (e) {}
   rowTo(last || arena.id, false);
 }
+
+// ---------- the gun row ----------
+const gunName = document.getElementById('gun-name');
+function gunLabel() {
+  const g = GUNS[gunPick], f = typeof rowFocus === 'function' ? rowFocus() : null;
+  if (!gunsOpen[gunPick]) {
+    gunName.textContent = '\u{1F512} ' + g.name + ': ' + g.how;
+    if (gunName.classList) gunName.classList.add('locked');
+    return;
+  }
+  if (gunName.classList) gunName.classList.remove('locked');
+  // the cabin always hands you its shotgun
+  const cabin = f && f.dataset && ARENAS[f.dataset.arena] && ARENAS[f.dataset.arena].shotgun;
+  gunName.textContent = 'Gun: ' + g.name + (cabin && gunPick !== 'shotgun' ? ' (shotgun here)' : '');
+}
+function gunStep(d) {
+  const i = GUN_ORDER.indexOf(gunPick);
+  gunPick = GUN_ORDER[(i + d + GUN_ORDER.length) % GUN_ORDER.length];
+  try { localStorage.setItem('rsb-gun', gunPick); } catch (e) {}
+  gunLabel();
+}
+document.getElementById('gun-prev').addEventListener('click', () => gunStep(-1));
+document.getElementById('gun-next').addEventListener('click', () => gunStep(1));
 
 // ---------- the arena row: swipe, arrows, keys ----------
 const arenaPrev = document.getElementById('arena-prev'), arenaNext = document.getElementById('arena-next');
@@ -178,6 +202,7 @@ function rowUpdate() {
   const cards = rowCards();
   arenaPrev.disabled = !f || f === cards[0];
   arenaNext.disabled = !f || f === cards[cards.length - 1];
+  gunLabel();
 }
 function rowTo(id, smooth = true) {
   const c = rowCards().find(c => c.dataset.arena === id);
@@ -198,6 +223,8 @@ arenaList.addEventListener('scroll', () => { if (!rowRaf) rowRaf = requestAnimat
 addEventListener('keydown', e => {
   if (state !== 'title' || overlay.hidden || isTyping(e) || !overlay.classList.contains('picking')) return;
   if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); rowStep(-1); }
+  else if (e.code === 'ArrowUp') { e.preventDefault(); gunStep(-1); }
+  else if (e.code === 'ArrowDown') { e.preventDefault(); gunStep(1); }
   else if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); rowStep(1); }
   else if (e.code === 'Enter' || e.code === 'Space') { const f = rowFocus(); if (f) { e.preventDefault(); e.stopImmediatePropagation(); pickArena(f.dataset.arena); } }
 }, true);

@@ -80,6 +80,7 @@ function updateSnore(b, dt, fighting) {
         if (deathTitle === 'You never got to sleep.') deathTitle = null;
         nextBossAt += 25; spawnT = 1.8; boss = null;
         banner = {title: '5:00 A.M.', sub: 'Survived   ·   +' + pts + '   ·   +1 life', life: 3.4};
+        unlockGun('rifle');
         texts.push({x: b.x, y: b.y - 70, s: '...five more minutes', life: 2, big: false});
       }
       return;

@@ -65,8 +65,34 @@ let ammo = MAG, reloadT = 0, dual = false;
 // two guns: double fire rate and two magazines, kept until you get hit
 // the cabin hands you a shotgun instead: 6 shells, loaded one at a time
 const SHELLS = 6, SHELL_TIME = 0.32;
-const shotgun = () => !!(arena && arena.shotgun);
-const magBase = () => shotgun() ? SHELLS : MAG;
+// the hunting rifle: a five-round magazine, slow bolt action, and every shot goes through a line
+const RIFLE_MAG = 5, RIFLE_RELOAD = 1.5, RIFLE_CD = 0.6;
+// Guns: the pistol, plus the shotgun and the rifle once they're unlocked (saved on this device,
+// like best scores). You pick one on the arena screen; there's no swapping during a run.
+// The Creepy Cabin always hands you its shotgun.
+const GUN_ORDER = ['pistol', 'shotgun', 'rifle'];
+const GUNS = {
+  pistol: {name: 'Pistol'},
+  shotgun: {name: 'Shotgun', how: 'survive the Tree (Creepy Cabin)', got: 'Uncle says you can keep it.'},
+  rifle: {name: 'Rifle', how: 'survive THE SNORE (Fishing Cabin)', got: "He's up for fishing. You can borrow his rifle."},
+};
+let gunPick = 'pistol', gunsOpen = {pistol: true};
+try { Object.assign(gunsOpen, JSON.parse(localStorage.getItem('rsb-guns') || '{}')); gunPick = localStorage.getItem('rsb-gun') || 'pistol'; } catch (e) {}
+if (!GUNS[gunPick]) gunPick = 'pistol';
+const gun = () => arena && arena.shotgun ? 'shotgun' : (gunsOpen[gunPick] ? gunPick : 'pistol');
+const shotgun = () => gun() === 'shotgun';
+const rifle = () => gun() === 'rifle';
+const magBase = () => shotgun() ? SHELLS : rifle() ? RIFLE_MAG : MAG;
+const reloadTime = () => shotgun() ? SHELL_TIME : rifle() ? RIFLE_RELOAD : RELOAD_TIME;
+// beating the right finale unlocks a gun (not with a cheat code on)
+function unlockGun(id) {
+  if (gunsOpen[id] || runCheated) return false;
+  gunsOpen[id] = true;
+  try { localStorage.setItem('rsb-guns', JSON.stringify(gunsOpen)); } catch (e) {}
+  // after the finale's own banner
+  props.push({t: 3.6, update(dt) { this.t -= dt; if (this.t <= 0) { this.done = true; banner = {title: GUNS[id].name.toUpperCase() + ' UNLOCKED', sub: GUNS[id].got + ' Pick it on the arena screen.', life: 3.4}; } }});
+  return true;
+}
 const magSize = () => dual ? magBase() * 2 : magBase();
 let cheatSophy = false, cheatLoaf = false, runCheated = false, typed = '';
 const maxHp = () => cheatLoaf ? 10 : 5;

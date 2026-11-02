@@ -3,7 +3,7 @@
 
    GET  /api/scores?arena=page-one   -> {top: [{n, s, k, t, id}, ...]}
    GET  /api/scores?arena=all        -> {tops: {'page-one': [top three], ...}}  (the arena picker)
-   POST /api/scores  {arena, initials, score, kills, time}   -> {top, id}
+   POST /api/scores  {arena, initials, score, kills, time, gun}   -> {top, id}
 
    No accounts and no personal data: just initials, score, kills and seconds survived.
    The checks below only stop lazy fakes (a made-up score from a script); a determined
@@ -12,6 +12,7 @@
 
 const ARENAS = ['page-one', 'grandmas-house', 'long-hallway', 'bear-cave', 'grandpas-farm', 'creepy-cabin', 'waiting-room', 'the-woods', 'fishing-cabin'];
 const SIZE = 10;
+const GUNS = ['pistol', 'shotgun', 'rifle'];   // which gun a score was set with
 // three-letter words that shouldn't go on the board
 const BLOCKED = new Set(('FUK FUC FCK FUQ FKU CUM SEX TIT TTS DIK DIC DIX COK COC KOK CNT KNT JIZ JZZ ' +
   'FAG FGT NIG NGR NGA KKK KYS SUK SUC PUS PIS STD VAG HOE HOR XXX RAP RPE NAZ SHT').split(' '));
@@ -59,7 +60,8 @@ export default {
       // only write when it actually makes the board (keeps KV writes low)
       if (top.length >= SIZE && b.score <= top[top.length - 1].s) return json({top, id: null});
       const id = crypto.randomUUID().slice(0, 8);
-      top.push({n, s: b.score, k: b.kills, t: b.time, id});
+      const g = GUNS.includes(b.gun) ? b.gun : 'pistol';
+      top.push({n, s: b.score, k: b.kills, t: b.time, id, g});
       top.sort((x, y) => y.s - x.s);
       top.length = Math.min(top.length, SIZE);
       await env.SCORES.put(key, JSON.stringify(top));

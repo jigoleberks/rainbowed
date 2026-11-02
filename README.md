@@ -77,6 +77,8 @@ Besides `drawStage`, `drawOver`, `spawnPoint` and `setup`, an arena can define `
 
 An arena with `shotgun: true` swaps the pistol for a 6-shell shotgun (a spread of short-range pellets, shells loaded one at a time). Uncle's Creepy Cabin uses it.
 
+Guns you bring: the pistol, plus the shotgun (unlocked by surviving the Tree in Uncle's Creepy Cabin) and the hunting rifle (unlocked by surviving THE SNORE in the Fishing Cabin). Unlocks are saved on the device (`rsb-guns`), not with a cheat code on. You pick one on the arena screen (◀ ▶, or the up and down arrow keys); there's no swapping during a run. The Creepy Cabin always hands you its shotgun. Each leaderboard score keeps the gun it was set with (`g`). In the console, `gunsOpen.rifle = true` unlocks one for testing.
+
 ## Testing
 
 ```

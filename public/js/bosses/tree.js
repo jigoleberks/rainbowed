@@ -100,6 +100,7 @@ function updateTree(b, dt, fighting) {
         score += pts; hp = Math.min(maxHp(), hp + 1);
         nextBossAt += 25; spawnT = 1.8; boss = null;
         banner = {title: 'THE SUN CAME UP', sub: 'Survived the night   ·   +' + pts + '   ·   +1 life', life: 3.4};
+        unlockGun('shotgun');
         // morning doesn't last in this cabin
         props.push({t: 18, update(dt) { this.t -= dt; if (this.t < 6) cab.dawn = Math.max(0, cab.dawn - dt / 6); if (this.t <= 0) this.done = true; }});
       }

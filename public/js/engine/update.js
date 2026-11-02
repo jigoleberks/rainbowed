@@ -117,6 +117,12 @@ function updatePlayer(dt) {
     if (!reduceMotion) shake = Math.max(shake, 4);
     if (typeof sfx !== 'undefined') sfx.shotgun();
   }
+  else if ((pointer.down || auto) && fireCd <= 0 && reloadT <= 0 && ammo > 0 && rainbowT <= 0 && rifle()) {
+    if (!cheatSophy) ammo--;
+    fireCd = dual ? RIFLE_CD / 2 : RIFLE_CD;
+    fireRifleShot(ang);
+    if (ammo === 0) startReload();
+  }
   else if ((pointer.down || auto) && fireCd <= 0 && reloadT <= 0 && ammo > 0 && rainbowT <= 0) {
     fireCd = dual ? 0.065 : 0.13;
     if (!cheatSophy) ammo--;
@@ -132,6 +138,19 @@ function updatePlayer(dt) {
     flash = 0.05; p.recoil = 1;
     if (!reduceMotion) shake = Math.max(shake, 1.5);
   }
+}
+
+// one rifle shot: fast, through up to five stickmen in a line, three times as hard on a boss
+function fireRifleShot(ang) {
+  const p = player, a = ang + rand(-0.01, 0.01);
+  p.side = dual ? -(p.side || 1) : 0;
+  const off = p.side * 4;
+  bullets.push({x: p.x + Math.cos(a) * 44 - Math.sin(a) * off, y: p.y - 52 + Math.sin(a) * 44 + Math.cos(a) * off, vx: Math.cos(a) * 1900, vy: Math.sin(a) * 1900, life: 0.6, pierce: 4, dmg: 3, rifle: true});
+  shotsFired++;
+  flash = 0.09; p.recoil = 3; p.vx -= Math.cos(a) * 160;
+  if (!reduceMotion) shake = Math.max(shake, 6);
+  parts.push({x: p.x + Math.cos(a) * 10, y: p.y - 54, vx: -p.facing * rand(60, 130), vy: -rand(140, 220), h: 0, r: 2, life: 0.6, spark: true, ink: true, col: '#e0c46a'});
+  if (typeof sfx !== 'undefined' && sfx.rifle) sfx.rifle();
 }
 
 function updateEnemies(dt) {

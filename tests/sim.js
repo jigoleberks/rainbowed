@@ -897,6 +897,8 @@ test('THE SNORE: survive until the alarm; his snores only stun', () => {
   ok(fan, 'the fan should come loose');
   ok(g.saw(/^5:00 A\.M\.$/) && !g.get('boss'), 'the alarm should end it');
   ok(g.saw(/^Morning! Slept GREAT\.$/), 'and he wakes up refreshed');
+  g.seconds(4, () => {});
+  ok(g.get('gunsOpen.rifle') && g.saw(/^RIFLE UNLOCKED$/), 'surviving him unlocks the rifle');
 });
 
 test('The Fishing Cabin: grab the hunting rifle off the shelf; it goes through a whole line', () => {
@@ -914,6 +916,21 @@ test('The Fishing Cabin: grab the hunting rifle off the shelf; it goes through a
   ok(g.get('arena.st.rifle') === 0 && g.get('arena.st.rifleBack') > 0, 'used up, it goes back on the shelf later');
   g.seconds(26, () => { g.run('arena.st.snoreT = 999; player.x = 100;'); });
   ok(g.get('arena.st.rifleOnWall'), 'and it should be back');
+});
+
+test('Guns: locked guns fall back to the pistol; the rifle goes through a line; the cabin keeps its shotgun', () => {
+  const g = boot(); g.godMode(); g.run('dropCrate = function () {}; spawn = function () {}; gunPick = "rifle";');
+  g.start();
+  ok(g.get('gun()') === 'pistol' && g.get('magSize()') === 12, 'a locked rifle should mean the pistol');
+  g.run('gunsOpen.rifle = true;'); g.start(); g.run('spawn = function () {}; enemies = [];');
+  ok(g.get('gun()') === 'rifle' && g.get('ammo') === 5, 'unlocked, you get the rifle: ' + g.get('gun()') + ' ' + g.get('ammo'));
+  g.seconds(1, () => {});
+  g.run('player.x = 100; player.y = G; player.vx = 0;');
+  for (const x of [300, 360, 420]) g.run(`enemies.push({x: ${x}, y: G, vx: 0, vy: 0, onGround: true, facing: -1, phase: 0, speed: 0, drop: 0, jumpCd: 9});`);
+  g.key('KeyJ'); g.step(4); g.key('KeyJ', false); g.step(20);
+  ok(g.get('kills') === 3 && g.get('ammo') === 4, 'one rifle shot, three stickmen: kills ' + g.get('kills') + ' ammo ' + g.get('ammo'));
+  g.run("pickArena('creepy-cabin')");
+  ok(g.get('gun()') === 'shotgun', 'the cabin always hands you its shotgun');
 });
 
 let failed = 0;

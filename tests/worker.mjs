@@ -54,6 +54,12 @@ await test('made-up scores are refused', async () => {
   ok((await run('BAD', 999999, {kills: 2, time: 10})).status === 400, 'endpoint refuses it');
 });
 
+await test('each score keeps the gun it was set with', async () => {
+  const r = await run('GUN', 300000, {gun: 'rifle'});
+  ok(r.body.top.find(e => e.id === r.body.id).g === 'rifle', 'rifle');
+  const x = await run('GUX', 300001, {gun: 'bazooka'});
+  ok(x.body.top.find(e => e.id === x.body.id).g === 'pistol', 'anything else counts as the pistol');
+});
 await test('the arena picker gets the top three of every arena', async () => {
   const r = await call('/api/scores?arena=all');
   ok(r.status === 200 && r.body.tops['page-one'].length === 3 && r.body.tops['long-hallway'].length === 0, JSON.stringify(r.body));

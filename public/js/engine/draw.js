@@ -3,6 +3,18 @@
 function line(ax, ay, bx, by) { ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); }
 function poly(pts) { ctx.beginPath(); ctx.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]); ctx.stroke(); }
 
+// the hunting rifle (in your hands, or on the Fishing Cabin's wall)
+function drawRifle(x, y, ang, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s, s);
+  ctx.lineCap = 'round'; ctx.strokeStyle = INK;
+  ctx.lineWidth = 3.5; line(6, 0, 46, 0);                                // barrel
+  ctx.strokeStyle = '#8a5a34'; ctx.lineWidth = 7; line(-4, 1, 24, 1);      // wooden fore-end
+  ctx.lineWidth = 8; line(-6, 2, -22, 7);                                 // stock
+  ctx.strokeStyle = INK; ctx.lineWidth = 4; line(4, -6, 22, -6);           // scope
+  ctx.lineWidth = 2; line(8, -4, 8, -1); line(18, -4, 18, -1);
+  ctx.restore();
+}
+
 function drawStage() {
   ctx.strokeStyle = MUTED; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
   for (let x = -40; x < W; x += 16) line(x, G + 52, x + 40, G + 6);
@@ -110,8 +122,9 @@ function drawStick(e, kind) {
       ctx.lineWidth = 6; line(hx - ca * 2, hy - sa * 2, hx - ca * 11 + sa * 3, hy - sa * 11 - ca * 3);
       ctx.restore();
     }
+    if (rifle() && grenades <= 0) drawRifle(hx - ca * 4, hy - sa * 4, e.aim, 0.9);
     // an arena can put something else in your hands (the Fishing Cabin's hunting rifle)
-    if (arena.drawHeld && grenades <= 0) arena.drawHeld(hx, hy, ca, sa);
+    else if (arena.drawHeld && grenades <= 0) arena.drawHeld(hx, hy, ca, sa);
     if (grenades > 0) {
       // the launcher: a fat tube with a rainbow band at the muzzle
       ctx.save(); ctx.lineWidth = 9; line(hx - ca * 5, hy - sa * 5, hx + ca * 19, hy + sa * 19);
@@ -233,9 +246,11 @@ function drawHUD() {
       ctx.font = '600 11px "IBM Plex Mono", monospace';
       ctx.fillText('\u221E SOPHY MODE', 20, 76);
     } else {
-      const sg = shotgun(), n = magSize(), step = sg ? (dual ? 8 : 11) : dual ? 5 : 7;
+      const sg = shotgun(), rf = rifle(), n = magSize(), step = sg ? (dual ? 8 : 11) : rf ? 9 : dual ? 5 : 7;
       for (let i = 0; i < n; i++) {
-        const on = reloadT > 0 && !sg ? i < Math.floor((1 - reloadT / RELOAD_TIME) * n) : i < ammo;
+        const on = reloadT > 0 && !sg ? i < Math.floor((1 - reloadT / reloadTime()) * n) : i < ammo;
+        // rifle rounds: fat and brass
+        if (rf) { ctx.fillStyle = on ? '#e0c46a' : (HI === INK ? '#c9ccd4' : '#4a5068'); ctx.fillRect(20 + i * step, 65, 5, 12); continue; }
         ctx.fillStyle = on ? (sg ? '#d9574a' : HI) : (HI === INK ? '#c9ccd4' : '#4a5068');
         // shotgun shells are fatter, with a brass end
         if (sg) { ctx.fillRect(20 + i * step, 66, dual ? 6 : 8, 11); ctx.fillStyle = on ? '#e0c46a' : '#dfe1e6'; ctx.fillRect(20 + i * step, 74, dual ? 6 : 8, 3); }

@@ -40,7 +40,7 @@ function hideBoard() {
 function boardAfterRun() {
   hideBoard();
   const seq = boardSeq;
-  const run = {arena: arena.id, score, kills, time: Math.max(1, Math.round(runTime))};
+  const run = {arena: arena.id, score, kills, time: Math.max(1, Math.round(runTime)), gun: gun()};
   api('/api/scores?arena=' + run.arena).then(({ok, b}) => {
     if (seq !== boardSeq || state !== 'over' || !ok) return;
     const top = b.top || [];
@@ -158,7 +158,8 @@ function showBoard(top, myId) {
   top.forEach((e, i) => {
     const li = document.createElement('li');
     if (e.id && e.id === myId) li.className = 'me';
-    for (const [cls, text] of [['r', i + 1], ['n', e.n], ['s', pad6(e.s)]]) {
+    // which gun it was done with
+    for (const [cls, text] of [['r', i + 1], ['n', e.n], ['s', pad6(e.s)], ['g', e.g ? GUNS[e.g] ? GUNS[e.g].name.toLowerCase() : '' : '']]) {
       const s = document.createElement('span'); s.className = cls; s.textContent = text; li.appendChild(s);
     }
     boardEl.appendChild(li);

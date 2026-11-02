@@ -186,7 +186,7 @@ function stun(from, t = 0.25) {
 
 function startReload() {
   if (cheatSophy || reloadT > 0 || ammo >= magSize() || player.dead) return;
-  reloadT = shotgun() ? SHELL_TIME : RELOAD_TIME;
+  reloadT = reloadTime();
   const f = player.facing;
   debris.push({x: player.x + f * 14, y: player.y - 44, ang: Math.PI / 2, len: 7, lw: 4, vx: f * rand(30, 80), vy: -rand(60, 140), va: rand(-8, 8), life: 2.5, head:false});
   texts.push({x: player.x, y: player.y - 92, s: 'RELOAD', life: 0.7, big:false});
