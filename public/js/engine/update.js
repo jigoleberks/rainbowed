@@ -93,9 +93,11 @@ function updatePlayer(dt) {
   }
 
   fireCd -= dt;
+  let hooked;
   if (stunned) {}
   // arenas can take over a shot (Grandpa's Farm: throwing Buster's frisbee)
-  else if ((pointer.down || auto) && fireCd <= 0 && rainbowT <= 0 && arena.fireHook && arena.fireHook(ang)) fireCd = 0.35;
+  // (it can return its own cooldown: the Fishing Cabin's hunting rifle)
+  else if ((pointer.down || auto) && fireCd <= 0 && rainbowT <= 0 && arena.fireHook && (hooked = arena.fireHook(ang))) fireCd = typeof hooked === 'number' ? hooked : 0.35;
   else if ((pointer.down || auto) && fireCd <= 0 && rainbowT <= 0 && grenades > 0) fireGrenade(ang, aimD);
   else if ((pointer.down || auto) && fireCd <= 0 && ammo > 0 && rainbowT <= 0 && shotgun()) {
     // the shotgun: a spread of short-range pellets; firing interrupts a reload
@@ -213,12 +215,14 @@ function updateBullets(dt) {
       for (const e of enemies) {
         if (!e.dead && b.x > e.x - 10 && b.x < e.x + 10 && b.y > e.y - 78 && b.y < e.y + 2) {
           kill(e, b.vx, b.vy, b.y < e.y - 58); countHit(b);
+          // a piercing shot (the hunting rifle) keeps going through the line
+          if (b.pierce > 0) { b.pierce--; continue; }
           b.life = 0; break;
         }
       }
       const bs = boss, zone = b.life > 0 ? bossZone(bs, b.x, b.y, 0) : 0;
       if (zone) {
-        hitBoss(bs, b.x, b.y, b.vx, b.vy, bossDamage(bs, zone, 'bullet')); countHit(b);
+        hitBoss(bs, b.x, b.y, b.vx, b.vy, bossDamage(bs, zone, 'bullet') * (b.dmg || 1)); countHit(b);
         b.life = 0;
       }
       // props that can be shot (the Slow One)

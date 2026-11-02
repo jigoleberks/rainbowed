@@ -899,6 +899,23 @@ test('THE SNORE: survive until the alarm; his snores only stun', () => {
   ok(g.saw(/^Morning! Slept GREAT\.$/), 'and he wakes up refreshed');
 });
 
+test('The Fishing Cabin: grab the hunting rifle off the shelf; it goes through a whole line', () => {
+  const g = boot(); g.run("pickArena('fishing-cabin')"); g.godMode(); g.run('dropCrate = function () {}; spawn = function () {}; enemies = [];');
+  g.seconds(1, () => {});
+  g.run('arena.st.snoreT = 999; player.x = arena.RIFLE.x; player.y = 204; player.vy = 0;');
+  g.step(3);
+  ok(g.get('arena.st.rifle') === 5 && !g.get('arena.st.rifleOnWall') && g.saw(/^THE HUNTING RIFLE$/), 'you should have the rifle');
+  g.run('player.x = 100; player.y = G; player.facing = 1; arena.st.snoreT = 999;');
+  for (const x of [300, 360, 420]) g.run(`enemies.push({x: ${x}, y: G, vx: 0, vy: 0, onGround: true, facing: -1, phase: 0, speed: 0, drop: 0, jumpCd: 9});`);
+  g.run('ammo = 12; fireCd = 0; arena.fireHook(0);');
+  g.step(30);
+  ok(g.get('kills') === 3 && g.get('arena.st.rifle') === 4, 'one shot, three stickmen: kills ' + g.get('kills'));
+  g.run('arena.st.rifle = 1; arena.fireHook(0);');
+  ok(g.get('arena.st.rifle') === 0 && g.get('arena.st.rifleBack') > 0, 'used up, it goes back on the shelf later');
+  g.seconds(26, () => { g.run('arena.st.snoreT = 999; player.x = 100;'); });
+  ok(g.get('arena.st.rifleOnWall'), 'and it should be back');
+});
+
 let failed = 0;
 for (const [pass, name] of results) { console.log((pass ? 'PASS  ' : 'FAIL  ') + name); if (!pass) failed++; }
 console.log(`\n${results.length - failed}/${results.length} passed`);

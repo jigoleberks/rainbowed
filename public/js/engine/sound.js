@@ -190,6 +190,14 @@ const sfx = (() => {
       const t = ac.currentTime + 0.05, b = 0.18;
       [392, 392, 440, 392, 523, 494, 0, 392, 392, 440, 392, 587, 523].forEach((n, i) => { if (n) tone(t + i * b, n, b * 0.9, 0.08, 'square'); });
     },
+    // the hunting rifle: a sharp crack, and the bolt
+    rifle() {
+      if (!ready()) return;
+      const t = ac.currentTime;
+      noise(t, 0.18, 'highpass', 900, 0.7);
+      noise(t, 0.45, 'lowpass', 500, 0.4);
+      noise(t + 0.32, 0.04, 'bandpass', 3000, 0.2); noise(t + 0.44, 0.05, 'bandpass', 2400, 0.2);
+    },
     // the 5:00 alarm
     alarm() {
       if (!ready()) return;

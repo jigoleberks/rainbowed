@@ -110,6 +110,8 @@ function drawStick(e, kind) {
       ctx.lineWidth = 6; line(hx - ca * 2, hy - sa * 2, hx - ca * 11 + sa * 3, hy - sa * 11 - ca * 3);
       ctx.restore();
     }
+    // an arena can put something else in your hands (the Fishing Cabin's hunting rifle)
+    if (arena.drawHeld && grenades <= 0) arena.drawHeld(hx, hy, ca, sa);
     if (grenades > 0) {
       // the launcher: a fat tube with a rainbow band at the muzzle
       ctx.save(); ctx.lineWidth = 9; line(hx - ca * 5, hy - sa * 5, hx + ca * 19, hy + sa * 19);

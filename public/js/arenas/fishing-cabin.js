@@ -8,6 +8,9 @@
      lying there with him.
    - Stickmen trip over the tackle box and the rods on the floor.
    - Every so often the mounted fish on the wall starts singing, and the stickmen stop to dance.
+   - A hunting rifle hangs on the shelf over the door. Jump up and grab it: five slow shots that
+     go through every stickman in a line and hit bosses three times as hard. Back on the shelf
+     a while after you've used it up.
    The Mosquito (50) and THE SNORE (100) live in bosses/mosquito.js and bosses/snore.js.
    The snore sound is synthesized for now (sound.js: sfx.snore); a real recording can replace it. */
 
@@ -17,6 +20,7 @@
   const TRIPS = [{x: 236, w: 30, kind: 'box'}, {x: 590, w: 44, kind: 'rods'}];
   const DOOR = {x: 694, w: 72};
   const FISH = {x: 112, y: 150};
+  const RIFLE = {x: 730, y: 192, shots: 5, back: 25};   // on the shelf over the door
 
   const st = {};
   let zs = [], snores = [];
@@ -101,7 +105,40 @@
     for (const e of enemies) if (free(e)) { e.dance = true; e.vx = 0; }
   }
 
+  // ---------- the hunting rifle ----------
+  function fireRifle(ang) {
+    if (!(st.rifle > 0)) return false;
+    st.rifle--;
+    const p = player, a = ang + rand(-0.01, 0.01);
+    bullets.push({x: p.x + Math.cos(a) * 44, y: p.y - 52 + Math.sin(a) * 44, vx: Math.cos(a) * 1900, vy: Math.sin(a) * 1900, life: 0.6, pierce: 4, dmg: 3, rifle: true});
+    shotsFired++;
+    flash = 0.09; p.recoil = 3; p.vx -= Math.cos(a) * 160;
+    if (!reduceMotion) shake = Math.max(shake, 6);
+    parts.push({x: p.x + Math.cos(a) * 10, y: p.y - 54, vx: -p.facing * rand(60, 130), vy: -rand(140, 220), h: 0, r: 2, life: 0.6, spark: true, ink: true, col: '#e0c46a'});
+    if (typeof sfx !== 'undefined' && sfx.rifle) sfx.rifle();
+    if (st.rifle <= 0) { st.rifleBack = RIFLE.back; texts.push({x: p.x, y: p.y - 110, s: 'OUT', life: 0.8, big: false}); }
+    return 0.6;   // a slow bolt action
+  }
+  function updateRifle(dt) {
+    if (st.rifleBack > 0) { st.rifleBack -= dt; if (st.rifleBack <= 0) { st.rifleOnWall = true; texts.push({x: RIFLE.x, y: RIFLE.y - 30, s: 'the rifle is back', life: 1.2, big: false}); } }
+    if (st.rifleOnWall && playing() && Math.abs(player.x - RIFLE.x) < 34 && player.y > RIFLE.y - 10 && player.y < RIFLE.y + 30) {
+      st.rifleOnWall = false; st.rifle = RIFLE.shots;
+      banner = {title: 'THE HUNTING RIFLE', sub: RIFLE.shots + ' shots. Goes through every stickman in a line.', life: 2.6};
+    }
+  }
+  function drawRifle(x, y, ang, s = 1) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s, s);
+    ctx.lineCap = 'round'; ctx.strokeStyle = INK;
+    ctx.lineWidth = 3.5; line(6, 0, 46, 0);                                // barrel
+    ctx.strokeStyle = '#8a5a34'; ctx.lineWidth = 7; line(-4, 1, 24, 1);      // wooden fore-end
+    ctx.lineWidth = 8; line(-6, 2, -22, 7);                                 // stock
+    ctx.strokeStyle = INK; ctx.lineWidth = 4; line(4, -6, 22, -6);           // scope
+    ctx.lineWidth = 2; line(8, -4, 8, -1); line(18, -4, 18, -1);
+    ctx.restore();
+  }
+
   function update(dt) {
+    updateRifle(dt);
     const S = st.snorer;
     S.breath += dt * (S.back ? 2.4 : 1.6);
     S.mouth = Math.max(0, S.mouth - dt); S.roll = Math.max(0, S.roll - dt); S.rollCd = Math.max(0, S.rollCd - dt);
@@ -227,7 +264,14 @@
     box(DOOR.x, 236, DOOR.w * (1 - d * 0.75), G - 236, '#6b4a2c', 3);
     if (d < 0.4) { ctx.fillStyle = '#3a5a3a'; ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(DOOR.x + 20, 250); ctx.lineTo(DOOR.x + 50, 250); ctx.lineTo(DOOR.x + 48, 330); ctx.lineTo(DOOR.x + 22, 330); ctx.closePath(); ctx.fill(); ctx.stroke(); }
     box(DOOR.x - 6, 204, DOOR.w + 12, 8, '#7a5a3a', 2.5);
-    ctx.fillStyle = '#c0392b'; ctx.fillRect(DOOR.x + 6, 186, 22, 18); ctx.strokeRect(DOOR.x + 6, 186, 22, 18);   // a hat and a lantern on the shelf
+    if (st.rifleOnWall) {
+      // mounted on two pegs, just above the shelf
+      ctx.fillStyle = '#5a4128'; ctx.strokeStyle = INK; ctx.lineWidth = 1.5;
+      for (const px of [RIFLE.x - 14, RIFLE.x + 22]) { ctx.fillRect(px - 2, RIFLE.y - 6, 4, 10); ctx.strokeRect(px - 2, RIFLE.y - 6, 4, 10); }
+      drawRifle(RIFLE.x - 6, RIFLE.y - 8, 0, 1.3);
+      if (Math.floor(clock * 2) % 2 && !boss) { ctx.fillStyle = '#e0c46a'; ctx.font = '600 9px "IBM Plex Mono", monospace'; ctx.textAlign = 'center'; ctx.fillText('GRAB IT', RIFLE.x, RIFLE.y - 34); }
+    }
+    
     // the cooler by the door
     box(636, 362, 54, 38, '#3f6db0', 3); box(632, 356, 62, 8, '#f4f1ea', 2.5);
     // the floor
@@ -280,6 +324,12 @@
     if (flash > 0) hole(player.x + Math.cos(player.aim) * 40, player.y - 52, 120, 0.8);
     dctx.globalCompositeOperation = 'source-over';
     ctx.drawImage(dark, 0, 0, W, H);
+    // rifle rounds left, under the ammo
+    if (st.rifle > 0 && (state === 'play' || state === 'dying')) {
+      ctx.fillStyle = '#e0c46a'; ctx.font = '600 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'left';
+      for (let i = 0; i < st.rifle; i++) ctx.fillRect(20 + i * 9, grenades > 0 ? 102 : 86, 5, 12);
+      ctx.fillText('RIFLE', 20 + RIFLE.shots * 9 + 6, grenades > 0 ? 113 : 97);
+    }
   }
 
   ARENAS['fishing-cabin'] = {
@@ -304,13 +354,16 @@
       return {x: -15, y: G, air: false};
     },
     holdEnemy,
+    fireHook: fireRifle,
+    drawHeld(hx, hy, ca, sa) { if (st.rifle > 0) drawRifle(hx - ca * 4, hy - sa * 4, Math.atan2(sa, ca), 0.9); },
+    RIFLE,
     // splats don't stick to Z's (they float away)
     onSplat(x, y) { return !zs.some(z => Math.abs(z.y - y) < 2 && x > z.x && x < z.x + z.w); },
     drawStage: drawCabinRoom,
     drawOver,
     setup() {
       Object.assign(st, {snorer: {breath: 0, mouth: 0, inhale: false, roll: 0, rollCd: 0, side: 1, back: false},
-        snoreT: rand(4, 6), py: G, fish: 0, fishT: rand(20, 28), doorOpen: 0});
+        snoreT: rand(4, 6), py: G, fish: 0, rifle: 0, rifleOnWall: true, rifleBack: 0, fishT: rand(20, 28), doorOpen: 0});
       zs = []; snores = [];
       PLATS = PLATS.filter(p => !p.z);
       props.push({update}, {draw: drawZs, front: true});
