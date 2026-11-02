@@ -241,6 +241,18 @@ WILL BE TRAPPED. The woods are full of booby traps, and the stickmen keep walkin
 - Death lines: "The woods got you." (a trap), "You walked into that one." (a trap you shot off
   yourself), "Trapped." (the Trapper).
 
+#### The Wolf in a Backpack (the Woods finale)
+A big wolf wearing a hiking backpack. Kill him and the backpack unzips and another wolf climbs
+out, a size smaller and wearing a smaller backpack. Kill that one and another climbs out, like
+nesting dolls.
+- Each wolf is smaller, faster and jumpier than the last. The big one is slow and takes a lot
+  of hits; the little ones are quick, hard to hit and nip at your ankles.
+- Each one drops its empty backpack where it died, so the floor slowly fills with little
+  backpacks.
+- The last one is a tiny wolf with a tiny backpack. Kill it and the backpack unzips and has
+  nothing in it but a sandwich. Eat it (walk over it) for a heart back. KO: "UNPACKED".
+- Death line: "You got wolfed. Several times."
+
 ### The Fishing Cabin (from a real fishing trip)
 3 a.m. in the living room of a fishing cabin. You're on the couch and can't sleep, because a
 guy on an air mattress in the middle of the floor is snoring like a chainsaw. Rods and tackle
@@ -262,15 +274,3 @@ Stickmen come in the door, the windows, and out from behind the couch.
   Unkillable: survive until the 5:00 alarm goes off for fishing, and he sits up wide awake:
   "Morning! Slept GREAT." KO: "5:00 A.M."
 - Death lines: "You never got to sleep." (the Snore), "Bitten." (the Mosquito).
-
-#### The Wolf in a Backpack (the Woods finale)
-A big wolf wearing a hiking backpack. Kill him and the backpack unzips and another wolf climbs
-out, a size smaller and wearing a smaller backpack. Kill that one and another climbs out, like
-nesting dolls.
-- Each wolf is smaller, faster and jumpier than the last. The big one is slow and takes a lot
-  of hits; the little ones are quick, hard to hit and nip at your ankles.
-- Each one drops its empty backpack where it died, so the floor slowly fills with little
-  backpacks.
-- The last one is a tiny wolf with a tiny backpack. Kill it and the backpack unzips and has
-  nothing in it but a sandwich. Eat it (walk over it) for a heart back. KO: "UNPACKED".
-- Death line: "You got wolfed. Several times."
