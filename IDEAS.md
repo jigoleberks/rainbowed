@@ -253,18 +253,19 @@ nesting dolls.
   nothing in it but a sandwich. Eat it (walk over it) for a heart back. KO: "UNPACKED".
 - Death line: "You got wolfed. Several times."
 
-### The Fishing Cabin (from a real fishing trip)
+### The Fishing Cabin (from a real fishing trip): built (arena 9)
 3 a.m. in the living room of a fishing cabin. You're on the couch and can't sleep, because a
 guy on an air mattress in the middle of the floor is snoring like a chainsaw. Rods and tackle
 boxes everywhere, a cooler, waders hung by the door, a mounted fish on the wall, a ceiling fan.
 Stickmen come in the door, the windows, and out from behind the couch.
 - The Snorer: never wakes up, can't be hurt. Every snore is a shockwave across the floor (jump
-  it), and the snores slowly build all night. Big Z's float up off him, and you can stand on
+  it; it only stuns you, it never takes a heart), and the snores slowly build all night. Big Z's float up off him, and you can stand on
   them and ride them up until they pop.
 - The air mattress is bouncy. Land on it and he snorts, rolls over and squashes whatever's on
   the other side of him.
-- Gear on the floor: stickmen trip over the rods and the tackle box. A cast fishing rod can
-  hook a stickman and reel him in.
+- Gear on the floor: stickmen trip over the rods and the tackle box. (Not built yet: a cast
+  fishing rod that hooks a stickman and reels him in.)
+- To do: swap the synthesized snore (sound.js, sfx.snore) for a real recording.
 - The mounted fish on the wall starts singing at the worst moment.
 - Sub-boss (50), the Mosquito: the one buzzing in your ear all night. Tiny, fast, really hard
   to hit; it buzzes around your head (with the sound on) and a bite stuns you for a moment.

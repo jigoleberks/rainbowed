@@ -159,6 +159,43 @@ const sfx = (() => {
       noise(t + 0.08, 0.18, 'lowpass', 600, 0.5);
       tone(t + 0.08, 90, 0.15, 0.3, 'sine');
     },
+    // a snore (a stand-in: a real recording can replace this). big: the finale's
+    snore(big) {
+      if (!ready()) return;
+      const t = ac.currentTime + 0.02, dur = big ? 1.5 : 1.1;
+      const src = ac.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+      const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(big ? 380 : 300, t); f.frequency.linearRampToValueAtTime(big ? 650 : 480, t + dur * 0.6); f.frequency.linearRampToValueAtTime(220, t + dur);
+      const rattle = ac.createGain(); rattle.gain.value = 0.5;
+      const lfo = ac.createOscillator(); lfo.type = 'square'; lfo.frequency.value = big ? 34 : 28;
+      const lg = ac.createGain(); lg.gain.value = 0.5; lfo.connect(lg); lg.connect(rattle.gain);
+      const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(big ? 0.9 : 0.55, t + dur * 0.35); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(f); f.connect(rattle); rattle.connect(g); g.connect(out);
+      const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(big ? 62 : 75, t);
+      const og = ac.createGain(); og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(big ? 0.25 : 0.12, t + dur * 0.4); og.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(og); og.connect(rattle);
+      src.start(t); lfo.start(t); o.start(t); src.stop(t + dur + 0.05); lfo.stop(t + dur + 0.05); o.stop(t + dur + 0.05);
+    },
+    // a mosquito, louder the closer it is to your head
+    buzz(dist = 100) {
+      if (!ready()) return;
+      const t = ac.currentTime, vol = clamp(0.12 - dist / 2500, 0.01, 0.12);
+      const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(620 + Math.random() * 60, t);
+      const vib = ac.createOscillator(); vib.frequency.value = 18; const vg = ac.createGain(); vg.gain.value = 25; vib.connect(vg); vg.connect(o.frequency);
+      const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.1); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.85);
+      o.connect(g); g.connect(out); o.start(t); vib.start(t); o.stop(t + 0.9); vib.stop(t + 0.9);
+    },
+    // the mounted fish, singing
+    fishSong() {
+      if (!ready()) return;
+      const t = ac.currentTime + 0.05, b = 0.18;
+      [392, 392, 440, 392, 523, 494, 0, 392, 392, 440, 392, 587, 523].forEach((n, i) => { if (n) tone(t + i * b, n, b * 0.9, 0.08, 'square'); });
+    },
+    // the 5:00 alarm
+    alarm() {
+      if (!ready()) return;
+      const t = ac.currentTime + 0.02;
+      for (let i = 0; i < 9; i++) tone(t + i * 0.22 + Math.floor(i / 3) * 0.25, 1760, 0.12, 0.08, 'square');
+    },
     // a wolf, off in the trees
     howl() {
       if (!ready()) return;

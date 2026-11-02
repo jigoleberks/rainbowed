@@ -831,6 +831,74 @@ test('The Wolf: five wolves, each out of the last one\'s backpack, and a sandwic
   ok(g.saw(/^SANDWICH$/), 'the sandwich should give a heart back');
 });
 
+test('The Fishing Cabin: a snore stuns you but never takes a heart, and trips the stickmen', () => {
+  const g = boot(); g.run("pickArena('fishing-cabin')"); g.run('dropCrate = function () {}; spawn = function () {}; enemies = [];');
+  ok(g.get('arena.id') === 'fishing-cabin' && g.get("arena.bossLoop.join()") === 'giant,mosquito,giant,snore', 'arena setup');
+  g.seconds(1.5, () => {});
+  g.run('player.x = 150; player.y = G; player.vy = 0; invuln = 0; hp = 5; arena.st.snoreT = 999;');
+  g.run('enemies.push({x: 120, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 0, drop: 0, jumpCd: 9});');
+  g.run('arena.snore(true);');
+  let stunned = false;
+  g.seconds(1.5, () => { g.run('arena.st.snoreT = 999;'); if (g.get('player.stunT > 0')) stunned = true; });
+  ok(stunned, 'the snore should stun you');
+  ok(g.get('hp') === 5, 'and not take a heart: hp ' + g.get('hp'));
+  ok(g.saw(/^(TRIP|OOF|WHOA)$/), 'the stickman should trip');
+});
+
+test('The Fishing Cabin: ride a Z up, and the mattress bounces you and squashes them', () => {
+  const g = boot(); g.run("pickArena('fishing-cabin')"); g.godMode(); g.run('dropCrate = function () {}; spawn = function () {}; enemies = [];');
+  g.seconds(1, () => {});
+  g.run('arena.st.snoreT = 999; arena.snore(false);');
+  g.run('{ const z = arena.zs[0]; player.x = z.x + z.w / 2; player.y = z.y - 2; player.vy = 0; }');
+  g.step(10); const y0 = g.get('player.y');
+  g.seconds(1, () => { g.run('arena.st.snoreT = 999;'); });
+  ok(g.get('player.onGround') && g.get('player.y') < y0 - 20, 'the Z should carry you up: ' + y0 + ' -> ' + g.get('player.y'));
+  // land on the mattress with a stickman lying on it
+  g.run('enemies = [{x: 330, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 0, drop: 0, jumpCd: 9}];');
+  g.run('player.x = 400; player.y = 300; player.vy = 300; player.onGround = false; arena.st.py = 300;');
+  g.step(12);
+  ok(g.saw(/^BOING$/) && g.get('kills') === 1 && g.saw(/^SQUASHED$/), 'bounce and squash: kills ' + g.get('kills'));
+});
+
+test('The Fishing Cabin: the fish sings and the stickmen dance', () => {
+  const g = boot(); g.run("pickArena('fishing-cabin')"); g.godMode(); g.run('dropCrate = function () {}; spawn = function () {}; enemies = [];');
+  g.seconds(2, () => {});
+  g.run('enemies.push({x: 700, y: G, vx: 0, vy: 0, onGround: true, facing: 1, phase: 0, speed: 140, drop: 0, jumpCd: 9}); player.x = 100; arena.st.snoreT = 999; arena.fishTime();');
+  const x0 = g.get('enemies[0].x'); g.seconds(2, () => { g.run('arena.st.snoreT = 999;'); });
+  ok(Math.abs(g.get('enemies[0].x') - x0) < 3 && g.get('enemies[0].dance'), 'he should be dancing, not chasing');
+  g.seconds(3, () => { g.run('arena.st.snoreT = 999;'); });
+  ok(!g.get('enemies[0].dance'), 'and stop when the song ends');
+});
+
+test('The Mosquito: hard to hit, bites, and goes SPLAT', () => {
+  const g = boot('#mosquito'); g.start(); g.godMode(); g.run('dropCrate = function () {};');
+  ok(g.get('arena.id') === 'fishing-cabin' && g.get('kills') === 49, 'mosquito link');
+  g.run('spawn = function () {}; kills = 50; enemies = [];');
+  let dived = false;
+  g.seconds(15, () => { if (g.get("boss && boss.kind === 'mosquito' && boss.st === 'dive'")) dived = true; });
+  ok(dived, 'it should dive at you');
+  g.type('sophy'); g.key('KeyJ');
+  g.seconds(40, () => {});
+  ok(g.saw(/^SPLAT$/), 'the mosquito was never beaten');
+});
+
+test('THE SNORE: survive until the alarm; his snores only stun', () => {
+  const g = boot('#snore'); g.start(); g.run('dropCrate = function () {};');
+  ok(g.get('arena.id') === 'fishing-cabin', 'snore link');
+  g.run('spawn = function () {}; kills = 100; enemies = []; hp = 10;');
+  g.run('hurt = function () { hurtBy.push(1); }; var hurtBy = [];');
+  let maxStun = 0, fan = false;
+  g.seconds(55, () => {
+    g.run('invuln = 0;');
+    if (g.get('player.stunT > 0')) maxStun++;
+    if (g.get("boss && boss.fanGone")) fan = true;
+  });
+  ok(maxStun > 0, 'the snores should stun you');
+  ok(fan, 'the fan should come loose');
+  ok(g.saw(/^5:00 A\.M\.$/) && !g.get('boss'), 'the alarm should end it');
+  ok(g.saw(/^Morning! Slept GREAT\.$/), 'and he wakes up refreshed');
+});
+
 let failed = 0;
 for (const [pass, name] of results) { console.log((pass ? 'PASS  ' : 'FAIL  ') + name); if (!pass) failed++; }
 console.log(`\n${results.length - failed}/${results.length} passed`);
