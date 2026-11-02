@@ -241,6 +241,28 @@ WILL BE TRAPPED. The woods are full of booby traps, and the stickmen keep walkin
 - Death lines: "The woods got you." (a trap), "You walked into that one." (a trap you shot off
   yourself), "Trapped." (the Trapper).
 
+### The Fishing Cabin (from a real fishing trip)
+3 a.m. in the living room of a fishing cabin. You're on the couch and can't sleep, because a
+guy on an air mattress in the middle of the floor is snoring like a chainsaw. Rods and tackle
+boxes everywhere, a cooler, waders hung by the door, a mounted fish on the wall, a ceiling fan.
+Stickmen come in the door, the windows, and out from behind the couch.
+- The Snorer: never wakes up, can't be hurt. Every snore is a shockwave across the floor (jump
+  it), and the snores slowly build all night. Big Z's float up off him, and you can stand on
+  them and ride them up until they pop.
+- The air mattress is bouncy. Land on it and he snorts, rolls over and squashes whatever's on
+  the other side of him.
+- Gear on the floor: stickmen trip over the rods and the tackle box. A cast fishing rod can
+  hook a stickman and reel him in.
+- The mounted fish on the wall starts singing at the worst moment.
+- Sub-boss (50), the Mosquito: the one buzzing in your ear all night. Tiny, fast, really hard
+  to hit; it buzzes around your head (with the sound on) and a bite stuns you for a moment.
+  KO: "SPLAT".
+- Finale (100), THE SNORE: he rolls onto his back and it gets apocalyptic. Every snore is
+  bigger, the furniture shakes, the fan spins off the ceiling, the Z's fill the room.
+  Unkillable: survive until the 5:00 alarm goes off for fishing, and he sits up wide awake:
+  "Morning! Slept GREAT." KO: "5:00 A.M."
+- Death lines: "You never got to sleep." (the Snore), "Bitten." (the Mosquito).
+
 #### The Wolf in a Backpack (the Woods finale)
 A big wolf wearing a hiking backpack. Kill him and the backpack unzips and another wolf climbs
 out, a size smaller and wearing a smaller backpack. Kill that one and another climbs out, like
